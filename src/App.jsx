@@ -25,8 +25,8 @@ function App() {
                     element: <h1 className="title">Reports</h1>,
                 },
                 {
-                    path: "customers",
-                    element: <h1 className="title">Customers</h1>,
+                    path: "employees",
+                    element: <h1 className="title">Employees</h1>,
                 },
                 {
                     path: "new-customer",
