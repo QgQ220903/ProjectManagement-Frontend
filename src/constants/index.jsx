@@ -29,9 +29,9 @@ export const navbarLinks = [
             path: "/employees",
         },
         {
-            label: "New customer",
+            label: "Phòng Ban",
             icon: UserPlus,
-            path: "/new-customer",
+            path: "/Department",
         },
         {
             label: "Verified customers",

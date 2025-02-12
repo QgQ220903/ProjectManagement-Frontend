@@ -7,6 +7,8 @@ import { overviewData, recentSalesData, topProducts } from "@/constants";
 
 import { CreditCard, DollarSign, Package, PencilLine, Star, Trash, TrendingUp, Users } from "lucide-react";
 
+import  {Footer}  from "@/components/footer";
+
 const DashboardPage = () => {
     const { theme } = useTheme();
 
@@ -236,6 +238,7 @@ const DashboardPage = () => {
                     </div>
                 </div>
             </div>
+            <Footer />
         </div>
     );
 };

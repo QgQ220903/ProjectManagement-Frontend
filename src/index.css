@@ -32,12 +32,16 @@
         @apply flex h-10 flex-shrink-0 items-center justify-center gap-x-2 rounded-lg p-2 text-slate-400 transition-colors hover:bg-blue-50 hover:text-slate-500 dark:hover:bg-blue-950 dark:hover:text-slate-300;
     }
 
+    .btn-primary {
+        @apply rounded-lg bg-blue-500 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-600;
+    }
+
     .link {
         @apply text-base font-medium text-slate-900 transition-colors hover:underline dark:text-slate-50;
     }
 
     .input {
-        @apply hidden h-10 flex-shrink-0 items-center gap-x-2 rounded-lg border border-slate-300 px-2 text-base text-slate-900 transition-colors has-[input:focus]:border-blue-500 md:flex md:w-auto lg:w-80 dark:border-slate-700 dark:text-slate-50 dark:focus:border-blue-600;
+        @apply hidden h-10 flex-shrink-0 items-center gap-x-2 rounded-lg border border-slate-300 px-2 text-base text-slate-900 transition-colors has-[input:focus]:border-blue-500 dark:border-slate-700 dark:text-slate-50 dark:focus:border-blue-600 md:flex md:w-auto lg:w-80;
     }
 
     .card {
@@ -88,3 +92,43 @@
 .recharts-tooltip-item {
     @apply text-base font-medium !text-blue-500 dark:!text-blue-600;
 }
+
+ .ant-table {
+    @apply border border-slate-300 dark:border-slate-800;
+}
+
+.ant-table-thead > tr > th {
+    @apply bg-slate-200 text-slate-900 dark:bg-slate-800 dark:text-slate-50 ;
+}
+
+.ant-table-tbody > tr > td {
+    /* @apply border-b border-slate-300 text-slate-900 dark:border-slate-700 dark:text-slate-50; */
+    @apply text-slate-900 dark:bg-slate-800 dark:text-slate-50 ;
+}
+
+ .ant-table-cell-row-hover {
+    @apply dark:bg-slate-600  !important ;
+}
+
+
+
+.ant-pagination-item {
+    @apply dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50;
+}
+
+.ant-pagination-item-active {
+    @apply dark:bg-blue-500 dark:text-slate-50;
+}
+
+
+.ant-pagination-item-active a {
+    @apply dark:text-slate-200;
+}
+
+.ant-pagination-item-link .anticon{
+    @apply dark:text-white;
+}
+
+
+
+
