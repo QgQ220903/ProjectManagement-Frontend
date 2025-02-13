@@ -5,8 +5,8 @@ import { ThemeProvider } from "@/contexts/theme-context";
 // import Layout from "@/routes/layout";
 import MainLayout from "@/layouts/MainLayout";
 import DashboardPage from "@/pages/dashboard/Page";
-import Employee from "@/pages/employee/Employee.page.jsx";
 import Department from "@/pages/department";
+import Employee from "@/pages/employee/page.jsx";
 
 function App() {
     const router = createBrowserRouter([
@@ -28,11 +28,11 @@ function App() {
                 },
                 {
                     path: "employees",
-                    element: <Employee/>,
+                    element: <Employee />,
                 },
                 {
                     path: "department",
-                    element: <Department/>,
+                    element: <Department />,
                 },
                 {
                     path: "verified-customers",
