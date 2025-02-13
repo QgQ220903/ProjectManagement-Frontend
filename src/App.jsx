@@ -8,6 +8,10 @@ import DashboardPage from "@/pages/dashboard/Page";
 import Employee from "@/pages/employee/Employee.page.jsx";
 import Department from "@/pages/department";
 
+
+import { theme as antdTheme } from 'antd';
+import { useTheme } from "@/hooks/use-theme";
+
 function App() {
     const router = createBrowserRouter([
         {

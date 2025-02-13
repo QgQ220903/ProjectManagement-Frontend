@@ -4,11 +4,9 @@ import { Space, Table, Tag } from 'antd';
 
 import { Plus } from 'lucide-react';
 
-import { Button, Modal } from 'antd';
+import ModalCreateDepartment from '@/components/modal/modalCreateDepartment'
 
 
-
-  
 
 const columns = [
   {
@@ -69,9 +67,9 @@ const data = [
   },
 ];
 
-const Department = () => {
+  const Department = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   const showModal = () => {
     setIsModalOpen(true);
   };
@@ -82,21 +80,24 @@ const Department = () => {
     setIsModalOpen(false);
   };
 
+
   return (
     <>
       <div className='flex justify-between items-center mb-3'>
-          <h2 className='title'>Phòng Ban</h2>
-          <button onClick={showModal} className='capitalize btn-primary flex gap-1'> <Plus/> Thêm phòng ban mới</button>
+        <h2 className='title'>Phòng Ban</h2>
+        <button onClick={showModal} className='capitalize btn-primary flex gap-1'> <Plus /> Thêm phòng ban mới</button>
       </div>
       <Table columns={columns} dataSource={data} />
-      <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-        <p>Some contents...</p>
-        <p>Some contents...</p>
-        <p>Some contents...</p>
-      </Modal>
-        
+      <ModalCreateDepartment
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        handleOk={handleOk}
+        handleCancel={handleCancel}
+        title={'Thêm Phòng Ban Mới'}
+      />
+
     </>
-  ) 
+  )
 }
 
 export default Department
