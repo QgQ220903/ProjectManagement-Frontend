@@ -10,9 +10,12 @@ import { Footer } from "@/components/footer";
 import { cn } from "@/utils/cn";
 import { useEffect, useRef, useState } from "react";
 
+
 const MainLayout = () => {
   const isDesktopDevice = useMediaQuery("(min-width: 768px)");
   const [collapsed, setCollapsed] = useState(!isDesktopDevice);
+
+
 
   const sidebarRef = useRef(null);
 

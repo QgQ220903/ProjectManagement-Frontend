@@ -1,45 +1,73 @@
 import { Breadcrumbs, Button, Grid2, Link, Typography } from "@mui/material"
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 
 
+import { useState } from 'react';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import TextField from '@mui/material/TextField';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Space } from "antd";
+import { DeleteOutlined, EditOutlined } from "@mui/icons-material";
 const columns = [
   { field: 'id', headerName: 'ID', width: 70 },
-  { field: 'firstName', headerName: 'First name', width: 130 },
-  { field: 'lastName', headerName: 'Last name', width: 130 },
-  {
-    field: 'age',
-    headerName: 'Age',
-    type: 'number',
-    width: 90,
-  },
   {
     field: 'fullName',
-    headerName: 'Full name',
+    headerName: 'Họ Và Tên',
     description: 'This column has a value getter and is not sortable.',
     sortable: false,
-    width: 160,
-    valueGetter: (value, row) => `${row.firstName || ''} ${row.lastName || ''}`,
+    width: 250,
   },
+  { field: 'email', headerName: 'Địa Chỉ Email', width: 200 },
+  { field: 'phone', headerName: 'Số Điện Thoại', width: 200 },
+  { field: 'department', headerName: 'Phòng Ban', width: 200 },
+  { field: 'position', headerName: 'Vị Trí', width: 200 },
+  {
+    title: "Action",
+    headerName: "Thao Tác",
+    key: "action",
+    render: (_,) => (
+      <Space>
+        <Button
+          icon={<EditOutlined />}
+        />
+        <Button danger icon={<DeleteOutlined />} />
+      </Space>
+    ),
+  },
+
 ];
 
+const handleEdit = (row) => {
+  // Xử lý sửa nhân viên (ví dụ: mở form sửa)
+  console.log("Edit row:", row);
+};
+
+const handleDelete = (row) => {
+  // Xử lý xóa nhân viên (ví dụ: xác nhận xóa)
+  console.log("Delete row:", row);
+};
+
 const rows = [
-  { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-  { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-  { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-  { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-  { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: 10 },
-  { id: 6, lastName: 'Melisandre', firstName: "Tyrone", age: 150 },
-  { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-  { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-  { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
+  { id: 1, fullName: 'Quách Gia Quy', email: 'quyquach@gmail.com', phone: '0907111222', department: 'Công Nghệ Thông Tin', position: 'Nhân Viên' },
 ];
 
 
 const paginationModel = { page: 0, pageSize: 5 };
 
 const Employee = () => {
+  const [open, setOpen] = useState(false);
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
   return (
     <div>
       <Grid2 container spacing={2}>
@@ -67,7 +95,61 @@ const Employee = () => {
           }}
         >
           <Typography variant="h5" type="primary">Danh Sách Nhân Viên</Typography>
-          <Button variant="contained" startIcon={<AddRoundedIcon />}>Thêm Nhân Viên </Button>
+          <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={handleClickOpen}>Thêm Nhân Viên </Button>
+          <Dialog
+            open={open}
+            onClose={handleClose}
+            sx={{
+              '& .MuiDialog-paper': { width: '30rem', maxWidth: 'none' },
+            }}
+          >
+            <DialogTitle className="mb-4">Thông Tin Nhân Viên</DialogTitle>
+            <DialogContent>
+              <form> {/* Bọc form trong thẻ <form> và thêm onSubmit */}
+                <TextField
+                  fullWidth
+                  id="fullname"
+                  name="fullname"
+                  label="Họ và Tên"
+                  margin="normal"
+                />
+                <TextField
+                  fullWidth
+                  id="email"
+                  name="email"
+                  label="Địa Chỉ Email"
+                  margin="normal"
+                />
+                <TextField
+                  fullWidth
+                  id="phone"
+                  name="phone"
+                  label="Số Điện Thoại"
+                  margin="normal"
+                />
+                <TextField
+                  fullWidth
+                  id="department"
+                  name="department"
+                  label="Phòng Ban"
+                  margin="normal"
+                />
+                <TextField
+                  fullWidth
+                  id="position"
+                  name="position"
+                  label="Vị Trí"
+                  margin="normal"
+                />
+                <DialogActions>
+                  <Button variant="outlined" onClick={handleClose}>Hủy</Button>
+                  <Button variant="contained" type="submit">
+                    Lưu
+                  </Button>
+                </DialogActions>
+              </form>
+            </DialogContent>
+          </Dialog>
         </Grid2>
 
         <Grid2 size={12}>
@@ -77,7 +159,6 @@ const Employee = () => {
               columns={columns}
               initialState={{ pagination: { paginationModel } }}
               pageSizeOptions={[5, 10]}
-              checkboxSelection
               sx={{ border: 0 }}
             />
           </Paper>
