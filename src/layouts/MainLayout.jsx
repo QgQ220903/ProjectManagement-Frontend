@@ -55,17 +55,11 @@ const MainLayout = () => {
             theme={{
               algorithm: theme === 'dark' ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,  // Kích hoạt chế độ dark mode
               token: {
-                // colorBgBase: theme === 'dark' && "#0f172a"
+                colorBgBase: theme === 'dark' && "#0f172a",
+                colorBgContainer:  theme === 'dark' && "#0f172a",
+                colorBgElevated: theme === 'dark' && "#0f172a"
               },
-              components: {
-                Modal: {
-                  contentBg: theme === 'dark'? "rgb(15,23,42)": "#fff",
-                  headerBg: theme === 'dark'? "rgb(15,23,42)": "#fff",
-                },
-                Table: {
-                  colorBgContainer: theme === 'dark'? "rgb(15,23,42)": "#fff"
-                }
-              },
+
              
             }}
           >

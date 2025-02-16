@@ -5,7 +5,8 @@ import { Modal, Form, Input } from "antd";
 
 
 const ModalCreateDepartment = (props) => {
-  const { isModalOpen, handleOk, handleCancel, title, setIsModalOpen } = props;
+  const { isModalOpen, handleOk, handleCancel, title, setIsModalOpen, useData } = props;
+  
 
   const formItemLayout = {
     labelCol: {
@@ -16,7 +17,7 @@ const ModalCreateDepartment = (props) => {
     },
   };
 
-``
+
   const [form] = Form.useForm();
   
   const reset = () => {
@@ -24,10 +25,14 @@ const ModalCreateDepartment = (props) => {
     form.resetFields()
     setIsModalOpen(false)
   }
+
   useEffect(() => {
     form.validateFields(['managerName']);
     form.validateFields(['departmentName']);
-  }, [form]);
+    if(useData){
+      form.setFieldsValue(useData)
+    }
+  }, [form, useData]);
 
   const onCheckboxChange = (e) => {
     setCheckNick(e.target.checked);
@@ -49,7 +54,7 @@ const ModalCreateDepartment = (props) => {
       open={isModalOpen}
       onOk={onCheck}
       onCancel={reset}
-      okText="Thêm Mới"
+      okText="Lưu"
       cancelText="Thoát"
     >
       <Form
@@ -59,10 +64,18 @@ const ModalCreateDepartment = (props) => {
           maxWidth: 600,
         }}
       >
+         <Form.Item
+          {...formItemLayout}
+          name="key"
+          label="Id"
+        
+        >
+          <Input placeholder="Please input your name"   disabled />
+        </Form.Item>
         <Form.Item
           {...formItemLayout}
-          name="departmentName"
-          label="Department Name"
+          name="department"
+          label="Tên Phòng Ban"
           rules={[
             {
               required: true,
@@ -74,8 +87,8 @@ const ModalCreateDepartment = (props) => {
         </Form.Item>
         <Form.Item
           {...formItemLayout}
-          name="managerName"
-          label="Manager Name"
+          name="manager"
+          label="Tên Trưởng Phòng"
           rules={[
             {
               required: true,
