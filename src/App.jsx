@@ -11,6 +11,8 @@ import Department from "@/pages/department";
 
 import { theme as antdTheme } from 'antd';
 import { useTheme } from "@/hooks/use-theme";
+import Login from "./pages/login/Login";
+import Register from "./pages/register/Register";
 
 function App() {
     const router = createBrowserRouter([
@@ -58,7 +60,16 @@ function App() {
                     path: "settings",
                     element: <h1 className="title">Settings</h1>,
                 },
+              
             ],
+        },
+        {
+            path: "login",
+            element: <Login/>,
+        },
+        {
+            path: "register",
+            element: <Register/>,
         },
     ]);
 

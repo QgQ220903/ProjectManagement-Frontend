@@ -33,6 +33,18 @@ const MainLayout = () => {
   });
 
   return (
+    <ConfigProvider
+    theme={{
+      algorithm: theme === 'dark' ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,  // Kích hoạt chế độ dark mode
+      token: {
+        colorBgBase: theme === 'dark'? "#0f172a" : "#fff",
+        colorBgContainer:  theme === 'dark'? "#0f172a":"#fff",
+        colorBgElevated: theme === 'dark' ? "#0f172a" : "#fff"
+      },
+
+     
+    }}
+  >
     <div className="min-h-screen bg-slate-100 transition-colors dark:bg-slate-950">
       <div
         className={cn(
@@ -51,25 +63,15 @@ const MainLayout = () => {
         />
         <div className="h-[calc(100vh-60px)] overflow-y-auto overflow-x-hidden p-6">
           
-          <ConfigProvider
-            theme={{
-              algorithm: theme === 'dark' ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,  // Kích hoạt chế độ dark mode
-              token: {
-                colorBgBase: theme === 'dark' && "#0f172a",
-                colorBgContainer:  theme === 'dark' && "#0f172a",
-                colorBgElevated: theme === 'dark' && "#0f172a"
-              },
-
-             
-            }}
-          >
+       
             <Outlet />
 
-          </ConfigProvider>
+       
         </div>
         <Footer />
       </div>
     </div>
+    </ConfigProvider>
   );
 }
 

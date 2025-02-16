@@ -6,8 +6,32 @@ import profileImg from "@/assets/profile-image.jpg";
 
 import PropTypes from "prop-types";
 
+import { Link } from "react-router-dom";
+
+import { Dropdown, Space } from 'antd';
+
 export const Header = ({ collapsed, setCollapsed }) => {
     const { theme, setTheme } = useTheme();
+
+    const items = [
+        {
+          key: '1',
+          label: (
+            <Link to="login" rel="noopener noreferrer">
+              Login
+            </Link>
+          ),
+        },
+        {
+          key: '2',
+          label: (
+            <Link to='/register'rel="noopener noreferrer" >
+              Register
+            </Link>
+          ),
+        },
+       
+      ];
 
     return (
         <header className="relative z-10 flex h-[60px] items-center justify-between bg-white px-4 shadow-md transition-colors dark:bg-slate-900">
@@ -49,13 +73,22 @@ export const Header = ({ collapsed, setCollapsed }) => {
                 <button className="btn-ghost size-10">
                     <Bell size={20} />
                 </button>
-                <button className="size-10 overflow-hidden rounded-full">
-                    <img
-                        src={profileImg}
-                        alt="profile image"
-                        className="size-full object-cover"
-                    />
-                </button>
+                <Dropdown
+                    menu={{
+                        items,
+                    }}
+                    trigger={['click']}
+                    arrow
+                    overlayStyle = {{marginTop:'15px', width:'10%'}}
+                >
+                    <button className="size-10 overflow-hidden rounded-full">
+                        <img
+                            src={profileImg}
+                            alt="profile image"
+                            className="size-full object-cover"
+                        />
+                    </button>
+                </Dropdown>
             </div>
         </header>
     );
