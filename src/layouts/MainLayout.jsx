@@ -41,6 +41,16 @@ const MainLayout = () => {
         colorBgContainer:  theme === 'dark'? "#0f172a":"#fff",
         colorBgElevated: theme === 'dark' ? "#0f172a" : "#fff"
       },
+      components: {
+        Table: {
+          headerBorderRadius: 5
+        },
+        Input: {
+          borderRadius: 5,
+          borderRadiusLG: 5,
+          borderRadiusSM: 5
+        }
+      }
 
      
     }}

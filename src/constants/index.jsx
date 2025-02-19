@@ -30,7 +30,7 @@ export const navbarLinks = [
         },
         {
             label: "Phòng Ban",
-            icon: UserPlus,
+            icon: Users,
             path: "/Department",
         },
         {
@@ -60,6 +60,12 @@ export const navbarLinks = [
             label: "Settings",
             icon: Settings,
             path: "/settings",
+        },
+
+        {
+            label: "Test",
+            icon: Settings,
+            path: "/test",
         },
         
 ];
