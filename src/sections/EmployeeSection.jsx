@@ -1,8 +1,8 @@
 import React from 'react'
 
-import ModalDepartment from '@/components/modal/ModalDepartment'
+import ModalDepartment from '@/components/modal/Modal'
 
-import FormDepartment from '@/components/form/FormDepartment'
+import FormDepartment from '@/components/form/Form'
 
 import PageHeader from '../components/PageHeader';
 
@@ -10,7 +10,7 @@ import { Table, Drawer  } from 'antd';
 
 import { Search } from 'lucide-react';
 
-const DepartmentSection = (props) => {
+const EmployeeSection = (props) => {
     const {
         handleNewDepartment,
         columns,
@@ -27,7 +27,6 @@ const DepartmentSection = (props) => {
         form,
         formItemLayout,
         formItems,
-        type,
         itemsBreadcrumb,
     } = props 
 
@@ -36,8 +35,8 @@ const DepartmentSection = (props) => {
   return (
     <>
         <PageHeader 
-            title={'Phòng Ban'} 
-            titleButton={'Thêm Phòng Ban Mới'} 
+            title={'Nhân Viên'} 
+            titleButton={'Thêm Nhân Viên Mới'} 
             itemsBreadcrumb={itemsBreadcrumb}
             handleNewDepartment={handleNewDepartment}
         />
@@ -73,12 +72,11 @@ const DepartmentSection = (props) => {
             title={titleModal}
             useData={useData}
             setUseData={setUseData}
-            formItemLayout={formItemLayout}
             form={form} 
-            type={type}
-            formItems={formItems}
          
-        />
+        >
+            <FormDepartment form={form} formItemLayout={formItemLayout} formItems={formItems}></FormDepartment>
+        </ModalDepartment>
 
         <Drawer title="Thông tin Phòng Ban" onClose={onClose} open={open} width={'30%'}>
             <FormDepartment form={form} formItemLayout={formItemLayout} formItems={formItems}></FormDepartment>
@@ -87,4 +85,4 @@ const DepartmentSection = (props) => {
   )
 }
 
-export default DepartmentSection
+export default EmployeeSection

@@ -8,6 +8,8 @@ import { Plus } from 'lucide-react';
 const { Title } = Typography;
 
 const PageHeader = ({ title, handleNewDepartment, titleButton, itemsBreadcrumb }) => {
+
+    
     return (
         <>
             <div className='flex justify-between items-center '>

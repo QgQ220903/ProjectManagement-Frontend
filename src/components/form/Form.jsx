@@ -3,12 +3,12 @@ import { Form } from 'antd';
 
 
 
-const FormDepartment = ({ form, formItemLayout, formItems  }) => {
+const FormDepartment = ({ form, formItemLayout, formItems, formName  }) => {
     return (
         <>
             <Form
                 form={form}
-                name="formDepartment"
+                name={formName}
                 style={{
                     maxWidth: 600,
                 }}

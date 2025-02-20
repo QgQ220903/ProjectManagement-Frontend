@@ -1,58 +1,50 @@
-import React from 'react'
-import FormDepartment from '@/components/form/FormDepartment'
-import { Form, Input  } from 'antd';
+import React,  {useState} from 'react'
+import FormDepartment from '@/components/form/Form'
+import { Form, Input, Table, Button, Modal  } from 'antd';
 import PageHeader from '../components/PageHeader';
+import ModalTest from '../components/modal/ModalTest';
 const Test = () => {
-
-  const [form] = Form.useForm();
-
-  const formItems = [
+  
+  const dataSource = [
     {
-      name: "key",
-      label: "Id",
-      component: <Input placeholder="Please input ID" />,
+      key: '1',
+      name: 'Mike',
+      age: 32,
+      address: '10 Downing Street',
     },
     {
-      name: "department",
-      label: "Tên Phòng Ban",
-      component: <Input placeholder="Please input Department" />,
+      key: '2',
+      name: 'John',
+      age: 42,
+      address: '10 Downing Street',
+    },
+  ];
+  
+  const columns = [
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
     },
     {
-      name: "manager",
-      label: "Tên Trưởng Phòng",
-      component: <Input placeholder="Please input Manager" />,
+      title: 'Age',
+      dataIndex: 'age',
+      key: 'age',
+    },
+    {
+      title: 'Address',
+      dataIndex: 'address',
+      key: 'address',
     },
   ];
 
-  const formItemLayout = {
-    labelCol: {
-      span: 8,
-    },
-    wrapperCol: {
-      span: 16,
-    },
-  };
-
-  const items=[
-    {
-      title: 'Home',
-    },
-    {
-      title: <a href="">Application Center</a>,
-    },
-    {
-      title: <a href="">Application List</a>,
-    },
-    {
-      title: 'An Application',
-    },
-  ]
-
   return (
     <div>
-      <PageHeader title={'Phòng Ban'} titleButton={'Thêm Phòng Ban Mới'} itemsBreadcrumb={items}></PageHeader>
-      
-      <FormDepartment form={form} formItemLayout={formItemLayout} formItems={formItems} ></FormDepartment>
+      <ModalTest>2</ModalTest>
+      <Table dataSource={dataSource} columns={columns} />
+
+        
+    
     </div>
   )
 }

@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 
 import { Space, Tag, Popconfirm, Form, Input } from 'antd';
 
-import DepartmentSection from '../sections/DepartmentSection';
+import HeaderDepartment from '@/sections/DepartmenSection/HeaderDepartment';
+
+import BodyDepartmen from '@/sections/DepartmenSection/BodyDepartmen';
 
 import { Pencil, Trash2 } from 'lucide-react';
 
 const Department = () => {
 
   const [useData, setUseData] = useState(null);
-  const [titleModal, setTitleModal] = useState('Thêm Phòng Ban Mới')
-  const [type, setType] = useState('ADD')
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -25,37 +26,36 @@ const Department = () => {
     },
   };
 
- const formItems = [
-       {
-         name: "key",
-         label: "Id",
-         component: <Input placeholder="Please input ID" />,
-         props: { readOnly: true }, 
-         hidden: type === 'EDIT' ? false : true
-       },
-       {
-         name: "department",
-         label: "Tên Phòng Ban",
-         component: <Input placeholder="Please input Department" />,
-         rules:[
-           {
-             required: true,
-             message: 'Làm ơn nhập tên phòng ban',
-           },
-         ]
-       },
-       {
-         name: "manager",
-         label: "Tên Trưởng Phòng",
-         component: <Input placeholder="Please input Manager" />,
-         rules:[
-           {
-             required: true,
-             message: 'Làm ơn nhập tên trưởng phòng',
-           },
-         ]
-       },
-     ];
+  const formItems = [
+    {
+      name: "key",
+      label: "Id",
+      component: <Input placeholder="Please input ID" />,
+      props: { readOnly: true },
+    },
+    {
+      name: "department",
+      label: "Tên Phòng Ban",
+      component: <Input placeholder="Please input Department" />,
+      rules: [
+        {
+          required: true,
+          message: 'Làm ơn nhập tên phòng ban',
+        },
+      ]
+    },
+    {
+      name: "manager",
+      label: "Tên Trưởng Phòng",
+      component: <Input placeholder="Please input Manager" />,
+      rules: [
+        {
+          required: true,
+          message: 'Làm ơn nhập tên trưởng phòng',
+        },
+      ]
+    },
+  ];
 
   const itemsBreadcrumb = [
     {
@@ -115,7 +115,7 @@ const Department = () => {
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <a className='font-medium text-yellow-500' onClick={() => handleEditDepartment(record)} ><Pencil  size={20} /></a>
+          <a className='font-medium text-yellow-500' onClick={() => handleEditDepartment(record)} ><Pencil size={20} /></a>
 
           <Popconfirm
             placement="bottomRight"
@@ -125,7 +125,7 @@ const Department = () => {
             cancelText="Không"
           >
 
-            <a className='text-red-600 font-medium  '><Trash2  size={20}/></a>
+            <a className='text-red-600 font-medium  '><Trash2 size={20} /></a>
           </Popconfirm>
         </Space>
       ),
@@ -151,7 +151,7 @@ const Department = () => {
       manager: 'Trần Quang Trường',
       tags: 'Active',
     },
-  
+
   ];
 
 
@@ -169,19 +169,10 @@ const Department = () => {
 
   const handleEditDepartment = (value) => {
     showModal()
-    setTitleModal('Sửa Thông Tin Phòng Ban');
-    setType('EDIT')
     setUseData(value)
-    console.log(value)
   }
 
-  const handleNewDepartment = () => {
-    showModal();
-    setTitleModal('Thêm Phòng Ban Mới')
-    setType('ADD')
-    setUseData(null)
-  }
-
+ 
   const showDrawer = () => {
     setOpen(true);
   };
@@ -197,27 +188,35 @@ const Department = () => {
 
   return (
     <>
-      <DepartmentSection
-        handleNewDepartment={handleNewDepartment}
+      <HeaderDepartment
+        itemsBreadcrumb={itemsBreadcrumb}
+        formItemLayout={formItemLayout}
+
+        form={form}
+        useData={useData}
+        setUseData={setUseData}
+      />
+
+      <BodyDepartmen
+        formItemLayout={formItemLayout}
+        formItems={formItems}
+        form={form}
+        useData={useData}
+        setUseData={setUseData}
         columns={columns}
+        open={open}
         data={data}
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
-        handleOk={handleOk}
         handleCancel={handleCancel}
-        titleModal={titleModal}
-        useData={useData}
-        setUseData={setUseData}
+        handleOk={handleOk}
         onClose={onClose}
-        open={open}
-        form={form}
-        formItemLayout={formItemLayout}
-        formItems={formItems}
-        type={type}
-        itemsBreadcrumb={itemsBreadcrumb}
-      />
+
+      ></BodyDepartmen>
+
+
     </>
   )
-} 
+}
 
 export default Department
