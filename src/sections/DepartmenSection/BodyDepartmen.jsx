@@ -2,37 +2,24 @@ import React, { useState } from 'react'
 
 import { Table, Drawer } from 'antd';
 
-import { Search } from 'lucide-react';
+import Search from '../../components/Search';
 
 import ModalDepartment from '@/components/modal/Modal';
 
 import FormDepartment from '@/components/form/Form'
 
 
-const BodyDepartmen = ({ 
-    formItemLayout, formItems, form, 
-    useData, setUseData, columns, 
-    data, isModalOpen,setIsModalOpen,
-    handleCancel, handleOk , onClose, open
+const BodyDepartmen = ({
+    formItemLayout, formItems, form,
+    useData, setUseData, columns,
+    data, isModalOpen, setIsModalOpen,
+    handleCancel, handleOk, onClose, open
 }) => {
-
 
 
     return (
         <>
-            <div className="input bg-white mb-5 dark:bg-slate-900">
-                <Search
-                    size={20}
-                    className="text-slate-300"
-                />
-                <input
-                    type="text"
-                    name="search"
-                    id="search"
-                    placeholder="Search..."
-                    className="w-full bg-transparent text-slate-900 outline-0 placeholder:text-slate-300 dark:text-slate-50"
-                />
-            </div>
+            <Search size={20} />
 
             <Table className='select-none' columns={columns} dataSource={data}
                 pagination={{
@@ -55,13 +42,13 @@ const BodyDepartmen = ({
                 form={form}
 
             >
-                 <FormDepartment 
-                 formName={'formEdit'} 
-                 form={form} 
-                 formItemLayout={formItemLayout} 
-                 formItems={formItems}>
+                <FormDepartment
+                    formName={'formEdit'}
+                    form={form}
+                    formItemLayout={formItemLayout}
+                    formItems={formItems}>
 
-                 </FormDepartment>
+                </FormDepartment>
             </ModalDepartment>
         </>
     )

@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/contexts/theme-context";
 import MainLayout from "@/layouts/MainLayout";
 import DashboardPage from "@/pages/Home";
 import Employee from "@/pages/Employee.jsx";
-import Department from "@/pages/department";
+import Department from "@/pages/Department/department";
 
 
 import { theme as antdTheme } from 'antd';
