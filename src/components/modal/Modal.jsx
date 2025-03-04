@@ -16,28 +16,28 @@ const ModalCreateDepartment = (props) => {
     setCheckNick(e.target.checked);
   };
 
-  const onCheck = async () => {
-    try {
-      const values = await form.validateFields();
-      console.log('Success:', values);
-    } catch (errorInfo) {``
-      console.log('Failed:', errorInfo);
-    }
-  };
+  // const onCheck = async () => {
+  //   try {
+  //     const values = await form.validateFields();
+  //     console.log('Success:', values);
+  //   } catch (errorInfo) {``
+  //     console.log('Failed:', errorInfo);
+  //   }
+  // };
   return (
 
 
     <Modal
       title={title}
       open={isModalOpen}
-      onOk={onCheck}
+      onOk={handleOk}
       onCancel={reset}
       // destroyOnClose={true}
       okText="Lưu"
       cancelText="Thoát"
     >
       {children}
-        {/* <FormDepartment form={form} formItemLayout={formItemLayout} formItems={formItems}></FormDepartment> */}
+     
     </Modal>
 
 

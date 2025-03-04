@@ -7,20 +7,24 @@ import { Plus } from 'lucide-react';
 
 const { Title } = Typography;
 
-const PageHeader = ({ title, handleNewDepartment, titleButton, itemsBreadcrumb }) => {
+const PageHeader = ({ title, itemsBreadcrumb, children }) => {
 
     
     return (
         <>
             <div className='flex justify-between items-center '>
-                <Title level={2} className='title'>{title}</Title>
+                <div>
+                    <Title level={2} className='title'>{title}</Title>
+                    <Breadcrumb items={itemsBreadcrumb}></Breadcrumb>
+                </div>
 
-                <ButtonIcon handleNewDepartment={handleNewDepartment}><Plus />{titleButton}</ButtonIcon>
+                {/* <ButtonIcon handleEvent={handleNewDepartment}>
+                    <Plus />{titleButton}
+                </ButtonIcon> */}
+                {children}
             </div>
 
-            <div className='mb-7'>
-                <Breadcrumb items={itemsBreadcrumb}></Breadcrumb>
-            </div>
+
            
 
         </>

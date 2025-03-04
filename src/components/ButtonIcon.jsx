@@ -1,9 +1,9 @@
 import React from 'react'
 
-const ButtonIcon = ({handleNewDepartment, children}) => {
+const ButtonIcon = ({handleEvent, children}) => {
   return (
     <>
-        <button onClick={handleNewDepartment} className='capitalize btn-primary flex gap-1'> {children} </button>
+        <button onClick={handleEvent} className='capitalize btn-primary flex gap-1 select-none'> {children} </button>
     </>
   )
 }

@@ -16,9 +16,13 @@ import PageHeader from '@/components/PageHeader'
 
 import ButtonIcon from '@/components/ButtonIcon'
 
-import { Plus } from 'lucide-react';
+import { Plus } from 'lucide-react'
 
-const Department = () => {
+import {projectGetAPI, projectPostAPI} from '@/Services/ProjectService'
+
+import {formatDate} from '@/utils/cn'
+
+const Project = () => {
 
   const [useData, setUseData] = useState(null);
 
@@ -31,6 +35,30 @@ const Department = () => {
   const [mode, setMode] = useState("");
 
   const [form] = Form.useForm();
+
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    const test = async () => {
+      const data = await projectGetAPI(); // Gọi API
+  
+      if (data) { // Kiểm tra dữ liệu trước khi gọi .map()
+        const dataItem = data.map((item) => ({
+          key: item.id,
+          name: item.name,
+          createdAt: formatDate(item.createdAt),
+          updatedAt: formatDate(item.updatedAt),
+        }));
+  
+        setData(dataItem); // Cập nhật state
+      } else {
+        console.error("Không có dữ liệu từ API");
+      }
+    };
+  
+    test();
+  }, [data]);
+  
 
   const formItemLayout = {
     labelCol: {
@@ -50,27 +78,18 @@ const Department = () => {
       hidden: mode === "Add" ? true : false
     },
     {
-      name: "department",
-      label: "Tên Phòng Ban",
+      name: "name",
+      label: "Tên Công Việc",
       component: <Input placeholder="Please input Department" />,
+      props: { readOnly: mode === "Info" && true },
       rules: [
         {
           required: true,
-          message: 'Làm ơn nhập tên phòng ban',
+          message: 'Làm ơn nhập tên công việc',
         },
       ]
     },
-    {
-      name: "manager",
-      label: "Tên Trưởng Phòng",
-      component: <Input placeholder="Please input Manager" />,
-      rules: [
-        {
-          required: true,
-          message: 'Làm ơn nhập tên trưởng phòng',
-        },
-      ]
-    },
+  
   ];
 
   const itemsBreadcrumb = [
@@ -79,15 +98,16 @@ const Department = () => {
     },
 
     {
-      title: 'Phòng Ban',
+      title: 'Công việc',
     },
   ]
 
 
   useEffect(() => {
-    form.validateFields(['managerName']);
-    form.validateFields(['departmentName']);
+    // form.validateFields(['name']);
+    // form.validateFields(['departmentName']);
     if (useData) {
+      console.log(useData)
       form.setFieldsValue(useData)
     }
   }, [form, useData]);
@@ -100,32 +120,26 @@ const Department = () => {
       key: 'key',
     },
     {
-      title: 'Phòng Ban',
-      dataIndex: 'department',
-      key: 'department',
+      title: 'Tên Công Việc',
+      dataIndex: 'name',
+      key: 'name',
       render: (text, record) => <a onClick={() => handleShowData(record)} className='text-blue-600 '>{text}</a>,
     },
     {
-      title: 'Trưởng Phòng',
-      dataIndex: 'manager',
-      key: 'manager',
+      title: 'Ngày Bắt Đầu',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
       render: (text) => <p className='capitalize'>{text}</p>,
     },
 
     {
-      title: 'Kích Hoạt',
-      key: 'tags',
-      dataIndex: 'tags',
-      render: (tags) => {
-        let color = tags.length > 5 ? "geekblue" : "green";
-        if (tags === "Loser") {
-          color = "volcano";
-        }
-        return (
-          <Tag color={color}>{tags}</Tag>
-        )
-      }
+      title: 'Ngày Kết Thúc',
+      dataIndex: 'updatedAt',
+      key: 'updatedAt',
+      render: (text) => <p className='capitalize'>{text}</p>,
     },
+
+   
     {
       title: 'Action',
       key: 'action',
@@ -148,33 +162,47 @@ const Department = () => {
     },
   ];
 
-  const data = [
-    {
-      key: '1',
-      department: 'PHÒNG BAN A',
-      manager: 'Trần Quang Trường',
-      tags: 'Loser',
-    },
-    {
-      key: '2',
-      department: 'PHÒNG BAN B',
-      manager: 'Trần Quang Trường',
-      tags: 'Active',
-    },
-    {
-      key: '3',
-      department: 'PHÒNG BAN C',
-      manager: 'Trần Quang Trường',
-      tags: 'Active',
-    },
+  // const data = [
+  //   {
+  //     key: '1',
+  //     project: 'Công việc 1',
+  //     dateStart: '1/1/2025',
+  //     dateEnd: '1/2/2025',
+  //     tags: 'Loser',
+  //   },
+  //   {
+  //     key: '2',
+  //     project: 'Công việc 1',
+  //     dateStart: '1/1/2025',
+  //     dateEnd: '1/2/2025',
+  //     tags: 'Loser',
+  //   },
+  //   {
+  //     key: '3',
+  //     project: 'Công việc 1',
+  //     dateStart: '1/1/2025',
+  //     dateEnd: '1/2/2025',
+  //     tags: 'Loser',
+  //   },
 
-  ];
+  // ];
 
   const showModal = () => {
     setIsModalOpen(true);
   };
 
-  const handleOk = () => {
+  const handleOk = async () => {
+    try {
+      const values = await form.validateFields();
+      console.log('Success:', values);
+      await projectPostAPI(values);
+      
+    } catch (errorInfo) {``
+      console.log('Failed:', errorInfo);
+    }
+
+
+
     setIsModalOpen(false);
   };
 
@@ -188,8 +216,9 @@ const Department = () => {
     setUseData(value)
   }
 
-  const handleNewDepartment = () => {
-    setTitle("Thêm Phòng Ban Mới");
+  const handleCreateProject =  () => {
+    form.resetFields()
+    setTitle("Thêm Công Việc Mới");
     setMode("Add");
     showModal()
   }
@@ -204,6 +233,8 @@ const Department = () => {
 
   const handleShowData = (value) => {
     showDrawer();
+    setMode('Info')
+    console.log(value,"value")
     setUseData(value)
   }
 
@@ -211,11 +242,11 @@ const Department = () => {
     <>
 
       <PageHeader
-        title={'Phòng Ban'}
+        title={'Công Việc'}
         itemsBreadcrumb={itemsBreadcrumb}
       >
-        <ButtonIcon handleEvent={handleNewDepartment}>
-          <Plus /> Thêm Phòng Ban Mới 
+          <ButtonIcon handleEvent={handleCreateProject}>
+          <Plus /> Thêm Công Việc Mới 
         </ButtonIcon>
 
       </PageHeader>
@@ -259,4 +290,4 @@ const Department = () => {
   )
 }
 
-export default Department
+export default Project

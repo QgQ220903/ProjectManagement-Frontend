@@ -39,11 +39,10 @@ export const navbarLinks = [
             path: "/verified-customers",
         },
        
-   
         {
-            label: "Products",
+            label: "Công Việc",
             icon: Package,
-            path: "/products",
+            path: "/project",
         },
         {
             label: "New product",

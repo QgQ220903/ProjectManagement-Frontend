@@ -7,6 +7,7 @@ import MainLayout from "@/layouts/MainLayout";
 import DashboardPage from "@/pages/Home";
 import Employee from "@/pages/Employee.jsx";
 import Department from "@/pages/Department/department";
+import Project from "@/pages/Project/project";
 
 
 import { theme as antdTheme } from 'antd';
@@ -46,8 +47,8 @@ function App() {
                     element: <h1 className="title">Verified Customers</h1>,
                 },
                 {
-                    path: "products",
-                    element: <h1 className="title">Products</h1>,
+                    path: "Project",
+                    element: <Project/>
                 },
                 {
                     path: "new-product",
