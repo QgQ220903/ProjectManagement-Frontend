@@ -15,7 +15,7 @@ export const projectPostAPI = async(obj) => {
     try {
         const response = await axios.post(api, obj);
         console.log(response)
-        return response;
+        return response.data;
     } catch (error) {
         console.log(error);
     }

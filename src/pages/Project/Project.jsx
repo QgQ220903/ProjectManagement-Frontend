@@ -57,7 +57,7 @@ const Project = () => {
     };
   
     test();
-  }, [data]);
+  }, []);
   
 
   const formItemLayout = {
@@ -195,7 +195,19 @@ const Project = () => {
     try {
       const values = await form.validateFields();
       console.log('Success:', values);
-      await projectPostAPI(values);
+      const dataNew = await projectPostAPI(values);
+
+      if (dataNew) {
+        const dataItem = {
+            key: dataNew.id,
+            name: dataNew.name,
+            createdAt: formatDate(dataNew.createdAt),
+            updatedAt: formatDate(dataNew.updatedAt)
+        }
+        setData([...data,dataItem])
+      }else{
+        console.log('lỗi')
+      }
       
     } catch (errorInfo) {``
       console.log('Failed:', errorInfo);
