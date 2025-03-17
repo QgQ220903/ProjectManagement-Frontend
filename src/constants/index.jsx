@@ -40,7 +40,7 @@ export const navbarLinks = [
         },
        
         {
-            label: "Công Việc",
+            label: "Dự Án",
             icon: Package,
             path: "/project",
         },

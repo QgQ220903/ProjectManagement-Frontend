@@ -15,6 +15,8 @@ import { useTheme } from "@/hooks/use-theme";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Test from "./pages/Test";
+import ProjectDetail from "./pages/Project/ProjectDetail";
+
 
 function App() {
     const router = createBrowserRouter([
@@ -50,6 +52,11 @@ function App() {
                     path: "Project",
                     element: <Project/>
                 },
+                {
+                    path: "Project/:id",
+                    element: <ProjectDetail/>
+                },
+              
                 {
                     path: "new-product",
                     element: <h1 className="title">New Product</h1>,

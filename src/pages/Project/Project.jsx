@@ -1,28 +1,34 @@
 import React, { useState, useEffect } from 'react';
 
-import { Space, Tag, Popconfirm, Form, Input } from 'antd';
+import { Space, Popconfirm, Form, Input } from 'antd';
 
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Plus } from 'lucide-react';
+
+import { Link } from "react-router-dom";
+
+import { FaEye } from "react-icons/fa";
 
 import Search from '@/components/Search';
 
 import { Table, Drawer } from 'antd';
 
-import ModalDepartment from '@/components/modal/Modal';
+import ModalProject from '@/components/modal/Modal';
 
-import FormDepartment from '@/components/form/Form'
+import FormProject from '@/components/form/Form'
 
 import PageHeader from '@/components/PageHeader'
 
 import ButtonIcon from '@/components/ButtonIcon'
-
-import { Plus } from 'lucide-react'
 
 import {projectGetAPI, projectPostAPI} from '@/Services/ProjectService'
 
 import {formatDate} from '@/utils/cn'
 
 const Project = () => {
+
+  const [current,setCurrent] = useState(1)
+
+  const [total,setTotal] = useState(16)
 
   const [useData, setUseData] = useState(null);
 
@@ -41,13 +47,13 @@ const Project = () => {
   useEffect(() => {
     const test = async () => {
       const data = await projectGetAPI(); // Gọi API
-  
+    
       if (data) { // Kiểm tra dữ liệu trước khi gọi .map()
         const dataItem = data.map((item) => ({
           key: item.id,
           name: item.name,
-          createdAt: formatDate(item.createdAt),
-          updatedAt: formatDate(item.updatedAt),
+          createdAt: formatDate(item.created_at),
+          updatedAt: formatDate(item.updated_at),
         }));
   
         setData(dataItem); // Cập nhật state
@@ -60,6 +66,14 @@ const Project = () => {
   }, []);
   
 
+  useEffect(() => {
+    if (useData) {
+      console.log(useData)
+      form.setFieldsValue(useData)
+    }
+  }, [form, useData]);
+
+// tùy chỉnh form kích thước input
   const formItemLayout = {
     labelCol: {
       span: 8,
@@ -68,6 +82,8 @@ const Project = () => {
       span: 16,
     },
   };
+
+  // Form items
 
   const formItems = [
     {
@@ -92,6 +108,7 @@ const Project = () => {
   
   ];
 
+  // Đường dẫn
   const itemsBreadcrumb = [
     {
       title: <a href="">Home</a>,
@@ -103,16 +120,7 @@ const Project = () => {
   ]
 
 
-  useEffect(() => {
-    // form.validateFields(['name']);
-    // form.validateFields(['departmentName']);
-    if (useData) {
-      console.log(useData)
-      form.setFieldsValue(useData)
-    }
-  }, [form, useData]);
-
-
+  //  Tùy chỉnh cột của table
   const columns = [
     {
       title: 'ID',
@@ -145,7 +153,7 @@ const Project = () => {
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <a className='font-medium text-yellow-500' onClick={() => handleEditDepartment(record)} ><Pencil size={20} /></a>
+          <a className='font-medium  ' onClick={() => handleEditProject(record)} ><Pencil size={20} /></a>
 
           <Popconfirm
             placement="bottomRight"
@@ -155,37 +163,15 @@ const Project = () => {
             cancelText="Không"
           >
 
-            <a className='text-red-600 font-medium  '><Trash2 size={20} /></a>
+            <a className=' font-medium  '><Trash2 size={20} /></a>
           </Popconfirm>
+
+          <Link to={"/project/" + record.key } ><FaEye className='text-lg' /></Link>
+
         </Space>
       ),
     },
   ];
-
-  // const data = [
-  //   {
-  //     key: '1',
-  //     project: 'Công việc 1',
-  //     dateStart: '1/1/2025',
-  //     dateEnd: '1/2/2025',
-  //     tags: 'Loser',
-  //   },
-  //   {
-  //     key: '2',
-  //     project: 'Công việc 1',
-  //     dateStart: '1/1/2025',
-  //     dateEnd: '1/2/2025',
-  //     tags: 'Loser',
-  //   },
-  //   {
-  //     key: '3',
-  //     project: 'Công việc 1',
-  //     dateStart: '1/1/2025',
-  //     dateEnd: '1/2/2025',
-  //     tags: 'Loser',
-  //   },
-
-  // ];
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -213,19 +199,22 @@ const Project = () => {
       console.log('Failed:', errorInfo);
     }
 
-
-
     setIsModalOpen(false);
   };
 
   const handleCancel = () => {
-    setIsModalOpen(false);
+    setIsModalOpen(false)
+    setUseData(null)
   };
 
-  const handleEditDepartment = (value) => {
+  const handleEditProject = (value) => {
+    console.log("recode edit", value)
+
+    setTitle("Sửa Công Việc");
+    setUseData(value)
+
     showModal()
     setMode("Edit");
-    setUseData(value)
   }
 
   const handleCreateProject =  () => {
@@ -250,15 +239,16 @@ const Project = () => {
     setUseData(value)
   }
 
+ 
   return (
     <>
 
       <PageHeader
-        title={'Công Việc'}
+        title={'Dự Án'}
         itemsBreadcrumb={itemsBreadcrumb}
       >
           <ButtonIcon handleEvent={handleCreateProject}>
-          <Plus /> Thêm Công Việc Mới 
+          <Plus /> Thêm Dự Án Mới 
         </ButtonIcon>
 
       </PageHeader>
@@ -268,7 +258,9 @@ const Project = () => {
 
         <Table className='select-none' columns={columns} dataSource={data}
           pagination={{
-            // pageSize: , // Mặc định 10 dòng mỗi trang
+            total: total,
+            defaultCurrent: current,
+            pageSize: 10, // Mặc định 10 dòng mỗi trang
             showSizeChanger: true, // Cho phép chọn số dòng mỗi trang
             pageSizeOptions: ['10', '20', '50', '100'], // Các tùy chọn số dòng
           }}
@@ -276,11 +268,11 @@ const Project = () => {
       </div>
 
       <Drawer title="Thông tin Phòng Ban" onClose={onClose} open={open} width={'30%'}>
-        <FormDepartment form={form} formItemLayout={formItemLayout} formItems={formItems}></FormDepartment>
+        <FormProject form={form} formItemLayout={formItemLayout} formItems={formItems}></FormProject>
       </Drawer>
 
 
-      <ModalDepartment
+      <ModalProject
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         handleOk={handleOk}
@@ -289,14 +281,14 @@ const Project = () => {
         form={form}
 
       >
-        <FormDepartment
+        <FormProject
           formName={'form' + mode}
           form={form}
           formItemLayout={formItemLayout}
           formItems={formItems}>
 
-        </FormDepartment>
-      </ModalDepartment>
+        </FormProject>
+      </ModalProject>
 
     </>
   )

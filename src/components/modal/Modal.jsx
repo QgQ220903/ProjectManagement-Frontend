@@ -6,10 +6,10 @@ import { Modal } from "antd";
 const ModalCreateDepartment = (props) => {
   const { isModalOpen, handleOk, handleCancel, title, setIsModalOpen, form, children } = props;
   
-  const reset = () => {
-    form.resetFields()
-    setIsModalOpen(false)
-  }
+  // const reset = () => {
+  //   form.resetFields()
+  //   setIsModalOpen(false)
+  // }
 
 
   const onCheckboxChange = (e) => {
@@ -31,7 +31,7 @@ const ModalCreateDepartment = (props) => {
       title={title}
       open={isModalOpen}
       onOk={handleOk}
-      onCancel={reset}
+      onCancel={handleCancel}
       // destroyOnClose={true}
       okText="Lưu"
       cancelText="Thoát"
