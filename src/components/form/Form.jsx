@@ -3,7 +3,7 @@ import { Form } from 'antd';
 
 
 
-const FormDepartment = ({ form, formItemLayout, formItems, formName  }) => {
+const FormDepartment = ({ form, formItemLayout, formItems, formName,initialValues  }) => {
     return (
         <>
             <Form
@@ -12,6 +12,7 @@ const FormDepartment = ({ form, formItemLayout, formItems, formName  }) => {
                 style={{
                     maxWidth: 600,
                 }}
+                initialValues={initialValues}
 
             >
                {formItems?.map((item, index) =>

@@ -1,22 +1,12 @@
 import axios from "axios";
 
-const api = "http://127.0.0.1:8000/api/projects/";
+const api = "http://127.0.0.1:8000/api/project-parts/";
 
-export const projectDetailGetAPI = async (id) => {
-    try {
-        const response = await axios.get(api+id);
-        console.log(response.data)
-        return response.data;
-    } catch (error) {
-        console.log(error);
-    }
-};
-
-export const projectPostAPI = async (obj) => {
+export const projectPartPostAPI = async (obj) => {
     try {
         const response = await axios.post(api, obj);
         console.log(response)
-        return response.data.results;
+        return response.data;
     } catch (error) {
         console.log(error);
     }

@@ -88,20 +88,20 @@ const Project = () => {
   const formItems = [
     {
       name: "key",
-      label: "Id",
-      component: <Input placeholder="Please input ID" />,
+      label: "Mã dự án: ",
+      component: <Input/>,
       props: { readOnly: true },
       hidden: mode === "Add" ? true : false
     },
     {
       name: "name",
-      label: "Tên Công Việc",
-      component: <Input placeholder="Please input Department" />,
+      label: "Tên dự án",
+      component: <Input placeholder="Làm ơn nhập tên dự án" />,
       props: { readOnly: mode === "Info" && true },
       rules: [
         {
           required: true,
-          message: 'Làm ơn nhập tên công việc',
+          message: 'Làm ơn nhập tên dự án',
         },
       ]
     },
@@ -157,7 +157,7 @@ const Project = () => {
 
           <Popconfirm
             placement="bottomRight"
-            title="Xóa một Phòng Ban"
+            title="Xóa một dự án"
             description="Bạn đã chắc chắn muốn xóa ?"
             okText="Có"
             cancelText="Không"
@@ -219,7 +219,7 @@ const Project = () => {
 
   const handleCreateProject =  () => {
     form.resetFields()
-    setTitle("Thêm Công Việc Mới");
+    setTitle("Thêm dự án mới");
     setMode("Add");
     showModal()
   }

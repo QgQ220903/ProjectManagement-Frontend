@@ -1,13 +1,17 @@
 import React, { Children, useEffect, useState } from "react";
-import { Table, Badge, Popconfirm, Space} from "antd";
+import { Table, Badge, Popconfirm, Space, Input, Form } from "antd";
 import Search from '@/components/Search';
 import PageHeader from '@/components/PageHeader';
 import { Link, useParams } from 'react-router-dom';
-import { projectDetailGetAPI } from "@/Services/ProjectDetailService";
+import { projectDetailGetAPI } from "@/Services/ProjectService";
+import { projectPartPostAPI } from "@/Services/ProjectDetailService";
 import { formatDate } from '@/utils/cn';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import ButtonIcon from '@/components/ButtonIcon'
 // import { FaEye } from "react-icons/fa";
+import ModalProjectPart from '@/components/modal/Modal';
+
+import FormProjectPart from '@/components/form/Form'
 
 
 const ProjectDetail = () => {
@@ -16,38 +20,45 @@ const ProjectDetail = () => {
     const [projectData, setProjectData] = useState(null);
     const [data, setData] = useState(null);
 
-    useEffect(() => {
-        const fetchProject = async () => {
-            const data = await projectDetailGetAPI(id);
-            if (data?.project_parts) {
-                setData(data)
-                const dataFillter = data.project_parts.map((data, index)=>({
-                    key:  data.id,
-                    name: data.name,
-                    created_at: formatDate(data.created_at),
-                    updated_at: formatDate(data.updated_at),
-                    tasks: data.tasks
-                    ? data.tasks.map((task) => {
-                          const taskData = {
-                              ...task,
-                              key: "task" + task.id
-                          };
-                          // Chỉ thêm `children` nếu có `subtasks`
-                          if (task.subtasks && task.subtasks.length > 0) {
-                              taskData.children = task.subtasks.map((sub) => ({
-                                  ...sub,
-                                  key: "sub" + sub.id
-                              }));
-                          }
-                          return taskData;
-                      })
-                    : []
-                     
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [title, setTitle] = useState("");
+    const [form] = Form.useForm();
+    const [mode, setMode] = useState("");
 
-                }))
-                setProjectData(dataFillter);
-            }
-        };
+    const fetchProject = async () => {
+        console.log("chạy 1 lần")
+        const data = await projectDetailGetAPI(id);
+        if (data?.project_parts) {
+            setData(data)
+            const dataFillter = data.project_parts.map((data, index) => ({
+                key: data.id,
+                name: data.name,
+                created_at: formatDate(data.created_at),
+                updated_at: formatDate(data.updated_at),
+                tasks: data.tasks
+                    ? data.tasks.map((task) => {
+                        const taskData = {
+                            ...task,
+                            key: "task" + task.id
+                        };
+                        // Chỉ thêm `children` nếu có `subtasks`
+                        if (task.subtasks && task.subtasks.length > 0) {
+                            taskData.children = task.subtasks.map((sub) => ({
+                                ...sub,
+                                key: "sub" + sub.id
+                            }));
+                        }
+                        return taskData;
+                    })
+                    : []
+
+
+            }))
+            setProjectData(dataFillter);
+        }
+    };
+
+    useEffect(() => {   
         fetchProject();
     }, [id]);
 
@@ -71,25 +82,25 @@ const ProjectDetail = () => {
             title: 'Action',
             key: 'action',
             render: (_, record) => (
-              <Space size="middle">
-                <a className='font-medium  ' onClick={() => handleEditProject(record)} ><Pencil size={20} /></a>
-      
-                <Popconfirm
-                  placement="bottomRight"
-                  title="Xóa một Phòng Ban"
-                  description="Bạn đã chắc chắn muốn xóa ?"
-                  okText="Có"
-                  cancelText="Không"
-                >
-      
-                  <a className=' font-medium  '><Trash2 size={20} /></a>
-                </Popconfirm>
-      
-                <Link to={"/project/" + record.key } ><Plus></Plus></Link>
-      
-              </Space>
+                <Space size="middle">
+                    <a className='font-medium  ' onClick={() => handleEditProject(record)} ><Pencil size={20} /></a>
+
+                    <Popconfirm
+                        placement="bottomRight"
+                        title="Xóa một Phòng Ban"
+                        description="Bạn đã chắc chắn muốn xóa ?"
+                        okText="Có"
+                        cancelText="Không"
+                    >
+
+                        <a className=' font-medium  '><Trash2 size={20} /></a>
+                    </Popconfirm>
+
+                    <Link to={"/project/" + record.key} ><Plus></Plus></Link>
+
+                </Space>
             ),
-          },
+        },
     ];
 
     // Cấu hình cột TASKS
@@ -108,17 +119,94 @@ const ProjectDetail = () => {
 
     const expandedRowRender = (part) => (
         <Table columns={taskColumns} dataSource={part.tasks} pagination={false} />
-      );
+    );
+
+    // tùy chỉnh form kích thước input
+    const formItemLayout = {
+        labelCol: {
+            span: 8,
+        },
+        wrapperCol: {
+            span: 16,
+        },
+    };
+
+    // Form items
+    const formItems = [
+        {
+            name: "project",
+            label: "Mã Dự án:",
+            component: <Input />,
+            props: { readOnly: true },
+            hidden: false
+        },
+        {
+            name: "name",
+            label: "Tên phần dự án:",
+            component: <Input placeholder="Please input Department" />,
+            //   props: { readOnly: mode === "Info" && true },
+            rules: [
+                {
+                    required: true,
+                    message: 'Làm ơn nhập tên phần dự án',
+                },
+            ]
+        },
+
+    ];
+
+    const handleOk = async () => {
+        try {
+            const values = await form.validateFields();
+            console.log('Success:', values);
+            const dataNew = await projectPartPostAPI(values);
+            if (dataNew) {
+                const dataItem = {
+                    key: dataNew.id,
+                    name: dataNew.name,
+                    created_at: formatDate(dataNew.created_at),
+                    updated_at: formatDate(dataNew.updated_at),
+                    tasks: dataNew.tasks || []
+                }
+              
+                setProjectData([ dataItem, ...projectData,]);
+        
+                
+            } else {
+                console.log('lỗi')
+            }
+        } catch (error) {
+            console.log('Failed:', error);
+        }
+
+        setIsModalOpen(false);
+
+    }
+
+    const handleCancel = () => {
+        setIsModalOpen(false)
+    }
+
+    const handleCreateProjectPart = () => {
+        setTitle((data && data.name));
+        form.resetFields()
+        setMode("Add");
+        showModal()
+    }
+
+    const showModal = () => {
+        setIsModalOpen(true);
+    };
 
     return (
         <>
-            <>{projectData &&  console.log(projectData)}</>
-            <PageHeader title={'Dự Án ' +( data && data.name)} itemsBreadcrumb={itemsBreadcrumb}>
+        {/* <div>{projectData && JSON.stringify(projectData)}</div> */}
+            <PageHeader title={(data && data.name)} itemsBreadcrumb={itemsBreadcrumb}>
 
-                <ButtonIcon >
-                    <Plus /> Thêm Phần Dự Án Mới 
+                <ButtonIcon handleEvent={handleCreateProjectPart}>
+                    <Plus /> Thêm Phần Dự Án Mới
                 </ButtonIcon>
-                
+
             </PageHeader>
 
             <div className='mt-5'>
@@ -136,6 +224,27 @@ const ProjectDetail = () => {
                 pagination={false}
 
             />
+
+            <ModalProjectPart
+                isModalOpen={isModalOpen}
+                setIsModalOpen={setIsModalOpen}
+                handleOk={handleOk}
+                handleCancel={handleCancel}
+                title={title}
+                form={form}
+
+            >
+                <FormProjectPart
+                    formName={'form' + mode}
+                    form={form}
+                    formItemLayout={formItemLayout}
+                    formItems={formItems}
+                    initialValues={{
+                        project: data && data.id
+                    }}>
+
+                </FormProjectPart>
+            </ModalProjectPart>
         </>
     )
 }
