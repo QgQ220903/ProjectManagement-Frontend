@@ -18,6 +18,8 @@ import ButtonIcon from '@/components/ButtonIcon'
 
 import { Plus } from 'lucide-react';
 
+import {departmentGetAPI, departmentPostAPI} from '@/Services/DepartmentService'
+
 const Department = () => {
 
   const [useData, setUseData] = useState(null);
@@ -32,6 +34,9 @@ const Department = () => {
 
   const [form] = Form.useForm();
 
+  const [data, setData] = useState(null);
+
+// tùy chỉnh form kích thước input
   const formItemLayout = {
     labelCol: {
       span: 8,
@@ -44,7 +49,7 @@ const Department = () => {
   const formItems = [
     {
       name: "key",
-      label: "Id",
+      label: "Mã phòng ban: ",
       component: <Input placeholder="Please input ID" />,
       props: { readOnly: true },
       hidden: mode === "Add" ? true : false
@@ -52,7 +57,7 @@ const Department = () => {
     {
       name: "department",
       label: "Tên Phòng Ban",
-      component: <Input placeholder="Please input Department" />,
+      component: <Input placeholder="Hãy nhập tên phòng ban" />,
       rules: [
         {
           required: true,
@@ -63,10 +68,10 @@ const Department = () => {
     {
       name: "manager",
       label: "Tên Trưởng Phòng",
-      component: <Input placeholder="Please input Manager" />,
+      component: <Input placeholder="Hãy nhập tên trưởng phòng" />,
       rules: [
         {
-          required: true,
+          required: false,
           message: 'Làm ơn nhập tên trưởng phòng',
         },
       ]
@@ -85,13 +90,32 @@ const Department = () => {
 
 
   useEffect(() => {
-    form.validateFields(['managerName']);
-    form.validateFields(['departmentName']);
+    const test = async () => {
+      const data = await departmentGetAPI(); // Gọi API
+    
+      if (data) { // Kiểm tra dữ liệu trước khi gọi .map()
+        const dataItem = data.map((item) => ({
+          key: item.id,
+          name: item.departmentName,
+          manager: item.managerID ? item.managerID.name : "Chưa có trưởng phòng", 
+          status: item.departmentStatus ? "Hoạt động" : "Ngừng hoạt động",
+        }));
+  
+        setData(dataItem); // Cập nhật state
+      } else {
+        console.error("Không có dữ liệu từ API");
+      }
+    };
+  
+    test();
+  }, []);
+
+  useEffect(() => {
     if (useData) {
+      console.log(useData)
       form.setFieldsValue(useData)
     }
   }, [form, useData]);
-
 
   const columns = [
     {
@@ -100,9 +124,9 @@ const Department = () => {
       key: 'key',
     },
     {
-      title: 'Phòng Ban',
-      dataIndex: 'department',
-      key: 'department',
+      title: 'Tên Phòng Ban',
+      dataIndex: 'name',
+      key: 'name',
       render: (text, record) => <a onClick={() => handleShowData(record)} className='text-blue-600 '>{text}</a>,
     },
     {
@@ -114,8 +138,8 @@ const Department = () => {
 
     {
       title: 'Kích Hoạt',
-      key: 'tags',
-      dataIndex: 'tags',
+      key: 'status',
+      dataIndex: 'status',
       render: (tags) => {
         let color = tags.length > 5 ? "geekblue" : "green";
         if (tags === "Loser") {
@@ -131,7 +155,7 @@ const Department = () => {
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <a className='font-medium text-yellow-500' onClick={() => handleEditDepartment(record)} ><Pencil size={20} /></a>
+          <a className='font-medium ' onClick={() => handleEditDepartment(record)} ><Pencil size={20} /></a>
 
           <Popconfirm
             placement="bottomRight"
@@ -141,62 +165,71 @@ const Department = () => {
             cancelText="Không"
           >
 
-            <a className='text-red-600 font-medium  '><Trash2 size={20} /></a>
+            <a className=' font-medium  '><Trash2 size={20} /></a>
           </Popconfirm>
         </Space>
       ),
     },
   ];
 
-  const data = [
-    {
-      key: '1',
-      department: 'PHÒNG BAN A',
-      manager: 'Trần Quang Trường',
-      tags: 'Loser',
-    },
-    {
-      key: '2',
-      department: 'PHÒNG BAN B',
-      manager: 'Trần Quang Trường',
-      tags: 'Active',
-    },
-    {
-      key: '3',
-      department: 'PHÒNG BAN C',
-      manager: 'Trần Quang Trường',
-      tags: 'Active',
-    },
-
-  ];
-
   const showModal = () => {
     setIsModalOpen(true);
   };
 
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
+  const handleOk = async () => {
+    try {
+      const values = await form.validateFields(); // Kiểm tra form hợp lệ
+      console.log('Success:', values);
+  
+      // Đảm bảo gửi manager là null nếu không chọn
+      const payload = {
+        ...values,
+        managerID: values.managerID || null,
+      };
+  
+      // Gửi dữ liệu lên API để tạo mới phòng ban
+      const dataNew = await departmentPostAPI(payload);
+  
+      if (dataNew) {
+        const dataItem = {
+          key: dataNew.id,
+          name: dataNew.departmentName,
+          manager: dataNew.managerID ? dataNew.managerID.name : "Chưa có trưởng phòng", // Trưởng phòng
+          status: dataNew.departmentStatus, // Trạng thái hoạt động
+        };
+  
+        setData([...data, dataItem]); // Cập nhật state data
+      } else {
+        console.error("Lỗi khi tạo phòng ban");
+      }
+    } catch (errorInfo) {
+      console.error("Lỗi xác thực form:", errorInfo);
+    }
+  
+    setIsModalOpen(false); // Đóng modal sau khi xử lý xong
+  };    
 
   const handleCancel = () => {
-    setIsModalOpen(false);
+    setIsModalOpen(false)
+    setUseData(null)
   };
 
   const handleEditDepartment = (value) => {
+    console.log("recode edit", value)
+
+    setTitle("Sửa Phòng Ban");
+    setUseData(value)
+
     showModal()
     setMode("Edit");
-    setUseData(value)
   }
 
   const handleNewDepartment = () => {
-    setTitle("Thêm Phòng Ban Mới");
+    form.resetFields()
+    setTitle("Thêm phòng ban mới");
     setMode("Add");
     showModal()
   }
-
-  const showDrawer = () => {
-    setOpen(true);
-  };
 
   const onClose = () => {
     setOpen(false);
@@ -204,6 +237,8 @@ const Department = () => {
 
   const handleShowData = (value) => {
     showDrawer();
+    setMode('Info')
+    console.log(value,"value")
     setUseData(value)
   }
 

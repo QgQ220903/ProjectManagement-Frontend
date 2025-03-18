@@ -1,222 +1,148 @@
 import React, { useState, useEffect } from 'react';
-
-import { Space, Tag, Popconfirm, Form, Input } from 'antd';
-
-import { Pencil, Trash2 } from 'lucide-react';
-import EmployeeSection from '../sections/EmployeeSection';
+import { Space, Popconfirm, Form, Input } from 'antd';
+import { Pencil, Trash2, Plus } from 'lucide-react';
+import { Link } from "react-router-dom";
+import { FaEye } from "react-icons/fa";
+import Search from '@/components/Search';
+import { Table, Drawer } from 'antd';
+import ModalProject from '@/components/modal/Modal';
+import FormProject from '@/components/form/Form';
+import PageHeader from '@/components/PageHeader';
+import ButtonIcon from '@/components/ButtonIcon';
+import { employeeGetAPI, employeePostAPI } from '@/Services/EmployeeService';
 
 const Employee = () => {
-
+  const [current, setCurrent] = useState(1);
+  const [total, setTotal] = useState(16);
   const [useData, setUseData] = useState(null);
-  const [titleModal, setTitleModal] = useState('Thêm Phòng Ban Mới')
-  const [type, setType] = useState('ADD')
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [open, setOpen] = useState(false);
-
+  const [title, setTitle] = useState("");
+  const [mode, setMode] = useState("");
   const [form] = Form.useForm();
-
-  const formItemLayout = {
-    labelCol: {
-      span: 8,
-    },
-    wrapperCol: {
-      span: 16,
-    },
-  };
-
- const formItems = [
-       {
-         name: "key",
-         label: "Id",
-         component: <Input placeholder="Please input ID" />,
-         props: { readOnly: true }, 
-         hidden: type === 'EDIT' ? false : true
-       },
-       {
-         name: "department",
-         label: "Tên Phòng Ban",
-         component: <Input placeholder="Please input Department" />,
-         rules:[
-           {
-             required: true,
-             message: 'Làm ơn nhập tên phòng ban',
-           },
-         ]
-       },
-       {
-         name: "manager",
-         label: "Tên Trưởng Phòng",
-         component: <Input placeholder="Please input Manager" />,
-         rules:[
-           {
-             required: true,
-             message: 'Làm ơn nhập tên trưởng phòng',
-           },
-         ]
-       },
-     ];
-
-  const itemsBreadcrumb = [
-    {
-      title: <a href="">Home</a>,
-    },
-
-    {
-      title: 'Phòng Ban',
-    },
-  ]
-
+  const [data, setData] = useState(null);
 
   useEffect(() => {
-    form.validateFields(['managerName']);
-    form.validateFields(['departmentName']);
+    const fetchData = async () => {
+      const data = await employeeGetAPI();
+      if (data) {
+        const dataItem = data.map((item) => ({
+          key: item.id,
+          name: item.employeeName,
+          position: item.positionName,
+          phone: item.employeePhone,
+          email: item.employeeEmail,
+          status: item.status ? "Active" : "Inactive",
+        }));
+        setData(dataItem);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
     if (useData) {
-      form.setFieldsValue(useData)
+      form.setFieldsValue(useData);
     }
   }, [form, useData]);
 
+  const formItems = [
+    {
+      name: "key",
+      label: "Mã nhân viên",
+      component: <Input readOnly />,
+      hidden: mode === "Add" ? true : false,
+    },
+    {
+      name: "name",
+      label: "Tên nhân viên",
+      component: <Input placeholder="Nhập tên nhân viên" />,
+      rules: [{ required: true, message: "Nhập tên nhân viên" }],
+    },
+    {
+      name: "position",
+      label: "Chức vụ",
+      component: <Input placeholder="Nhập chức vụ" />,
+    },
+    {
+      name: "phone",
+      label: "Số điện thoại",
+      component: <Input placeholder="Nhập số điện thoại" />,
+    },
+    {
+      name: "email",
+      label: "Email",
+      component: <Input placeholder="Nhập email" />,
+    },
+  ];
 
   const columns = [
+    { title: 'ID', dataIndex: 'key', key: 'key' },
+    { title: 'Tên Nhân Viên', dataIndex: 'name', key: 'name' },
+    { title: 'Chức Vụ', dataIndex: 'position', key: 'position' },
+    { title: 'Số Điện Thoại', dataIndex: 'phone', key: 'phone' },
+    { title: 'Email', dataIndex: 'email', key: 'email' },
+    { title: 'Trạng Thái', dataIndex: 'status', key: 'status' },
     {
-      title: 'ID',
-      dataIndex: 'key',
-      key: 'key',
-    },
-    {
-      title: 'Phòng Ban',
-      dataIndex: 'department',
-      key: 'department',
-      render: (text, record) => <a onClick={() => handleShowData(record)} className='text-blue-600 '>{text}</a>,
-    },
-    {
-      title: 'Trưởng Phòng',
-      dataIndex: 'manager',
-      key: 'manager',
-      render: (text) => <p className='capitalize'>{text}</p>,
-    },
-
-    {
-      title: 'Kích Hoạt',
-      key: 'tags',
-      dataIndex: 'tags',
-      render: (tags) => {
-        let color = tags.length > 5 ? "geekblue" : "green";
-        if (tags === "Loser") {
-          color = "volcano";
-        }
-        return (
-          <Tag color={color}>{tags}</Tag>
-        )
-      }
-    },
-    {
-      title: 'Action',
+      title: 'Hành động',
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <a className='font-medium text-yellow-500' onClick={() => handleEditDepartment(record)} ><Pencil  size={20} /></a>
-
-          <Popconfirm
-            placement="bottomRight"
-            title="Xóa một Phòng Ban"
-            description="Bạn đã chắc chắn muốn xóa ?"
-            okText="Có"
-            cancelText="Không"
-          >
-
-            <a className='text-red-600 font-medium  '><Trash2  size={20}/></a>
+          <a onClick={() => handleEditEmployee(record)}><Pencil size={20} /></a>
+          <Popconfirm title="Xóa nhân viên?" okText="Có" cancelText="Không">
+            <a><Trash2 size={20} /></a>
           </Popconfirm>
         </Space>
       ),
     },
   ];
 
-  const data = [
-    {
-      key: '1',
-      department: 'PHÒNG BAN A',
-      manager: 'Trần Quang Trường',
-      tags: 'Loser',
-    },
-    {
-      key: '2',
-      department: 'PHÒNG BAN B',
-      manager: 'Trần Quang Trường',
-      tags: 'Active',
-    },
-    {
-      key: '3',
-      department: 'PHÒNG BAN C',
-      manager: 'Trần Quang Trường',
-      tags: 'Active',
-    },
-  
-  ];
-
-
   const showModal = () => {
     setIsModalOpen(true);
   };
 
-  const handleOk = () => {
+  const handleOk = async () => {
+    try {
+      const values = await form.validateFields();
+      const newData = await employeePostAPI(values);
+      if (newData) {
+        setData([...data, { ...values, key: newData.id }]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
     setIsModalOpen(false);
   };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleEditDepartment = (value) => {
-    showModal()
-    setTitleModal('Sửa Thông Tin Phòng Ban');
-    setType('EDIT')
-    setUseData(value)
-    console.log(value)
-  }
-
-  const handleNewDepartment = () => {
+  const handleEditEmployee = (value) => {
+    setTitle("Sửa Nhân Viên");
+    setUseData(value);
     showModal();
-    setTitleModal('Thêm Phòng Ban Mới')
-    setType('ADD')
-    setUseData(null)
-  }
-
-  const showDrawer = () => {
-    setOpen(true);
+    setMode("Edit");
   };
-
-  const onClose = () => {
-    setOpen(false);
-  };
-
-  const handleShowData = (value) => {
-    showDrawer();
-    setUseData(value)
-  }
 
   return (
     <>
-      <EmployeeSection
-        handleNewDepartment={handleNewDepartment}
-        columns={columns}
-        data={data}
-        isModalOpen={isModalOpen}
-        setIsModalOpen={setIsModalOpen}
-        handleOk={handleOk}
-        handleCancel={handleCancel}
-        titleModal={titleModal}
-        useData={useData}
-        setUseData={setUseData}
-        onClose={onClose}
-        open={open}
-        form={form}
-        formItemLayout={formItemLayout}
-        formItems={formItems}
-        type={type}
-        itemsBreadcrumb={itemsBreadcrumb}
-      />
-    </>
-  )
-} 
+      <PageHeader title={'Nhân Viên'}>
+        <ButtonIcon handleEvent={() => { setTitle("Thêm Nhân Viên"); setMode("Add"); showModal(); }}>
+          <Plus /> Thêm Nhân Viên
+        </ButtonIcon>
+      </PageHeader>
 
-export default Employee
+      <div className='mt-5'>
+        <Search size={20} />
+        <Table columns={columns} dataSource={data} pagination={{ total, defaultCurrent: current, pageSize: 10 }} />
+      </div>
+
+      <Drawer title="Thông tin Nhân Viên" onClose={() => setOpen(false)} open={open} width={'30%'}>
+        <FormProject form={form} formItems={formItems} />
+      </Drawer>
+
+      <ModalProject isModalOpen={isModalOpen} handleOk={handleOk} handleCancel={() => setIsModalOpen(false)} title={title} form={form}>
+        <FormProject form={form} formItems={formItems} />
+      </ModalProject>
+    </>
+  );
+};
+
+export default Employee;
