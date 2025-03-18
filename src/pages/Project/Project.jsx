@@ -187,8 +187,8 @@ const Project = () => {
         const dataItem = {
             key: dataNew.id,
             name: dataNew.name,
-            createdAt: formatDate(dataNew.createdAt),
-            updatedAt: formatDate(dataNew.updatedAt)
+            createdAt: formatDate(dataNew.created_at),
+            updatedAt: formatDate(dataNew.updated_at)
         }
         setData([...data,dataItem])
       }else{
