@@ -5,6 +5,10 @@ import PageHeader from '@/components/PageHeader';
 import { Link, useParams } from 'react-router-dom';
 import { projectDetailGetAPI } from "@/Services/ProjectService";
 import { projectPartPostAPI } from "@/Services/ProjectPartService";
+import { employeeGetAPI } from "@/Services/EmployeeService";
+import { taskPost } from "@/Services/TaskService";
+import { taskAssignmentsPost } from "@/Services/TaskAssignmentsService";
+
 import { formatDate } from '@/utils/cn';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import ButtonIcon from '@/components/ButtonIcon'
@@ -23,29 +27,38 @@ const itemsBreadcrumb = [
     { title: 'Chi tiết dự án' },
 ];
 
+const { RangePicker } = DatePicker;
+
+const { TextArea } = Input;
+
 const ProjectDetail = () => {
 
-    const { RangePicker } = DatePicker;
-
     const { id } = useParams();
-    const { TextArea } = Input;
+
+
     const [projectData, setProjectData] = useState(null);
+
     const [data, setData] = useState(null);
 
-    const[projectPartSelect,setProjectPartSelect] = useState(null);
+    const [employeeData, setEmployeedata] = useState(null);
+
+    const [projectPartSelect, setProjectPartSelect] = useState(null);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+
     const [title, setTitle] = useState("");
 
     const [isModalTaskOpen, setIsModalTaskOpen] = useState(false);
 
     const [form] = Form.useForm();
     const [formTask] = Form.useForm();
+
     const [mode, setMode] = useState("");
 
     const fetchProject = async () => {
         console.log("chạy 1 lần")
         const data = await projectDetailGetAPI(id);
+        setEmployeedata(await employeeGetAPI());
         if (data?.project_parts) {
             setData(data)
             const dataFillter = data.project_parts.map((data, index) => ({
@@ -57,6 +70,7 @@ const ProjectDetail = () => {
                     ? data.tasks.map((task) => {
                         const taskData = {
                             ...task,
+                            priority: task.priority === 0 ? "Thấp" : task.priority === 1 ? "Trung Bình" : "Cao",
                             key: "task" + task.id
                         };
                         // Chỉ thêm `children` nếu có `subtasks`
@@ -81,6 +95,12 @@ const ProjectDetail = () => {
     }, [id]);
 
 
+    useEffect(() => {
+        if (projectPartSelect) {
+            console.log(projectPartSelect)
+            formTask.setFieldsValue(projectPartSelect)
+        }
+    }, [formTask, projectPartSelect]);
 
 
 
@@ -171,21 +191,26 @@ const ProjectDetail = () => {
 
     const onChange = (value) => {
         console.log(`selected ${value}`);
+        // setEmployeedata(employeeData.filter((item) => item.id !== value));
+
+        // console.log("employeeData",employeeData)
+        // return 
     };
     const onSearch = (value) => {
         console.log('search:', value);
     };
 
-    const options = [];
-    for (let i = 10; i < 26; i++) {
-        options.push({
-            label: "nhân viên " + i,
-            value: i.toString(36) + i,
-        });
-    }
+    // const options = [];
+    // for (let i = 10; i < 26; i++) {
+    //     options.push({
+    //         label: "nhân viên " + i,
+    //         value: i.toString(36) + i,
+    //     });
+    // }
     const handleChange = (value) => {
         console.log(`selected ${value}`);
-    };
+
+    }
     // Form items task
     const formItemsTask = [
         {
@@ -229,20 +254,10 @@ const ProjectDetail = () => {
                     optionFilterProp="label"
                     onChange={onChange}
                     onSearch={onSearch}
-                    options={[
-                        {
-                            value: 'jack',
-                            label: 'Jack',
-                        },
-                        {
-                            value: 'lucy',
-                            label: 'Lucy',
-                        },
-                        {
-                            value: 'tom',
-                            label: 'Tom',
-                        },
-                    ]}
+                    options={employeeData?.map((item) => ({
+                        value: item.id,
+                        label: item.name,
+                    }))}
                 />,
             rules: [
                 {
@@ -261,7 +276,11 @@ const ProjectDetail = () => {
                     allowClear
                     placeholder="Please select"
                     onChange={handleChange}
-                    options={options}
+                    // options={options}
+                    options={employeeData?.map((item) => ({
+                        value: item.id,
+                        label: item.name,
+                    }))}
                 />,
             rules: [
                 {
@@ -301,15 +320,15 @@ const ProjectDetail = () => {
                     onChange={onChange}
                     options={[
                         {
-                            value: 'low',
+                            value: '0',
                             label: 'Thấp',
                         },
                         {
-                            value: 'medium',
+                            value: '1',
                             label: 'Trung Bình',
                         },
                         {
-                            value: 'high',
+                            value: '2',
                             label: 'Cao',
                         },
                     ]}
@@ -369,10 +388,11 @@ const ProjectDetail = () => {
 
     const handleCreateProjectTask = (value) => {
         formTask.resetFields()
-        console.log(value)
-        value && setProjectPartSelect(value);
-        console.log("projectPartSelect",projectPartSelect)
-        form.resetFields()
+        console.log("handleCreateProjectTask", value)
+        value && setProjectPartSelect({
+            projectPart: value.key,
+        });
+        console.log("projectPartSelect", projectPartSelect)
         setMode("Add");
         showModalTask()
     }
@@ -385,9 +405,89 @@ const ProjectDetail = () => {
         setIsModalTaskOpen(true);
     };
 
+    const createTaskAssignments = async (value, role, taskId) => {
+        console.log("createTaskAssignments", value);
+        try {
+            const res = await taskAssignmentsPost({
+                ...value,
+                role: role,
+                task: taskId
+            })
+            return res
+        } catch (error) {
+            console.log("createTaskAssignments", error)
+        }
+    }
+
     const handleOkTask = async () => {
-        const values = await formTask.validateFields();
-        console.log('Success:', values);
+        try {
+            const values = await formTask.validateFields();
+            values.date = values.date?.map(d => d.format("YYYY-MM-DDThh:mm"));
+            console.log('Success:', values);
+            const valueNew = {
+                "name": values.nameTask,
+                "description": values.desTask,
+                "priority": values.Priority,
+                "start_time": values.date[0],
+                "end_time": values.date[1],
+                "task_status": 'TO_DO',
+                "completion_percentage": "0",
+                "is_deleted": false,
+                "project_part": values.projectPart,
+                "parent_task": null
+            };
+
+            const dataNew = await taskPost(valueNew);
+            console.log("dataNew", dataNew)
+            if (dataNew) {
+                const dataItem = {
+                    ...dataNew,
+                    priority: dataNew.priority === 0 ? "Thấp" : dataNew.priority === 1 ? "Trung Bình" : "Cao",
+                    key: "task" + dataNew.id
+                }
+                console.log("dataItem", dataItem);
+                setProjectData(prevData =>
+                    prevData.map(part => {
+                        if (part.key === valueNew.project_part) {
+                            // Thêm task vào đúng project_part
+                            return {
+                                ...part,
+                                tasks: [...part.tasks, dataItem]
+                            };
+                        }
+                        return part; // Giữ nguyên các project_part khác
+                    })
+                );
+
+                if (dataNew.id) {
+                    if (values.resEmployee) {
+                        const resEmployee = await createTaskAssignments({
+                            employee: values.resEmployee,
+                        }, "RESPONSIBLE", dataNew.id)
+
+                        console.log("resEmployee", resEmployee)
+                    }
+                    if(values.WorksEmployee){
+                        for (const item of values.WorksEmployee) {
+                            await createTaskAssignments({
+                                employee: item,
+                            }, "DOER", dataNew.id)
+                        }
+                        
+                        // console.log("WorksEmployee", values.WorksEmployee)
+                    }
+                }
+
+
+
+            }
+
+            setIsModalTaskOpen(false);
+
+
+        } catch (error) {
+            console.log('Failed:', error);
+        }
     }
 
     return (
@@ -452,9 +552,7 @@ const ProjectDetail = () => {
                     form={formTask}
                     formItemLayout={formItemLayout}
                     formItems={formItemsTask}
-                    initialValues={{
-                        projectPart: projectPartSelect && projectPartSelect.key
-                    }}
+
 
                 >
 
