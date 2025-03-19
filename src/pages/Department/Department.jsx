@@ -24,6 +24,8 @@ const Department = () => {
 
   const [useData, setUseData] = useState(null);
 
+  // const [employeeData, setEmployeeData] = useState(null);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [open, setOpen] = useState(false);
@@ -55,7 +57,7 @@ const Department = () => {
       hidden: mode === "Add" ? true : false
     },
     {
-      name: "department",
+      name: "departmentName",
       label: "Tên Phòng Ban",
       component: <Input placeholder="Hãy nhập tên phòng ban" />,
       rules: [
@@ -65,17 +67,17 @@ const Department = () => {
         },
       ]
     },
-    {
-      name: "manager",
-      label: "Tên Trưởng Phòng",
-      component: <Input placeholder="Hãy nhập tên trưởng phòng" />,
-      rules: [
-        {
-          required: false,
-          message: 'Làm ơn nhập tên trưởng phòng',
-        },
-      ]
-    },
+    // {
+    //   name: "manager",
+    //   label: "Tên Trưởng Phòng",
+    //   component: <Input placeholder="Hãy nhập tên trưởng phòng" />,
+    //   rules: [
+    //     {
+    //       required: false,
+    //       message: 'Làm ơn nhập tên trưởng phòng',
+    //     },
+    //   ]
+    // },
   ];
 
   const itemsBreadcrumb = [
@@ -96,9 +98,9 @@ const Department = () => {
       if (data) { // Kiểm tra dữ liệu trước khi gọi .map()
         const dataItem = data.map((item) => ({
           key: item.id,
-          name: item.departmentName,
-          manager: item.managerID ? item.managerID.name : "Chưa có trưởng phòng", 
-          status: item.departmentStatus ? "Hoạt động" : "Ngừng hoạt động",
+          departmentName: item.departmentName,
+          managerID: item.managerID ? item.managerID : "Chưa có trưởng phòng", 
+          departmentStatus: item.departmentStatus ? "Hoạt động" : "Ngừng hoạt động",
         }));
   
         setData(dataItem); // Cập nhật state
@@ -125,24 +127,25 @@ const Department = () => {
     },
     {
       title: 'Tên Phòng Ban',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'departmentName',
+      key: 'departmentName',
       render: (text, record) => <a onClick={() => handleShowData(record)} className='text-blue-600 '>{text}</a>,
     },
     {
       title: 'Trưởng Phòng',
-      dataIndex: 'manager',
-      key: 'manager',
+      dataIndex: 'managerID',
+      key: 'managerID',
       render: (text) => <p className='capitalize'>{text}</p>,
     },
 
     {
       title: 'Kích Hoạt',
-      key: 'status',
-      dataIndex: 'status',
+      key: 'departmentStatus',
+      dataIndex: 'departmentStatus',
+      // render: (text) => <p className='capitalize'>{text}</p>,
       render: (tags) => {
         let color = tags.length > 5 ? "geekblue" : "green";
-        if (tags === "Loser") {
+        if (tags === "Ngừng hoạt động") {
           color = "volcano";
         }
         return (
@@ -193,9 +196,9 @@ const Department = () => {
       if (dataNew) {
         const dataItem = {
           key: dataNew.id,
-          name: dataNew.departmentName,
-          manager: dataNew.managerID ? dataNew.managerID.name : "Chưa có trưởng phòng", // Trưởng phòng
-          status: dataNew.departmentStatus, // Trạng thái hoạt động
+          departmentName: dataNew.departmentName,
+          managerID: dataNew.managerID ? dataNew.managerID : "Chưa có trưởng phòng", // Trưởng phòng
+          departmentStatus: dataNew.departmentStatus ? "Hoạt động" : "Ngừng hoạt động",
         };
   
         setData([...data, dataItem]); // Cập nhật state data

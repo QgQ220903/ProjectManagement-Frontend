@@ -21,3 +21,21 @@ export const departmentPostAPI = async (obj) => {
         console.log(error);
     }
 }
+
+export const updateManagerForDepartmentAPI = async (id, obj) => {
+    try {
+        console.log("Request PATCH:", api + id, { managerID: obj },
+            {
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        ); // Log API URL và dữ liệu gửi đi
+  
+        const response = await axios.patch(api+id+'/', {managerID : obj});
+        console.log("updateManagerForDepartmentAPI",response.data)
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}

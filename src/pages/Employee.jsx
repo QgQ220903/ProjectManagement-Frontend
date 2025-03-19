@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Space, Popconfirm, Form, Input } from 'antd';
+import { Space, Popconfirm, Form, Input, Select } from 'antd';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import { Link } from "react-router-dom";
 import { FaEye } from "react-icons/fa";
@@ -10,11 +10,16 @@ import FormProject from '@/components/form/Form';
 import PageHeader from '@/components/PageHeader';
 import ButtonIcon from '@/components/ButtonIcon';
 import { employeeGetAPI, employeePostAPI } from '@/Services/EmployeeService';
+import {departmentGetAPI, departmentPostAPI, updateManagerForDepartmentAPI} from '@/Services/DepartmentService'
 
 const Employee = () => {
   const [current, setCurrent] = useState(1);
   const [total, setTotal] = useState(16);
   const [useData, setUseData] = useState(null);
+
+  const [departmentData, setDepartmentData] = useState(null);
+  const [departmentDataFilter, setDepartmentDataFilter] = useState(null);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -22,17 +27,33 @@ const Employee = () => {
   const [form] = Form.useForm();
   const [data, setData] = useState(null);
 
+  const handleChange = (value) => {
+    console.log(`selected ${value}`);
+    if(value === "TP"){
+      setDepartmentDataFilter(departmentData
+      ?.filter((item) => !item.managerID))
+    }else{
+      setDepartmentDataFilter(departmentData)
+    }
+  };
+
+
   useEffect(() => {
     const fetchData = async () => {
       const data = await employeeGetAPI();
+      const dataDepartment = await departmentGetAPI();
+      dataDepartment ? setDepartmentData(dataDepartment) : console.log("error");
+      console.log("dataDepartment",dataDepartment);
+    
       if (data) {
         const dataItem = data.map((item) => ({
           key: item.id,
           name: item.employeeName,
-          position: item.positionName,
+          position: item.positionName === "TP"? "Trưởng Phòng" : "Nhân Viên",
           phone: item.employeePhone,
           email: item.employeeEmail,
-          status: item.status ? "Active" : "Inactive",
+          departmentID: item.departmentID,
+          status: item.status ? "Hoạt Động" : "Ngưng Hoạt Động",
         }));
         setData(dataItem);
       }
@@ -46,6 +67,17 @@ const Employee = () => {
     }
   }, [form, useData]);
 
+  // tùy chỉnh form kích thước input
+  const formItemLayout = {
+    labelCol: {
+      span: 8,
+    },
+    wrapperCol: {
+      span: 16,
+    },
+  };
+
+
   const formItems = [
     {
       name: "key",
@@ -54,25 +86,52 @@ const Employee = () => {
       hidden: mode === "Add" ? true : false,
     },
     {
-      name: "name",
+      name: "employeeName",
       label: "Tên nhân viên",
       component: <Input placeholder="Nhập tên nhân viên" />,
-      rules: [{ required: true, message: "Nhập tên nhân viên" }],
+      rules: [{ required: true, message: "Vui lòng nhập tên nhân viên" }],
     },
     {
-      name: "position",
+      name: "positionName",
       label: "Chức vụ",
-      component: <Input placeholder="Nhập chức vụ" />,
+      component: <Select   
+      // defaultValue={'NV'}
+       placeholder="Chọn chức vụ"
+      onChange={handleChange}
+      options={[
+        { value: 'NV', label: 'Nhân Viên' },
+        { value: 'TP', label: 'Trường Phòng' },
+        
+      ]}></Select>,
+      rules: [{ required: true, message: "Vui lòng chọn chức vụ" }],
     },
     {
-      name: "phone",
+      name: "employeePhone",
       label: "Số điện thoại",
       component: <Input placeholder="Nhập số điện thoại" />,
+      rules: [{ required: true, message: "Vui lòng nhập số điện thoại" }],
     },
     {
-      name: "email",
+      name: "employeeEmail",
       label: "Email",
       component: <Input placeholder="Nhập email" />,
+      rules: [{ required: true, message: "Vui lòng nhập email" }],
+    },
+    {
+      name: "departmentID",
+      label: "Phòng ban",
+      component: <Select   
+    
+        placeholder="Chọn phòng ban"
+        options={
+          departmentDataFilter?.map((item) => ({
+          value: item.id,
+          label: item.departmentName,
+        })) 
+      }
+        
+        ></Select>,
+        rules: [{ required: true, message: "Vui lòng chọn phòng ban" }],
     },
   ];
 
@@ -104,14 +163,31 @@ const Employee = () => {
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
+      console.log("values",values);
       const newData = await employeePostAPI(values);
       if (newData) {
-        setData([...data, { ...values, key: newData.id }]);
+        setData([...data, 
+          { 
+            key: newData.id,
+            name: newData.employeeName,
+            position: newData.positionName === "TP"? "Trưởng Phòng" : "Nhân Viên",
+            phone: newData.employeePhone,
+            email: newData.employeeEmail,
+            departmentID: newData.departmentID,
+            status: newData.status ? "Hoạt Động" : "Ngưng Hoạt Động",
+           }
+        ]);
+        if(newData.positionName === "TP") {
+           await updateManagerForDepartmentAPI(newData.departmentID, newData.id)
+        }
+        setIsModalOpen(false);
+      }else {
+
       }
     } catch (error) {
       console.log(error);
     }
-    setIsModalOpen(false);
+    
   };
 
   const handleEditEmployee = (value) => {
@@ -121,10 +197,11 @@ const Employee = () => {
     setMode("Edit");
   };
 
+  
   return (
     <>
       <PageHeader title={'Nhân Viên'}>
-        <ButtonIcon handleEvent={() => { setTitle("Thêm Nhân Viên"); setMode("Add"); showModal(); }}>
+        <ButtonIcon handleEvent={() => { setDepartmentDataFilter(departmentData),form.resetFields();setTitle("Thêm Nhân Viên"); setMode("Add"); showModal(); }}>
           <Plus /> Thêm Nhân Viên
         </ButtonIcon>
       </PageHeader>
@@ -139,7 +216,11 @@ const Employee = () => {
       </Drawer>
 
       <ModalProject isModalOpen={isModalOpen} handleOk={handleOk} handleCancel={() => setIsModalOpen(false)} title={title} form={form}>
-        <FormProject form={form} formItems={formItems} />
+        <FormProject form={form} formItems={formItems} formItemLayout={formItemLayout} 
+           initialValues={{
+            positionName: "NV"
+            }}
+        />
       </ModalProject>
     </>
   );
