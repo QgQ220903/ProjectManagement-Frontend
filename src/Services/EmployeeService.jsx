@@ -21,3 +21,20 @@ export const employeePostAPI = async (obj) => {
         console.log(error);
     }
 }
+
+export const employeePutAPI = async (id, obj) => {
+    try {
+        const response = await axios.put(`${api}${id}/`, obj);
+        return response.data;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const employeeDeleteAPI = async (id) => {
+    try {
+        await axios.delete(`${api}${id}/`);
+    } catch (error) {
+        console.log(error);
+    }
+};

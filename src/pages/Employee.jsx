@@ -9,7 +9,7 @@ import ModalProject from '@/components/modal/Modal';
 import FormProject from '@/components/form/Form';
 import PageHeader from '@/components/PageHeader';
 import ButtonIcon from '@/components/ButtonIcon';
-import { employeeGetAPI, employeePostAPI } from '@/Services/EmployeeService';
+import { employeeGetAPI, employeePostAPI, employeePutAPI, employeeDeleteAPI } from '@/Services/EmployeeService';
 import {departmentGetAPI, departmentPostAPI, updateManagerForDepartmentAPI} from '@/Services/DepartmentService'
 
 const Employee = () => {
@@ -146,12 +146,12 @@ const Employee = () => {
       title: 'Hành động',
       key: 'action',
       render: (_, record) => (
-        <Space size="middle">
-          <a onClick={() => handleEditEmployee(record)}><Pencil size={20} /></a>
-          <Popconfirm title="Xóa nhân viên?" okText="Có" cancelText="Không">
-            <a><Trash2 size={20} /></a>
-          </Popconfirm>
-        </Space>
+          <Space size="middle">
+              <a onClick={() => handleEditEmployee(record)}><Pencil size={20} /></a>
+              <Popconfirm title="Xóa nhân viên?" onConfirm={() => handleDeleteEmployee(record.key)} okText="Có" cancelText="Không">
+                  <a><Trash2 size={20} /></a>
+              </Popconfirm>
+          </Space>
       ),
     },
   ];
@@ -162,42 +162,73 @@ const Employee = () => {
 
   const handleOk = async () => {
     try {
-      const values = await form.validateFields();
-      console.log("values",values);
-      const newData = await employeePostAPI(values);
-      if (newData) {
-        setData([...data, 
-          { 
-            key: newData.id,
-            name: newData.employeeName,
-            position: newData.positionName === "TP"? "Trưởng Phòng" : "Nhân Viên",
-            phone: newData.employeePhone,
-            email: newData.employeeEmail,
-            departmentID: newData.departmentID,
-            status: newData.status ? "Hoạt Động" : "Ngưng Hoạt Động",
-           }
-        ]);
-        if(newData.positionName === "TP") {
-           await updateManagerForDepartmentAPI(newData.departmentID, newData.id)
+        const values = await form.validateFields(); // Kiểm tra dữ liệu nhập vào form
+        console.log("values", values);
+
+        if (mode === "Edit") {
+            // Gọi API update nhân viên
+            const updatedData = await employeePutAPI(useData.key, values);
+
+            if (updatedData) {
+                setData(prevData =>
+                    prevData.map(item =>
+                        item.key === useData.key ? { 
+                            ...item, 
+                            name: updatedData.employeeName,
+                            position: updatedData.positionName === "TP" ? "Trưởng Phòng" : "Nhân Viên",
+                            phone: updatedData.employeePhone,
+                            email: updatedData.employeeEmail,
+                            departmentID: updatedData.departmentID,
+                            status: updatedData.status ? "Hoạt Động" : "Ngưng Hoạt Động",
+                        } : item
+                    )
+                );
+            }
+        } else {
+            // Thêm nhân viên mới
+            const newData = await employeePostAPI(values);
+
+            if (newData) {
+                setData([...data, {
+                    key: newData.id,
+                    name: newData.employeeName,
+                    position: newData.positionName === "TP" ? "Trưởng Phòng" : "Nhân Viên",
+                    phone: newData.employeePhone,
+                    email: newData.employeeEmail,
+                    departmentID: newData.departmentID,
+                    status: newData.status ? "Hoạt Động" : "Ngưng Hoạt Động",
+                }]);
+
+                if (newData.positionName === "TP") {
+                    await updateManagerForDepartmentAPI(newData.departmentID, newData.id);
+                }
+            }
         }
         setIsModalOpen(false);
-      }else {
-
-      }
     } catch (error) {
-      console.log(error);
+        console.log(error);
     }
-    
   };
 
-  const handleEditEmployee = (value) => {
+  const handleEditEmployee = (record) => {
+    console.log("Editing record:", record); // Kiểm tra dữ liệu được truyền vào
     setTitle("Sửa Nhân Viên");
-    setUseData(value);
-    showModal();
+    setUseData(record);
+    form.setFieldsValue(record); // Đổ dữ liệu vào form
     setMode("Edit");
+    setIsModalOpen(true);
   };
-
   
+
+
+  const handleDeleteEmployee = async (id) => {
+    try {
+        await employeeDeleteAPI(id);
+        setData(data.filter(item => item.key !== id));
+    } catch (error) {
+        console.log(error);
+    }
+  };
   return (
     <>
       <PageHeader title={'Nhân Viên'}>

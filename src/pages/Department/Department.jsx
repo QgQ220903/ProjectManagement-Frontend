@@ -18,12 +18,14 @@ import ButtonIcon from '@/components/ButtonIcon'
 
 import { Plus } from 'lucide-react';
 
-import {departmentGetAPI, departmentPostAPI} from '@/Services/DepartmentService'
+import { Select } from 'antd';
+
+import {departmentGetAPI, departmentPostAPI, departmentPutAPI, departmentDeleteAPI, employeeGetAPI} from '@/Services/DepartmentService'
 
 const Department = () => {
 
   const [useData, setUseData] = useState(null);
-
+  const [employees, setEmployees] = useState([]);
   // const [employeeData, setEmployeeData] = useState(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,37 +50,43 @@ const Department = () => {
     },
   };
 
+  useEffect(() => {
+    const fetchEmployees = async () => {
+        const employeeList = await employeeGetAPI();
+        if (employeeList) {
+            setEmployees(employeeList);
+        }
+    };
+    fetchEmployees();
+  }, []);
+
   const formItems = [
     {
-      name: "key",
-      label: "Mã phòng ban: ",
-      component: <Input placeholder="Please input ID" />,
-      props: { readOnly: true },
-      hidden: mode === "Add" ? true : false
+        name: "departmentName",
+        label: "Tên Phòng Ban",
+        component: <Input placeholder="Hãy nhập tên phòng ban" />,
+        rules: [{ required: true, message: 'Làm ơn nhập tên phòng ban' }]
     },
     {
-      name: "departmentName",
-      label: "Tên Phòng Ban",
-      component: <Input placeholder="Hãy nhập tên phòng ban" />,
-      rules: [
-        {
-          required: true,
-          message: 'Làm ơn nhập tên phòng ban',
-        },
-      ]
-    },
-    // {
-    //   name: "manager",
-    //   label: "Tên Trưởng Phòng",
-    //   component: <Input placeholder="Hãy nhập tên trưởng phòng" />,
-    //   rules: [
-    //     {
-    //       required: false,
-    //       message: 'Làm ơn nhập tên trưởng phòng',
-    //     },
-    //   ]
-    // },
-  ];
+        name: "managerID",
+        label: "Trưởng Phòng",
+        component: (
+            <Select 
+                placeholder="Chọn trưởng phòng"
+                allowClear // Cho phép xóa lựa chọn
+                onChange={(value) => form.setFieldsValue({ managerID: value || null })}
+            >
+                {employees.map(emp => (
+                    <Select.Option key={emp.id} value={emp.id}>
+                        {emp.name}
+                    </Select.Option>
+                ))}
+            </Select>
+        ),
+        rules: [{ required: false }]
+    }
+];
+
 
   const itemsBreadcrumb = [
     {
@@ -161,15 +169,15 @@ const Department = () => {
           <a className='font-medium ' onClick={() => handleEditDepartment(record)} ><Pencil size={20} /></a>
 
           <Popconfirm
-            placement="bottomRight"
-            title="Xóa một Phòng Ban"
-            description="Bạn đã chắc chắn muốn xóa ?"
-            okText="Có"
-            cancelText="Không"
+          placement="bottomRight"
+          title="Xóa một Phòng Ban"
+          description="Bạn đã chắc chắn muốn xóa ?"
+          onConfirm={() => handleDeleteDepartment(record.key)} // Gọi hàm xoá
+          okText="Có"
+          cancelText="Không"
           >
-
-            <a className=' font-medium  '><Trash2 size={20} /></a>
-          </Popconfirm>
+          <a className='font-medium'><Trash2 size={20} /></a>
+        </Popconfirm>
         </Space>
       ),
     },
@@ -181,36 +189,47 @@ const Department = () => {
 
   const handleOk = async () => {
     try {
-      const values = await form.validateFields(); // Kiểm tra form hợp lệ
-      console.log('Success:', values);
-  
-      // Đảm bảo gửi manager là null nếu không chọn
-      const payload = {
-        ...values,
-        managerID: values.managerID || null,
-      };
-  
-      // Gửi dữ liệu lên API để tạo mới phòng ban
-      const dataNew = await departmentPostAPI(payload);
-  
-      if (dataNew) {
-        const dataItem = {
-          key: dataNew.id,
-          departmentName: dataNew.departmentName,
-          managerID: dataNew.managerID ? dataNew.managerID : "Chưa có trưởng phòng", // Trưởng phòng
-          departmentStatus: dataNew.departmentStatus ? "Hoạt động" : "Ngừng hoạt động",
+        const values = await form.validateFields(); // Kiểm tra form hợp lệ
+        console.log('Success:', values);
+
+        // Đảm bảo gửi manager là null nếu không chọn
+        const payload = {
+            ...values,
+            managerID: values.managerID || null,
         };
-  
-        setData([...data, dataItem]); // Cập nhật state data
-      } else {
-        console.error("Lỗi khi tạo phòng ban");
-      }
+
+        if (mode === "Edit") {
+            // Nếu đang sửa, gọi API update
+            await departmentPutAPI(useData.key, payload);
+
+            // Cập nhật state `data`
+            setData(prevData =>
+                prevData.map(item =>
+                    item.key === useData.key ? { ...item, ...payload } : item
+                )
+            );
+        } else {
+            // Nếu đang thêm mới, gọi API tạo phòng ban
+            const dataNew = await departmentPostAPI(payload);
+
+            if (dataNew) {
+                const dataItem = {
+                    key: dataNew.id,
+                    departmentName: dataNew.departmentName,
+                    managerID: dataNew.managerID ? dataNew.managerID : "Chưa có trưởng phòng",
+                    departmentStatus: dataNew.departmentStatus ? "Hoạt động" : "Ngừng hoạt động",
+                };
+
+                setData([...data, dataItem]);
+            }
+        }
     } catch (errorInfo) {
-      console.error("Lỗi xác thực form:", errorInfo);
+        console.error("Lỗi xác thực form:", errorInfo);
     }
-  
+
     setIsModalOpen(false); // Đóng modal sau khi xử lý xong
-  };    
+};
+    
 
   const handleCancel = () => {
     setIsModalOpen(false)
@@ -218,14 +237,22 @@ const Department = () => {
   };
 
   const handleEditDepartment = (value) => {
-    console.log("recode edit", value)
-
+    console.log("recode edit", value);
     setTitle("Sửa Phòng Ban");
-    setUseData(value)
+    setUseData(value);
+    form.setFieldsValue(value); // Đổ dữ liệu vào form
+    showModal();
+    setMode("Edit"); // Đánh dấu là sửa
+  };
 
-    showModal()
-    setMode("Edit");
-  }
+  const handleDeleteDepartment = async (id) => {
+    try {
+      await departmentDeleteAPI(id); // Gọi API xoá
+      setData(prevData => prevData.filter(item => item.key !== id)); // Cập nhật state
+    } catch (error) {
+      console.error("Lỗi khi xoá phòng ban:", error);
+    }
+  };
 
   const handleNewDepartment = () => {
     form.resetFields()
