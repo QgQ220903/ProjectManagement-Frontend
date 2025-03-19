@@ -1,28 +1,46 @@
 import React, { Children, useEffect, useState } from "react";
-import { Table, Badge, Popconfirm, Space, Input, Form } from "antd";
+import { Table, Badge, Popconfirm, Space, Input, Form, Select, DatePicker } from "antd";
 import Search from '@/components/Search';
 import PageHeader from '@/components/PageHeader';
 import { Link, useParams } from 'react-router-dom';
 import { projectDetailGetAPI } from "@/Services/ProjectService";
-import { projectPartPostAPI } from "@/Services/ProjectDetailService";
+import { projectPartPostAPI } from "@/Services/ProjectPartService";
 import { formatDate } from '@/utils/cn';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import ButtonIcon from '@/components/ButtonIcon'
 // import { FaEye } from "react-icons/fa";
 import ModalProjectPart from '@/components/modal/Modal';
+import ModalProjectTask from '@/components/modal/Modal';
 
 import FormProjectPart from '@/components/form/Form'
+import FormProjectTask from '@/components/form/Form'
 
+
+
+const itemsBreadcrumb = [
+    { title: <Link to='/'>Home</Link> },
+    { title: <Link to="/project">Dự án</Link> },
+    { title: 'Chi tiết dự án' },
+];
 
 const ProjectDetail = () => {
 
+    const { RangePicker } = DatePicker;
+
     const { id } = useParams();
+    const { TextArea } = Input;
     const [projectData, setProjectData] = useState(null);
     const [data, setData] = useState(null);
 
+    const[projectPartSelect,setProjectPartSelect] = useState(null);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [title, setTitle] = useState("");
+
+    const [isModalTaskOpen, setIsModalTaskOpen] = useState(false);
+
     const [form] = Form.useForm();
+    const [formTask] = Form.useForm();
     const [mode, setMode] = useState("");
 
     const fetchProject = async () => {
@@ -58,16 +76,12 @@ const ProjectDetail = () => {
         }
     };
 
-    useEffect(() => {   
+    useEffect(() => {
         fetchProject();
     }, [id]);
 
 
-    const itemsBreadcrumb = [
-        { title: <Link to='/'>Home</Link> },
-        { title: <Link to="/project">Dự án</Link> },
-        { title: 'Chi tiết dự án' },
-    ];
+
 
 
 
@@ -77,7 +91,7 @@ const ProjectDetail = () => {
         { title: "Tên phần", dataIndex: "name", key: "name" },
         { title: "Ngày tạo", dataIndex: "created_at", key: "created_at" },
         { title: "Cập nhật gần nhất", dataIndex: "updated_at", key: "updated_at" },
-        { title: "Tổng Hoàn thành", dataIndex: "completion", key: "completion" },
+        { title: "Tổng Hoàn thành", dataIndex: "completion", key: "completion", render: () => <Badge status="success" text={`0%`} /> },
         {
             title: 'Action',
             key: 'action',
@@ -96,7 +110,7 @@ const ProjectDetail = () => {
                         <a className=' font-medium  '><Trash2 size={20} /></a>
                     </Popconfirm>
 
-                    <Link to={"/project/" + record.key} ><Plus></Plus></Link>
+                    <a onClick={() => handleCreateProjectTask(record)}><Plus></Plus></a>
 
                 </Space>
             ),
@@ -124,10 +138,10 @@ const ProjectDetail = () => {
     // tùy chỉnh form kích thước input
     const formItemLayout = {
         labelCol: {
-            span: 8,
+            span: 9,
         },
         wrapperCol: {
-            span: 16,
+            span: 18,
         },
     };
 
@@ -155,6 +169,161 @@ const ProjectDetail = () => {
 
     ];
 
+    const onChange = (value) => {
+        console.log(`selected ${value}`);
+    };
+    const onSearch = (value) => {
+        console.log('search:', value);
+    };
+
+    const options = [];
+    for (let i = 10; i < 26; i++) {
+        options.push({
+            label: "nhân viên " + i,
+            value: i.toString(36) + i,
+        });
+    }
+    const handleChange = (value) => {
+        console.log(`selected ${value}`);
+    };
+    // Form items task
+    const formItemsTask = [
+        {
+            name: "projectPart",
+            label: "Mã phần dự án:",
+            component: <Input />,
+            props: { readOnly: true },
+            hidden: false
+        },
+        {
+            name: "nameTask",
+            label: "Tên công việc:",
+            component: <Input placeholder="Vui lòng nhập tên công việc" />,
+            //   props: { readOnly: mode === "Info" && true },
+            rules: [
+                {
+                    required: true,
+                    message: 'Làm ơn nhập tên phần dự án',
+                },
+            ]
+        },
+        {
+            name: "desTask",
+            label: "Mô tả:",
+            component: <TextArea placeholder="Vui lòng nhập mô tả"></TextArea>,
+            //   props: { readOnly: mode === "Info" && true },
+            rules: [
+                {
+                    required: true,
+                    message: 'Làm ơn nhập tên phần dự án',
+                },
+            ]
+        },
+        {
+            name: "resEmployee",
+            label: "Người chịu tránh nhiệm:",
+            component:
+                <Select
+                    showSearch
+                    placeholder="Select a employee"
+                    optionFilterProp="label"
+                    onChange={onChange}
+                    onSearch={onSearch}
+                    options={[
+                        {
+                            value: 'jack',
+                            label: 'Jack',
+                        },
+                        {
+                            value: 'lucy',
+                            label: 'Lucy',
+                        },
+                        {
+                            value: 'tom',
+                            label: 'Tom',
+                        },
+                    ]}
+                />,
+            rules: [
+                {
+                    required: true,
+                    message: 'Làm ơn chọn người chịu trách nhiệm',
+                },
+            ]
+        },
+
+        {
+            name: "WorksEmployee",
+            label: "Người thực hiện:",
+            component:
+                <Select
+                    mode="multiple"
+                    allowClear
+                    placeholder="Please select"
+                    onChange={handleChange}
+                    options={options}
+                />,
+            rules: [
+                {
+                    required: true,
+                    message: 'Làm ơn chọn người chịu trách nhiệm',
+                },
+            ]
+        },
+
+        {
+            name: "date",
+            label: "Chọn thời gian:",
+            // getValueFromEvent: (_, dateString) => dateString,
+            component:
+                < RangePicker
+                    showTime
+                    format={"DD/MM/YY : HH:mm"}
+                    onChange={(date, dateString) => console.log("onChange", date, dateString)}
+                ></RangePicker>,
+            rules: [
+                {
+                    required: true,
+                    message: 'Làm ơn chọn ngày thực hiện và kết thức',
+                },
+            ]
+        },
+
+        {
+            name: "Priority",
+            label: "Mức độ ưu tiên:",
+            // getValueFromEvent: (_, dateString) => dateString,
+            component:
+                <Select
+                    showSearch
+                    placeholder="Select a priority"
+                    optionFilterProp="label"
+                    onChange={onChange}
+                    options={[
+                        {
+                            value: 'low',
+                            label: 'Thấp',
+                        },
+                        {
+                            value: 'medium',
+                            label: 'Trung Bình',
+                        },
+                        {
+                            value: 'high',
+                            label: 'Cao',
+                        },
+                    ]}
+                />,
+            rules: [
+                {
+                    required: true,
+                    message: 'Làm ơn chọn ngày thực hiện và kết thức',
+                },
+            ]
+        }
+
+    ];
+
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
@@ -168,10 +337,10 @@ const ProjectDetail = () => {
                     updated_at: formatDate(dataNew.updated_at),
                     tasks: dataNew.tasks || []
                 }
-              
-                setProjectData([ dataItem, ...projectData,]);
-        
-                
+
+                setProjectData([dataItem, ...projectData,]);
+
+
             } else {
                 console.log('lỗi')
             }
@@ -187,6 +356,10 @@ const ProjectDetail = () => {
         setIsModalOpen(false)
     }
 
+    const handleCancelTask = () => {
+        setIsModalTaskOpen(false)
+    }
+
     const handleCreateProjectPart = () => {
         setTitle((data && data.name));
         form.resetFields()
@@ -194,13 +367,32 @@ const ProjectDetail = () => {
         showModal()
     }
 
+    const handleCreateProjectTask = (value) => {
+        formTask.resetFields()
+        console.log(value)
+        value && setProjectPartSelect(value);
+        console.log("projectPartSelect",projectPartSelect)
+        form.resetFields()
+        setMode("Add");
+        showModalTask()
+    }
+
     const showModal = () => {
         setIsModalOpen(true);
     };
 
+    const showModalTask = () => {
+        setIsModalTaskOpen(true);
+    };
+
+    const handleOkTask = async () => {
+        const values = await formTask.validateFields();
+        console.log('Success:', values);
+    }
+
     return (
         <>
-        {/* <div>{projectData && JSON.stringify(projectData)}</div> */}
+            {/* <div>{projectData && JSON.stringify(projectData)}</div> */}
             <PageHeader title={(data && data.name)} itemsBreadcrumb={itemsBreadcrumb}>
 
                 <ButtonIcon handleEvent={handleCreateProjectPart}>
@@ -245,6 +437,31 @@ const ProjectDetail = () => {
 
                 </FormProjectPart>
             </ModalProjectPart>
+
+            <ModalProjectTask
+                isModalOpen={isModalTaskOpen}
+                setIsModalOpen={setIsModalTaskOpen}
+                handleOk={handleOkTask}
+                handleCancel={handleCancelTask}
+                title={"Thêm Công Việc Mới"}
+                form={formTask}
+
+            >
+                <FormProjectTask
+                    formName={'formTask' + mode}
+                    form={formTask}
+                    formItemLayout={formItemLayout}
+                    formItems={formItemsTask}
+                    initialValues={{
+                        projectPart: projectPartSelect && projectPartSelect.key
+                    }}
+
+                >
+
+                </FormProjectTask>
+            </ModalProjectTask>
+
+
         </>
     )
 }

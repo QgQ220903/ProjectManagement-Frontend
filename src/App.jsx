@@ -12,10 +12,11 @@ import Project from "@/pages/Project/project";
 
 import { theme as antdTheme } from 'antd';
 import { useTheme } from "@/hooks/use-theme";
+
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Test from "./pages/Test";
-import ProjectDetail from "./pages/Project/ProjectDetail";
+import ProjectPart from "./pages/Project/ProjectPart";
 
 
 function App() {
@@ -54,7 +55,7 @@ function App() {
                 },
                 {
                     path: "Project/:id",
-                    element: <ProjectDetail/>
+                    element: <ProjectPart/>
                 },
               
                 {

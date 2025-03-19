@@ -4,9 +4,9 @@ const api = "http://127.0.0.1:8000/api/projects/";
 
 export const projectGetAPI = async () => {
     try {
-        const data = await axios.get(api);
-        console.log(data)
-        return data.data;
+        const response = await axios.get(api);
+        console.log("projectGetAPI",response)
+        return response.data.results;
     } catch (error) {
         console.log(error);
     }
