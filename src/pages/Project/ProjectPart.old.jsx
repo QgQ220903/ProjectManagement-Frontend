@@ -31,7 +31,7 @@ const { RangePicker } = DatePicker;
 
 const { TextArea } = Input;
 
-const ProjectDetail = () => {
+const ProjectDetailOld = () => {
 
     const { id } = useParams();
 
@@ -721,4 +721,4 @@ const ProjectDetail = () => {
     )
 }
 
-export default ProjectDetail
+export default ProjectDetailOld

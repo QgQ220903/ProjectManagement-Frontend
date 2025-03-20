@@ -262,7 +262,7 @@ const Project = () => {
     try {
       const values = await form.validateFields();
       console.log('Success:', values);
-      if(mode === 'ADD'){
+      if(mode === 'Add'){
         createProject(values)
       }else if(mode === "Edit"){
         console.log("EDIT")
