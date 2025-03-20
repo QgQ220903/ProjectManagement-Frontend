@@ -12,7 +12,7 @@ export const projectGetAPI = async () => {
     }
 };
 
-export const projectDetailGetAPI = async (id) => {
+export const projectPartGetAPI = async (id) => {
     try {
         const response = await axios.get(api+id);
         console.log(response.data)
@@ -26,8 +26,30 @@ export const projectDetailGetAPI = async (id) => {
 export const projectPostAPI = async (obj) => {
     try {
         const response = await axios.post(api, obj);
-        console.log(response.data)
-        return response.data;
+        console.log("projectPostAPI",response)
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export const projectDeleteAPI = async (id) => {
+    try {
+        const response = await axios.patch(`${api}${id}/`, {
+            is_deleted: true
+        });
+        console.log("projectDeleteAPI",response)
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export const projectUpdateAPI = async (id, obj) => {
+    try {
+        const response = await axios.patch(`${api}${id}/`, obj);
+        console.log("projectUpdateAPI",response)
+        return response;
     } catch (error) {
         console.log(error);
     }

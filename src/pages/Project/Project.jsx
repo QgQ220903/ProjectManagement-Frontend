@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { Space, Popconfirm, Form, Input } from 'antd';
+import { Space, Popconfirm, Form, Input, message } from 'antd';
 
 import { Pencil, Trash2, Plus } from 'lucide-react';
 
@@ -20,12 +20,20 @@ import PageHeader from '@/components/PageHeader'
 
 import ButtonIcon from '@/components/ButtonIcon'
 
-import {projectGetAPI, projectPostAPI} from '@/Services/ProjectService'
+import {projectGetAPI, projectPostAPI, projectDeleteAPI, projectUpdateAPI} from '@/Services/ProjectService'
 
 import {formatDate} from '@/utils/cn'
 
+import {showToastMessage} from '@/utils/toast'
+
+import { ToastContainer, toast } from 'react-toastify';
+
+
+// import "react-toastify/dist/ReactToastify.css";
+
 const Project = () => {
 
+  
   const [current,setCurrent] = useState(1)
 
   const [total,setTotal] = useState(16)
@@ -119,6 +127,22 @@ const Project = () => {
     },
   ]
 
+  const confirm = async (record) => {
+    console.log("confirm",record);
+    try {
+      const response = await projectDeleteAPI(record.key)
+      if(response.status === 200){
+        showToastMessage('Xóa dự án thành công!','success', 'top-right')
+        const newData = data.filter((item) => item.key !== record.key)
+        setData(newData)
+      }else{
+        showToastMessage('Xóa dự án thất bại!', 'error', 'top-right')
+      }
+    } catch (error) {
+      console.log(error)
+    }
+    
+  }
 
   //  Tùy chỉnh cột của table
   const columns = [
@@ -161,6 +185,7 @@ const Project = () => {
             description="Bạn đã chắc chắn muốn xóa ?"
             okText="Có"
             cancelText="Không"
+            onConfirm={() => confirm(record)} // Sửa lại chỗ này
           >
 
             <a className=' font-medium  '><Trash2 size={20} /></a>
@@ -177,12 +202,11 @@ const Project = () => {
     setIsModalOpen(true);
   };
 
-  const handleOk = async () => {
-    try {
-      const values = await form.validateFields();
-      console.log('Success:', values);
-      const dataNew = await projectPostAPI(values);
+  const createProject = async (values) => {
+    const response = await projectPostAPI(values);
 
+    if(response.status === 201){
+      const dataNew = response.data;
       if (dataNew) {
         const dataItem = {
             key: dataNew.id,
@@ -190,16 +214,67 @@ const Project = () => {
             createdAt: formatDate(dataNew.created_at),
             updatedAt: formatDate(dataNew.updated_at)
         }
-        setData([...data,dataItem])
+        setData([dataItem,...data])
       }else{
         console.log('lỗi')
       }
+      showToastMessage('Thêm dự án thành công !', 'success', 'top-right')
+    }else{
+      showToastMessage('Thêm dự án thất bại !', 'error', 'top-right')
+    }
+  }
+
+  const updateProject = async (values) => {
+    const response = await projectUpdateAPI(values.key,values);
+
+    if(response.status === 200){
+      const dataNew = response.data;
+      if (dataNew) {
+        const dataItem = {
+            key: dataNew.id,
+            name: dataNew.name,
+            createdAt: formatDate(dataNew.created_at),
+            updatedAt: formatDate(dataNew.updated_at)
+        }
+         // Tìm index của phần tử có key (id) tương ứng
+         const index = data.findIndex(item => item.key === dataNew.id);
+            
+         if (index !== -1) {
+             // Tạo bản sao của data, cập nhật phần tử tại index
+             const updatedData = [...data];
+             updatedData[index] = dataItem;
+
+             setData(updatedData);
+         } else {
+             console.log('Không tìm thấy dự án trong danh sách, thêm mới...');
+         }
+      }else{
+        console.log('lỗi')
+      }
+      showToastMessage('Sửa tên dự án thành công !', 'success', 'top-right')
+    }else{
+      showToastMessage('Sửa tên dự án thất bại !', 'error', 'top-right')
+    }
+  }
+
+
+  const handleOk = async () => {
+    try {
+      const values = await form.validateFields();
+      console.log('Success:', values);
+      if(mode === 'ADD'){
+        createProject(values)
+      }else if(mode === "Edit"){
+        console.log("EDIT")
+        updateProject(values)
+      }
+    
+      setIsModalOpen(false);
       
     } catch (errorInfo) {``
       console.log('Failed:', errorInfo);
     }
 
-    setIsModalOpen(false);
   };
 
   const handleCancel = () => {
@@ -289,6 +364,8 @@ const Project = () => {
 
         </FormProject>
       </ModalProject>
+
+      <ToastContainer />
 
     </>
   )

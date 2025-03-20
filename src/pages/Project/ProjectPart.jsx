@@ -3,7 +3,7 @@ import { Table, Badge, Popconfirm, Space, Input, Form, Select, DatePicker } from
 import Search from '@/components/Search';
 import PageHeader from '@/components/PageHeader';
 import { Link, useParams } from 'react-router-dom';
-import { projectDetailGetAPI } from "@/Services/ProjectService";
+import { projectPartGetAPI } from "@/Services/ProjectService";
 import { projectPartPostAPI } from "@/Services/ProjectPartService";
 import { employeeGetAPI } from "@/Services/EmployeeService";
 import { taskPost } from "@/Services/TaskService";
@@ -57,7 +57,7 @@ const ProjectDetail = () => {
 
     const fetchProject = async () => {
         console.log("chạy 1 lần")
-        const data = await projectDetailGetAPI(id);
+        const data = await projectPartGetAPI(id);
         setEmployeedata(await employeeGetAPI());
         if (data?.project_parts) {
             setData(data)
