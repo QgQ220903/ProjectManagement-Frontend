@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Space, Popconfirm, Form, Input, Select } from "antd";
+import { Space, Popconfirm, Form, Input, Select, Descriptions } from "antd";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FaEye } from "react-icons/fa";
@@ -11,6 +11,7 @@ import PageHeader from "@/components/PageHeader";
 import ButtonIcon from "@/components/ButtonIcon";
 import { employeeGetAPI, employeePostAPI, employeePutAPI, employeeDeleteAPI } from "@/Services/EmployeeService";
 import { departmentGetAPI, departmentPostAPI, updateManagerForDepartmentAPI } from "@/Services/DepartmentService";
+import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Employee = () => {
     const [current, setCurrent] = useState(1);
@@ -30,40 +31,85 @@ const Employee = () => {
     const handleChange = (value) => {
         console.log(`selected ${value}`);
         if (value === "TP") {
-            setDepartmentDataFilter(departmentData?.filter((item) => !item.manager_id));
+            setDepartmentDataFilter(departmentData?.filter((item) => item.manager === null));
         } else {
             setDepartmentDataFilter(departmentData);
         }
     };
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const data = await employeeGetAPI();
-            const dataDepartment = await departmentGetAPI();
-            dataDepartment ? setDepartmentData(dataDepartment.results) : console.log("error");
-            console.log("dataDepartment", dataDepartment);
-            console.log("data", data);
-            // if (data.position === "TP") {
-            //     setDepartmentDataFilter(departmentData?.results?.filter((item) => !item.manager_id));
-            // } else {
-            //     setDepartmentDataFilter(departmentData?.results);
-            // }
-            if (data) {
-                const dataItem = data.map((item) => ({
-                    key: item.id,
-                    name: item.name,
-                    position: item.position === "TP" ? "Trưởng Phòng" : "Nhân Viên",
-                    phone_number: item.phone_number,
-                    email: item.email,
-                    department: item.department,
-                    status: !item.is_deleted ? "Hoạt Động" : "Ngưng Hoạt Động",
-                }));
-                setData(dataItem);
-            }
-        };
-        fetchData();
-    }, []);
+    function setDataEmployees(employees) {
+        return employees?.map((item) => ({
+            key: item.id,
+            name: item.name,
+            position: item.position === "TP" ? "Trưởng Phòng" : "Nhân Viên",
+            phone_number: item.phone_number,
+            email: item.email,
+            department: item.department,
+            is_deleted: item.is_deleted,
+        }));
+    }
+    //xu lý khi nv là trưởng phòng
+    function updateDepartmentManager(newData, departmentData, mutatePutDepartment) {
+        if (newData?.position === "TP") {
+            const department = departmentData.find((item) => item.id === newData.department);
 
+            if (department) {
+                const updatedDepartment = { ...department, manager: newData.id };
+                mutatePutDepartment(updatedDepartment);
+            }
+        }
+    }
+    const queryClient = useQueryClient();
+    //lấy ds nv
+    const { data: employees } = useQuery({
+        queryKey: ["employees"],
+        queryFn: employeeGetAPI,
+    });
+    //lấy ds phòng ban
+    const { data: dataDepartment } = useQuery({
+        queryKey: ["departments"],
+        queryFn: departmentGetAPI,
+    });
+    // sửa,xóa nv
+    const { data: employeData, mutate: mutatePut } = useMutation({
+        mutationFn: employeePutAPI,
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["employees"],
+            });
+        },
+    });
+    //thêm nv
+    const { data: newData, mutate: mutatePost } = useMutation({
+        mutationFn: employeePostAPI,
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["employees"],
+            });
+        },
+    });
+    //cap nhat lại trưởng phòng trong phòng ban
+    const { mutate: mutatePutDepartment } = useMutation({
+        mutationFn: updateManagerForDepartmentAPI,
+    });
+    // Cập nhật state chỉ khi `employees` thay đổi
+    useEffect(() => {
+        if (employees) {
+            const employeData = employees.filter((item) => {
+                return item.is_deleted !== true;
+            });
+            console.log("employ", employeData);
+            setData(setDataEmployees(employeData));
+        }
+        dataDepartment ? setDepartmentData(dataDepartment.results) : "";
+    }, [employees, dataDepartment]);
+
+    useEffect(() => {
+        updateDepartmentManager(newData, departmentData, mutatePutDepartment);
+    }, [newData, departmentData, mutatePutDepartment]);
+    useEffect(() => {
+        updateDepartmentManager(employeData, departmentData, mutatePutDepartment);
+    }, [employeData, departmentData, mutatePutDepartment]);
     useEffect(() => {
         if (useData) {
             form.setFieldsValue(useData);
@@ -143,7 +189,7 @@ const Employee = () => {
         { title: "Chức Vụ", dataIndex: "position", key: "position" },
         { title: "Số Điện Thoại", dataIndex: "phone_number", key: "phone" },
         { title: "Email", dataIndex: "email", key: "email" },
-        { title: "Trạng Thái", dataIndex: "status", key: "status" },
+
         {
             title: "Hành động",
             key: "action",
@@ -178,51 +224,12 @@ const Employee = () => {
     const handleOk = async () => {
         try {
             const values = await form.validateFields(); // Kiểm tra dữ liệu nhập vào form
-            console.log("values", values);
 
             if (mode === "Edit") {
-                // Gọi API update nhân viên
-                const updatedData = await employeePutAPI(useData.key, values);
-
-                if (updatedData) {
-                    setData((prevData) =>
-                        prevData.map((item) =>
-                            item.key === useData.key
-                                ? {
-                                      ...item,
-                                      name: updatedData.name,
-                                      position: updatedData.position === "TP" ? "Trưởng Phòng" : "Nhân Viên",
-                                      phone_number: updatedData.phone_number,
-                                      email: updatedData.email,
-                                      departmentID: updatedData.department_id,
-                                      status: !updatedData.is_deleted ? "Hoạt Động" : "Ngưng Hoạt Động",
-                                  }
-                                : item,
-                        ),
-                    );
-                }
+                mutatePut({ id: useData.key, obj: values });
             } else {
                 // Thêm nhân viên mới
-                const newData = await employeePostAPI(values);
-
-                if (newData) {
-                    setData([
-                        ...data,
-                        {
-                            key: newData.id,
-                            name: newData.name,
-                            position: newData.position === "TP" ? "Trưởng Phòng" : "Nhân Viên",
-                            phone_number: newData.phone_number,
-                            email: newData.email,
-                            departmentID: newData.department_id,
-                            status: !newData.is_deleted ? "Hoạt Động" : "Ngưng Hoạt Động",
-                        },
-                    ]);
-
-                    if (newData.position === "TP") {
-                        await updateManagerForDepartmentAPI(newData.department_id, newData.id);
-                    }
-                }
+                mutatePost(values);
             }
             setIsModalOpen(false);
         } catch (error) {
@@ -242,8 +249,11 @@ const Employee = () => {
 
     const handleDeleteEmployee = async (id) => {
         try {
-            await employeeDeleteAPI(id);
-            setData(data.filter((item) => item.key !== id));
+            const deleteEmploye = employees.find((item) => item.id === id);
+            if (deleteEmploye) {
+                const updatedEmploye = { ...deleteEmploye, is_deleted: true };
+                mutatePut({ id: updatedEmploye.id, obj: updatedEmploye });
+            }
         } catch (error) {
             console.log(error);
         }

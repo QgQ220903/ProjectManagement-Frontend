@@ -1,7 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import { ThemeProvider } from "@/contexts/theme-context";
-
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // import Layout from "@/routes/layout";
 import MainLayout from "@/layouts/MainLayout";
 import DashboardPage from "@/pages/Home";
@@ -9,8 +9,7 @@ import Employee from "@/pages/Employee.jsx";
 import Department from "@/pages/Department/department";
 import Project from "@/pages/Project/project";
 
-
-import { theme as antdTheme } from 'antd';
+import { theme as antdTheme } from "antd";
 import { useTheme } from "@/hooks/use-theme";
 
 import Login from "./pages/Login";
@@ -18,7 +17,13 @@ import Register from "./pages/Register";
 import Test from "./pages/Test";
 import ProjectPart from "./pages/Project/ProjectPart";
 
-
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 0,
+        },
+    },
+});
 function App() {
     const router = createBrowserRouter([
         {
@@ -39,11 +44,11 @@ function App() {
                 },
                 {
                     path: "employees",
-                    element: <Employee/>,
+                    element: <Employee />,
                 },
                 {
                     path: "department",
-                    element: <Department/>,
+                    element: <Department />,
                 },
                 {
                     path: "verified-customers",
@@ -51,13 +56,13 @@ function App() {
                 },
                 {
                     path: "Project",
-                    element: <Project/>
+                    element: <Project />,
                 },
                 {
                     path: "Project/:id",
-                    element: <ProjectPart/>
+                    element: <ProjectPart />,
                 },
-              
+
                 {
                     path: "new-product",
                     element: <h1 className="title">New Product</h1>,
@@ -72,24 +77,25 @@ function App() {
                 },
                 {
                     path: "test",
-                    element: <Test/>,
+                    element: <Test />,
                 },
-              
             ],
         },
         {
             path: "login",
-            element: <Login/>,
+            element: <Login />,
         },
         {
             path: "register",
-            element: <Register/>,
+            element: <Register />,
         },
     ]);
 
     return (
         <ThemeProvider storageKey="theme">
-            <RouterProvider router={router} />
+            <QueryClientProvider client={queryClient}>
+                <RouterProvider router={router} />
+            </QueryClientProvider>
         </ThemeProvider>
     );
 }
