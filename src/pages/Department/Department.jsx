@@ -36,12 +36,13 @@ const Department = () => {
       const response = await departmentGetAPI();
       console.log("API response:", response);
       if (response) {
-        const formattedData = response.map((dept) => ({
+        const dataFillter = response.filter((data) => data.is_deleted !== true)
+        const formattedData = dataFillter.map((dept) => ({
           key: dept.id,
           name: dept.name,
           manager: dept.manager ? dept.manager.name : "Chưa có trưởng phòng",
           description: dept.description ? dept.description : "Không có mô tả phòng ban",
-          is_deleted: dept.is_deleted ? "Ngừng hoạt động" : "Hoạt động",
+          // is_deleted: dept.is_deleted ? "Ngừng hoạt động" : "Hoạt động",
         }));
         setData(formattedData);
       }
@@ -99,7 +100,7 @@ const Department = () => {
                         name: newDept.name,
                         manager: newDept.manager ? newDept.manager.name || newDept.manager : "Chưa có trưởng phòng",
                         description: newDept.description || "Không có mô tả phòng ban",
-                        is_deleted: newDept.is_deleted ? "Ngừng hoạt động" : "Hoạt động",
+                        // is_deleted: newDept.is_deleted ? "Ngừng hoạt động" : "Hoạt động",
                     }
                 ]);
             }
@@ -142,7 +143,7 @@ const Department = () => {
     { title: 'Tên Phòng Ban', dataIndex: 'name', key: 'name', render: (text) => <span>{text}</span> },
     { title: 'Trưởng Phòng', dataIndex: 'manager', key: 'manager' },
     { title: 'Mô tả', dataIndex: 'description', key: 'description' },
-    { title: 'Trạng Thái', dataIndex: 'is_deleted', key: 'is_deleted', render: (text) => <Tag color={text === "Ngừng hoạt động" ? "volcano" : "green"}>{text}</Tag> },
+    // { title: 'Trạng Thái', dataIndex: 'is_deleted', key: 'is_deleted', render: (text) => <Tag color={text === "Ngừng hoạt động" ? "volcano" : "green"}>{text}</Tag> },
     { title: 'Hành Động', key: 'action', render: (_, record) => (
         <Space>
           <a onClick={() => handleEditDepartment(record)}><Pencil size={20} /></a>

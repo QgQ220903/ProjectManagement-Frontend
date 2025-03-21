@@ -43,7 +43,7 @@ export const updateManagerForDepartmentAPI = async (id, obj) => {
 export const employeeGetAPI = async () => {
     try {
         const response = await axios.get("http://127.0.0.1:8000/api/employees/");
-        return response.data;
+        return response.data.results;
     } catch (error) {
         console.error("Lỗi khi lấy danh sách nhân viên:", error);
     }
