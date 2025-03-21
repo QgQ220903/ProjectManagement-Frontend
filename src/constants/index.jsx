@@ -1,4 +1,4 @@
-import { ChartColumn, Home, NotepadText, Package, PackagePlus, Settings, ShoppingBag, UserCheck, UserPlus, Users } from "lucide-react";
+import { ChartLine, Briefcase,ChartColumn,User ,UserCog, CircleUserRound, Home, NotepadText, Package, PackagePlus, Settings, ShoppingBag, UserCheck, UserPlus, Users, ClipboardList, FolderOpen } from "lucide-react";
 
 import ProfileImage from "@/assets/profile-image.jpg";
 import ProductImage from "@/assets/product-image.jpg";
@@ -11,21 +11,21 @@ export const navbarLinks = [
             icon: Home,
             path: "/",
         },
-        {
-            label: "Analytics",
-            icon: ChartColumn,
-            path: "/analytics",
-        },
-        {
-            label: "Reports",
-            icon: NotepadText,
-            path: "/reports",
-        },
+        // {
+        //     label: "Analytics",
+        //     icon: ChartColumn,
+        //     path: "/analytics",
+        // },
+        // {
+        //     label: "Reports",
+        //     icon: NotepadText,
+        //     path: "/reports",
+        // },
         
     
         {
             label: "Nhân Viên",
-            icon: Users,
+            icon: User,
             path: "/employees",
         },
         {
@@ -33,38 +33,44 @@ export const navbarLinks = [
             icon: Users,
             path: "/Department",
         },
-        {
-            label: "Verified customers",
-            icon: UserCheck,
-            path: "/verified-customers",
-        },
+        // {
+        //     label: "Verified customers",
+        //     icon: UserCheck,
+        //     path: "/verified-customers",
+        // },
        
         {
             label: "Dự Án",
-            icon: Package,
+            icon: FolderOpen,
             path: "/project",
         },
         {
-            label: "New product",
-            icon: PackagePlus,
-            path: "/new-product",
+            label: "Tài Khoản",
+            icon: CircleUserRound,
+            path: "/account",
         },
         {
-            label: "Inventory",
-            icon: ShoppingBag,
-            path: "/inventory",
+            label: "Nhóm Quyền",
+            icon: UserCog ,
+            path: "/role",
         },
     
         {
-            label: "Settings",
-            icon: Settings,
-            path: "/settings",
+            label: "Công Việc",
+            icon: ClipboardList,
+            path: "/task",
         },
 
         {
-            label: "Test",
-            icon: Settings,
-            path: "/test",
+            label: "Công Việc Phòng Ban",
+            icon: Briefcase,
+            path: "/task-department",
+        },
+
+        {
+            label: "Thống Kê",
+            icon:ChartLine,
+            path: "/chart",
         },
         
 ];

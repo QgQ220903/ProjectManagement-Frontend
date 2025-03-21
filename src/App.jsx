@@ -5,9 +5,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // import Layout from "@/routes/layout";
 import MainLayout from "@/layouts/MainLayout";
 import DashboardPage from "@/pages/Home";
-import Employee from "@/pages/Employee.jsx";
+import Employee from "@/pages/Employee/Employee.jsx";
 import Department from "@/pages/Department/department";
 import Project from "@/pages/Project/project";
+import Account from "@/pages/Account/Account";
+import Role from "@/pages/Role/Role";
+import Task from "@/pages/Task/Task";
+import TaskDepartment from "@/pages/TaskDepartment/TaskDepartment";
 
 import { theme as antdTheme } from "antd";
 import { useTheme } from "@/hooks/use-theme";
@@ -55,21 +59,29 @@ function App() {
                     element: <h1 className="title">Verified Customers</h1>,
                 },
                 {
-                    path: "Project",
+                    path: "project",
                     element: <Project />,
                 },
                 {
-                    path: "Project/:id",
+                    path: "project/:id",
                     element: <ProjectPart />,
                 },
 
                 {
-                    path: "new-product",
-                    element: <h1 className="title">New Product</h1>,
+                    path: "account",
+                    element: <Account />,
                 },
                 {
-                    path: "inventory",
-                    element: <h1 className="title">Inventory</h1>,
+                    path: "role",
+                    element: <Role />,
+                },
+                {
+                    path: "task",
+                    element: <Task />,
+                },
+                {
+                    path: "task-department",
+                    element: <TaskDepartment/>,
                 },
                 {
                     path: "settings",

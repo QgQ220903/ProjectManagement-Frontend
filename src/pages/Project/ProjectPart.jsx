@@ -56,75 +56,60 @@ const ProjectDetail = () => {
 
     const [mode, setMode] = useState("");
 
+    const processTask = (task) => {
+        const taskData = {
+            ...task,
+            priority: task.priority === 0 ? "Thấp" : task.priority === 1 ? "Trung Bình" : "Cao",
+            key: "task" + task.id,
+            created_at: formatDate(task.created_at),
+            end_time: formatDate(task.end_time),
+            listWork: task.task_assignments
+                .filter((item) => item.role !== "RESPONSIBLE")
+                .map((item) => ({
+                    id: item.id,
+                    employeeName: item.employee.name,  // Lấy tên nhân viên
+                })),
+            responsible: task.task_assignments
+                .filter((item) => item.role === "RESPONSIBLE")
+                .map((item) => ({
+                    id: item.id,
+                    employeeName: item.employee.name,  // Lấy tên nhân viên
+                })),
+        };
+    
+        // Nếu task có subtasks, gọi đệ quy để xử lý tất cả các cấp
+        if (task.subtasks && task.subtasks.length > 0) {
+            taskData.children = task.subtasks.map(sub => ({
+                ...processTask(sub), // Gọi đệ quy
+                name:  sub.name,
+                key: "sub" + sub.id,
+            }));
+        }
+    
+        return taskData;
+    };
+    
+
     const fetchProject = async () => {
-        console.log("chạy 1 lần")
+        console.log("chạy 1 lần");
         const data = await projectPartGetAPI(id);
         setEmployeedata(await employeeGetAPI());
+    
         if (data?.project_parts) {
-            setData(data)
-            const dataFillter = data.project_parts.map((data, index) => ({
-                key: data.id,
-                name: data.name,
-                created_at: formatDate(data.created_at),
-                updated_at: formatDate(data.updated_at),
-                tasks: data.tasks
-                    ? data.tasks.map((task) => {
-                        const taskData = {
-                            ...task,
-                            priority: task.priority === 0 ? "Thấp" : task.priority === 1 ? "Trung Bình" : "Cao",
-                            key: "task" + task.id,
-                            created_at: formatDate(task.created_at),
-                            end_time: formatDate(task.end_time),
-                            listWork: task.task_assignments
-                                .filter((item) => item.role !== "RESPONSIBLE")
-                                .map((item) => ({
-                                    id: item.id,
-                                    employeeName: item.employee.name,  // Lấy tên nhân viên
-                                    // status: item.status,
-                                })),
-                            responsible: task.task_assignments && task.task_assignments.filter((item) => item.role == "RESPONSIBLE").map((item) => ({
-                                id: item.id,
-                                created_at: formatDate(task.created_at),
-                                end_time: formatDate(task.end_time),
-                                employeeName: item.employee.name,  // Lấy tên nhân viên
-                                // status: item.status,
-                            })),
-
-
-                        };
-                        // Chỉ thêm `children` nếu có `subtasks`
-                        if (task.subtasks && task.subtasks.length > 0) {
-                            taskData.children = task.subtasks.map((sub) => ({
-                                ...sub,
-                                name: '+ ' + sub.name,
-                                key: "sub" + sub.id,
-                                priority: task.priority === 0 ? "Thấp" : task.priority === 1 ? "Trung Bình" : "Cao",
-                                created_at: formatDate(task.created_at),
-                                end_time: formatDate(task.end_time),
-                                listWork: task.task_assignments
-                                    .filter((item) => item.role !== "RESPONSIBLE")
-                                    .map((item) => ({
-                                        id: item.id,
-                                        employeeName: item.employee.name,  // Lấy tên nhân viên
-                                        // status: item.status,
-                                    })),
-                                responsible: task.task_assignments && task.task_assignments.filter((item) => item.role == "RESPONSIBLE").map((item) => ({
-                                    id: item.id,
-                                    employeeName: item.employee.name,  // Lấy tên nhân viên
-                                    // status: item.status,
-                                })),
-                            }));
-                        }
-                        return taskData;
-                    })
-                    : []
-
-
-            }))
-            console.log("dataFillterv ", dataFillter)
+            setData(data);
+            const dataFillter = data.project_parts.map((part) => ({
+                key: part.id,
+                name: part.name,
+                created_at: formatDate(part.created_at),
+                updated_at: formatDate(part.updated_at),
+                tasks: part.tasks ? part.tasks.map(processTask) : [],
+            }));
+    
+            console.log("dataFillterv ", dataFillter);
             setProjectData(dataFillter);
         }
     };
+    
 
     useEffect(() => {
         fetchProject();
@@ -544,16 +529,39 @@ const ProjectDetail = () => {
                 ...value,
                 role: role,
                 task: taskId
-            })
-            return res
+            });
+            return res;
         } catch (error) {
-            console.log("createTaskAssignments", error)
+            console.error("Error in createTaskAssignments:", error);
+            return null;
         }
-    }
-
+    };
+    
+    const updateTasks = (tasks, parentTaskKey, dataItem) => {
+        return tasks.map(task => {
+            if (task.key === parentTaskKey) {
+                return {
+                    ...task,
+                    subtasks: [...task.subtasks, dataItem],
+                    children: [...(task.children || []), dataItem]
+                };
+            } else if (task.subtasks?.length) {
+                return {
+                    ...task,
+                    subtasks: updateTasks(task.subtasks, parentTaskKey, dataItem),
+                    children: updateTasks(task.children || [], parentTaskKey, dataItem)
+                };
+            }
+            return task;
+        });
+    };
+    
+    
     const createTask = async (values, valueNew, isSubTask = false) => {
-        const dataNew = await taskPost(valueNew);
-        if (dataNew) {
+        try {
+            const dataNew = await taskPost(valueNew);
+            if (!dataNew) return;
+    
             let resEmployeeData = [];
             let workEmployeeData = [];
     
@@ -563,10 +571,12 @@ const ProjectDetail = () => {
                     "RESPONSIBLE",
                     dataNew.id
                 );
-                resEmployeeData = resEmployee ? [{ id: resEmployee.id, employeeName: resEmployee.employee.name }] : [];
+                if (resEmployee) {
+                    resEmployeeData.push({ id: resEmployee.id, employeeName: resEmployee.employee.name });
+                }
             }
     
-            if (values.WorksEmployee && values.WorksEmployee.length > 0) {
+            if (values.WorksEmployee?.length > 0) {
                 const workEmployees = await Promise.all(
                     values.WorksEmployee.map(employee => createTaskAssignments(
                         { employee: employee },
@@ -574,7 +584,7 @@ const ProjectDetail = () => {
                         dataNew.id
                     ))
                 );
-                workEmployeeData = workEmployees.map(item => ({
+                workEmployeeData = workEmployees.filter(item => item).map(item => ({
                     id: item.id,
                     employeeName: item.employee.name
                 }));
@@ -582,54 +592,47 @@ const ProjectDetail = () => {
     
             const dataItem = {
                 ...dataNew,
-                priority: dataNew.priority === 0 ? "Thấp" : dataNew.priority === 1 ? "Trung Bình" : "Cao",
+                priority: ["Thấp", "Trung Bình", "Cao"][dataNew.priority] || "Không xác định",
                 key: isSubTask ? "sub" + dataNew.id : "task" + dataNew.id,
                 created_at: formatDate(dataNew.created_at),
                 end_time: formatDate(dataNew.end_time),
                 listWork: workEmployeeData,
                 responsible: resEmployeeData,
-                name: isSubTask ? "+ " + dataNew.name : dataNew.name
+                name: isSubTask ? "+ " + dataNew.name : dataNew.name,
+                subtasks: [],
+                children: [] // Đảm bảo có children để hiển thị đúng trong bảng
             };
     
             setProjectData(prevData => prevData.map(part => {
                 if (isSubTask) {
                     return {
                         ...part,
-                        tasks: part.tasks.map(task =>
-                            task.key === "task" + valueNew.parent_task
-                                ? {
-                                    ...task,
-                                    subtasks: [...(task.subtasks || []), dataItem],
-                                    children: [...(task.children || []), dataItem] // Cập nhật children
-                                }
-                                : task
-                        )
+                        tasks: updateTasks(part.tasks, "task" + valueNew.parent_task, dataItem)
                     };
                 } else if (part.key === valueNew.project_part) {
-                    return {
-                        ...part,
-                        tasks: [dataItem, ...part.tasks]
-                    };
+                    return { ...part, tasks: [dataItem, ...part.tasks] };
                 }
                 return part;
             }));
+        } catch (error) {
+            console.error("Error in createTask:", error);
         }
     };
     
     
-    // Xử lý khi nhấn OK
+    
     const handleOkTask = async () => {
         try {
             const values = await formTask.validateFields();
             values.date = values.date?.map(d => d.format("YYYY-MM-DDThh:mm"));
-            console.log('Success:', values);
+            console.log('Validated Values:', values);
     
             const valueNew = {
                 name: values.nameTask,
                 description: values.desTask,
                 priority: values.Priority,
-                start_time: values.date[0],
-                end_time: values.date[1],
+                start_time: values.date?.[0] || null,
+                end_time: values.date?.[1] || null,
                 task_status: 'TO_DO',
                 completion_percentage: "0",
                 is_deleted: false,
@@ -640,7 +643,7 @@ const ProjectDetail = () => {
             await createTask(values, valueNew, isSubTaskForm);
             setIsModalTaskOpen(false);
         } catch (error) {
-            console.log('Failed:', error);
+            console.error('Validation Failed:', error);
         }
     };
     

@@ -214,7 +214,7 @@ const Project = () => {
             createdAt: formatDate(dataNew.created_at),
             updatedAt: formatDate(dataNew.updated_at)
         }
-        setData([dataItem,...data])
+        setData([...data,dataItem])
       }else{
         console.log('lỗi')
       }
