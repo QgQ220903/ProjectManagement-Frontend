@@ -1,327 +1,174 @@
 import React, { useState, useEffect } from 'react';
-
-import { Space, Tag, Popconfirm, Form, Input } from 'antd';
-
-import { Pencil, Trash2 } from 'lucide-react';
-
+import { Space, Tag, Popconfirm, Form, Input, Select, Table, Drawer } from 'antd';
+import { Pencil, Trash2, Plus } from 'lucide-react';
 import Search from '@/components/Search';
-
-import { Table, Drawer } from 'antd';
-
 import ModalDepartment from '@/components/modal/Modal';
-
-import FormDepartment from '@/components/form/Form'
-
-import PageHeader from '@/components/PageHeader'
-
-import ButtonIcon from '@/components/ButtonIcon'
-
-import { Plus } from 'lucide-react';
-
-import { Select } from 'antd';
-
-import {departmentGetAPI, departmentPostAPI, departmentPutAPI, departmentDeleteAPI, employeeGetAPI} from '@/Services/DepartmentService'
+import FormDepartment from '@/components/form/Form';
+import PageHeader from '@/components/PageHeader';
+import ButtonIcon from '@/components/ButtonIcon';
+import { departmentGetAPI, departmentPostAPI, departmentPutAPI, departmentDeleteAPI, employeeGetAPI } from '@/Services/DepartmentService';
 
 const Department = () => {
-
-  const [useData, setUseData] = useState(null);
+  const [data, setData] = useState([]);
   const [employees, setEmployees] = useState([]);
-  // const [employeeData, setEmployeeData] = useState(null);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const [open, setOpen] = useState(false);
-
-  const [title, setTitle] = useState("");
-
-  const [mode, setMode] = useState("");
-
   const [form] = Form.useForm();
-
-  const [data, setData] = useState(null);
-
-// tùy chỉnh form kích thước input
-  const formItemLayout = {
-    labelCol: {
-      span: 8,
-    },
-    wrapperCol: {
-      span: 16,
-    },
-  };
+  const [title, setTitle] = useState("");
+  const [mode, setMode] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState(null);
 
   useEffect(() => {
     const fetchEmployees = async () => {
-        const employeeList = await employeeGetAPI();
-        if (employeeList) {
-            setEmployees(employeeList);
-        }
+      const employeeList = await employeeGetAPI();
+      console.log("Employees API response:", employeeList);
+      if (Array.isArray(employeeList)) {
+        setEmployees(employeeList);
+      } else {
+        setEmployees([]); // Đảm bảo employees luôn là một mảng
+      }
     };
     fetchEmployees();
   }, []);
-
-  const formItems = [
-    {
-        name: "departmentName",
-        label: "Tên Phòng Ban",
-        component: <Input placeholder="Hãy nhập tên phòng ban" />,
-        rules: [{ required: true, message: 'Làm ơn nhập tên phòng ban' }]
-    },
-    {
-        name: "managerID",
-        label: "Trưởng Phòng",
-        component: (
-            <Select 
-                placeholder="Chọn trưởng phòng"
-                allowClear // Cho phép xóa lựa chọn
-                onChange={(value) => form.setFieldsValue({ managerID: value || null })}
-            >
-                {employees.map(emp => (
-                    <Select.Option key={emp.id} value={emp.id}>
-                        {emp.name}
-                    </Select.Option>
-                ))}
-            </Select>
-        ),
-        rules: [{ required: false }]
-    }
-];
-
-
-  const itemsBreadcrumb = [
-    {
-      title: <a href="">Home</a>,
-    },
-
-    {
-      title: 'Phòng Ban',
-    },
-  ]
-
+  
 
   useEffect(() => {
-    const test = async () => {
-      const data = await departmentGetAPI(); // Gọi API
-    
-      if (data) { // Kiểm tra dữ liệu trước khi gọi .map()
-        const dataItem = data.map((item) => ({
-          key: item.id,
-          departmentName: item.departmentName,
-          managerID: item.managerID ? item.managerID : "Chưa có trưởng phòng", 
-          departmentStatus: item.departmentStatus ? "Hoạt động" : "Ngừng hoạt động",
+    const fetchDepartments = async () => {
+      const response = await departmentGetAPI();
+      console.log("API response:", response);
+      if (response) {
+        const dataFillter = response.filter((data) => data.is_deleted !== true)
+        const formattedData = dataFillter.map((dept) => ({
+          key: dept.id,
+          name: dept.name,
+          manager: dept.manager ? dept.manager.name : "Chưa có trưởng phòng",
+          description: dept.description ? dept.description : "Không có mô tả phòng ban",
+          // is_deleted: dept.is_deleted ? "Ngừng hoạt động" : "Hoạt động",
         }));
-  
-        setData(dataItem); // Cập nhật state
-      } else {
-        console.error("Không có dữ liệu từ API");
+        setData(formattedData);
       }
     };
-  
-    test();
+    fetchDepartments();
   }, []);
 
   useEffect(() => {
-    if (useData) {
-      console.log(useData)
-      form.setFieldsValue(useData)
-    }
-  }, [form, useData]);
+    if (selectedDepartment) form.setFieldsValue(selectedDepartment);
+  }, [form, selectedDepartment]);
 
-  const columns = [
-    {
-      title: 'ID',
-      dataIndex: 'key',
-      key: 'key',
-    },
-    {
-      title: 'Tên Phòng Ban',
-      dataIndex: 'departmentName',
-      key: 'departmentName',
-      render: (text, record) => <a onClick={() => handleShowData(record)} className='text-blue-600 '>{text}</a>,
-    },
-    {
-      title: 'Trưởng Phòng',
-      dataIndex: 'managerID',
-      key: 'managerID',
-      render: (text) => <p className='capitalize'>{text}</p>,
-    },
-
-    {
-      title: 'Kích Hoạt',
-      key: 'departmentStatus',
-      dataIndex: 'departmentStatus',
-      // render: (text) => <p className='capitalize'>{text}</p>,
-      render: (tags) => {
-        let color = tags.length > 5 ? "geekblue" : "green";
-        if (tags === "Ngừng hoạt động") {
-          color = "volcano";
-        }
-        return (
-          <Tag color={color}>{tags}</Tag>
-        )
-      }
-    },
-    {
-      title: 'Action',
-      key: 'action',
-      render: (_, record) => (
-        <Space size="middle">
-          <a className='font-medium ' onClick={() => handleEditDepartment(record)} ><Pencil size={20} /></a>
-
-          <Popconfirm
-          placement="bottomRight"
-          title="Xóa một Phòng Ban"
-          description="Bạn đã chắc chắn muốn xóa ?"
-          onConfirm={() => handleDeleteDepartment(record.key)} // Gọi hàm xoá
-          okText="Có"
-          cancelText="Không"
-          >
-          <a className='font-medium'><Trash2 size={20} /></a>
-        </Popconfirm>
-        </Space>
-      ),
-    },
-  ];
-
-  const showModal = () => {
+  const handleEditDepartment = (record) => {
+    setTitle("Sửa Phòng Ban");
+    setSelectedDepartment(record);
+    form.setFieldsValue(record);
     setIsModalOpen(true);
+    setMode("Edit");
+  };
+
+  const handleDeleteDepartment = async (id) => {
+    await departmentDeleteAPI(id);
+    setData((prevData) => prevData.filter((item) => item.key !== id));
   };
 
   const handleOk = async () => {
     try {
-        const values = await form.validateFields(); // Kiểm tra form hợp lệ
-        console.log('Success:', values);
-
-        // Đảm bảo gửi manager là null nếu không chọn
-        const payload = {
-            ...values,
-            managerID: values.managerID || null,
+        const values = await form.validateFields();
+        const payload = { 
+            ...values, 
+            manager: !values.manager || values.manager === "Chưa có trưởng phòng" ? null : values.manager 
         };
 
-        if (mode === "Edit") {
-            // Nếu đang sửa, gọi API update
-            await departmentPutAPI(useData.key, payload);
+        console.log("Payload gửi đi:", payload);
 
-            // Cập nhật state `data`
-            setData(prevData =>
-                prevData.map(item =>
-                    item.key === useData.key ? { ...item, ...payload } : item
+        if (mode === "Edit") {
+            await departmentPutAPI(selectedDepartment.key, payload);
+            setData((prevData) =>
+                prevData.map((item) =>
+                    item.key === selectedDepartment.key 
+                        ? { 
+                            ...item, 
+                            ...payload, 
+                            manager: payload.manager ? payload.manager.name || payload.manager : "Chưa có trưởng phòng"
+                          } 
+                        : item
                 )
             );
         } else {
-            // Nếu đang thêm mới, gọi API tạo phòng ban
-            const dataNew = await departmentPostAPI(payload);
-
-            if (dataNew) {
-                const dataItem = {
-                    key: dataNew.id,
-                    departmentName: dataNew.departmentName,
-                    managerID: dataNew.managerID ? dataNew.managerID : "Chưa có trưởng phòng",
-                    departmentStatus: dataNew.departmentStatus ? "Hoạt động" : "Ngừng hoạt động",
-                };
-
-                setData([...data, dataItem]);
+            const newDept = await departmentPostAPI(payload);
+            if (newDept) {
+                setData([
+                    ...data,
+                    {
+                        key: newDept.id,
+                        name: newDept.name,
+                        manager: newDept.manager ? newDept.manager.name || newDept.manager : "Chưa có trưởng phòng",
+                        description: newDept.description || "Không có mô tả phòng ban",
+                        // is_deleted: newDept.is_deleted ? "Ngừng hoạt động" : "Hoạt động",
+                    }
+                ]);
             }
         }
-    } catch (errorInfo) {
-        console.error("Lỗi xác thực form:", errorInfo);
-    }
-
-    setIsModalOpen(false); // Đóng modal sau khi xử lý xong
-};
-    
-
-  const handleCancel = () => {
-    setIsModalOpen(false)
-    setUseData(null)
-  };
-
-  const handleEditDepartment = (value) => {
-    console.log("recode edit", value);
-    setTitle("Sửa Phòng Ban");
-    setUseData(value);
-    form.setFieldsValue(value); // Đổ dữ liệu vào form
-    showModal();
-    setMode("Edit"); // Đánh dấu là sửa
-  };
-
-  const handleDeleteDepartment = async (id) => {
-    try {
-      await departmentDeleteAPI(id); // Gọi API xoá
-      setData(prevData => prevData.filter(item => item.key !== id)); // Cập nhật state
     } catch (error) {
-      console.error("Lỗi khi xoá phòng ban:", error);
+        console.error("Lỗi xác thực form:", error);
     }
-  };
+    setIsModalOpen(false);
+};
 
-  const handleNewDepartment = () => {
-    form.resetFields()
-    setTitle("Thêm phòng ban mới");
-    setMode("Add");
-    showModal()
-  }
 
-  const onClose = () => {
-    setOpen(false);
-  };
+  const formItems = [
+    {
+      name: "name",
+      label: "Tên Phòng Ban",
+      component: <Input placeholder="Hãy nhập tên phòng ban" />, 
+      rules: [{ required: true, message: 'Làm ơn nhập tên phòng ban' }]
+    },
+    {
+      name: "manager",
+      label: "Trưởng Phòng",
+      component: (
+        <Select placeholder="Chọn trưởng phòng" allowClear>
+          {employees.map(emp => (
+            <Select.Option key={emp.id} value={emp.id}>{emp.name}</Select.Option>
+          ))}
+        </Select>
+      )
+    },
+    {
+      name: "description",
+      label: "Mô tả",
+      component: <Input placeholder="Mô tả phòng ban" />, 
+      rules: [{ required: false, message: 'Hãy mô tả phòng ban' }]
+    }
+  ];
 
-  const handleShowData = (value) => {
-    showDrawer();
-    setMode('Info')
-    console.log(value,"value")
-    setUseData(value)
-  }
+  const columns = [
+    { title: 'ID', dataIndex: 'key', key: 'key' },
+    { title: 'Tên Phòng Ban', dataIndex: 'name', key: 'name', render: (text) => <span>{text}</span> },
+    { title: 'Trưởng Phòng', dataIndex: 'manager', key: 'manager' },
+    { title: 'Mô tả', dataIndex: 'description', key: 'description' },
+    // { title: 'Trạng Thái', dataIndex: 'is_deleted', key: 'is_deleted', render: (text) => <Tag color={text === "Ngừng hoạt động" ? "volcano" : "green"}>{text}</Tag> },
+    { title: 'Hành Động', key: 'action', render: (_, record) => (
+        <Space>
+          <a onClick={() => handleEditDepartment(record)}><Pencil size={20} /></a>
+          <Popconfirm title="Xóa phòng ban?" onConfirm={() => handleDeleteDepartment(record.key)} okText="Có" cancelText="Không">
+            <a><Trash2 size={20} /></a>
+          </Popconfirm>
+        </Space>
+      )
+    }
+  ];
 
   return (
     <>
-
-      <PageHeader
-        title={'Phòng Ban'}
-        itemsBreadcrumb={itemsBreadcrumb}
-      >
-        <ButtonIcon handleEvent={handleNewDepartment}>
-          <Plus /> Thêm Phòng Ban Mới 
+      <PageHeader title={'Phòng Ban'}>
+        <ButtonIcon handleEvent={() => { form.resetFields(); setTitle("Thêm Phòng Ban"); setMode("Add"); setIsModalOpen(true); }}>
+          <Plus /> Thêm Phòng Ban Mới
         </ButtonIcon>
-
       </PageHeader>
-
-      <div className='mt-5'>
-        <Search size={20} />
-
-        <Table className='select-none' columns={columns} dataSource={data}
-          pagination={{
-            // pageSize: , // Mặc định 10 dòng mỗi trang
-            showSizeChanger: true, // Cho phép chọn số dòng mỗi trang
-            pageSizeOptions: ['10', '20', '50', '100'], // Các tùy chọn số dòng
-          }}
-        />
-      </div>
-
-      <Drawer title="Thông tin Phòng Ban" onClose={onClose} open={open} width={'30%'}>
-        <FormDepartment form={form} formItemLayout={formItemLayout} formItems={formItems}></FormDepartment>
-      </Drawer>
-
-
-      <ModalDepartment
-        isModalOpen={isModalOpen}
-        setIsModalOpen={setIsModalOpen}
-        handleOk={handleOk}
-        handleCancel={handleCancel}
-        title={title}
-        form={form}
-
-      >
-        <FormDepartment
-          formName={'form' + mode}
-          form={form}
-          formItemLayout={formItemLayout}
-          formItems={formItems}>
-
-        </FormDepartment>
+      <Search size={20} />
+      <Table columns={columns} dataSource={data} pagination={{ showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'] }} />
+      <ModalDepartment isModalOpen={isModalOpen} handleOk={handleOk} handleCancel={() => setIsModalOpen(false)} title={title} form={form}>
+        <FormDepartment form={form} formItems={formItems} />
       </ModalDepartment>
-
     </>
-  )
-}
+  );
+};
 
-export default Department
+export default Department;
