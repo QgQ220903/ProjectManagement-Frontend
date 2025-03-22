@@ -107,9 +107,11 @@ const Employee = () => {
     useEffect(() => {
         updateDepartmentManager(newData, departmentData, mutatePutDepartment);
     }, [newData, departmentData, mutatePutDepartment]);
+
     useEffect(() => {
         updateDepartmentManager(employeData, departmentData, mutatePutDepartment);
     }, [employeData, departmentData, mutatePutDepartment]);
+    
     useEffect(() => {
         if (useData) {
             form.setFieldsValue(useData);

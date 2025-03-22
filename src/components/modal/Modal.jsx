@@ -35,6 +35,7 @@ const ModalCreateDepartment = (props) => {
       // destroyOnClose={true}
       okText="Lưu"
       cancelText="Thoát"
+      maskClosable={false}
     >
       {children}
      

@@ -49,6 +49,9 @@ const MainLayout = () => {
           borderRadius: 5,
           borderRadiusLG: 5,
           borderRadiusSM: 5
+        }, 
+        Card: {
+          bodyPadding: 15
         }
       }
 
