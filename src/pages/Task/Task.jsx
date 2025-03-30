@@ -1,15 +1,35 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 import ModalAccount from "@/components/modal/Modal";
 import FormAccount from "@/components/form/Form";
 import PageHeader from "@/components/PageHeader";
 import ButtonIcon from "@/components/ButtonIcon";
-import { Table, Drawer, Form, Input, Select, Space, Avatar, Tag, Progress  } from "antd";
-import { Pencil, Trash2, Plus  } from "lucide-react";
+import { Table, Drawer, Form, Input, Select, Space, Avatar, Tag, Progress } from "antd";
+import { Pencil, Trash2, Plus } from "lucide-react";
 import Search from "@/components/Search";
+import { UploadOutlined } from '@ant-design/icons';
+import { Button, message, Upload } from 'antd';
+
+const props = {
+    name: 'file',
+    action: 'https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload',
+    headers: {
+        authorization: 'authorization-text',
+    },
+    onChange(info) {
+        if (info.file.status !== 'uploading') {
+            console.log(info.file, info.fileList);
+        }
+        if (info.file.status === 'done') {
+            message.success(`${info.file.name} file uploaded successfully`);
+        } else if (info.file.status === 'error') {
+            message.error(`${info.file.name} file upload failed.`);
+        }
+    },
+};
 
 const Task = () => {
-   
-    
+
+
     const columns = [
         {
             title: "Tên công việc",
@@ -51,14 +71,26 @@ const Task = () => {
             title: "Chịu trách nhiệm",
             dataIndex: "responsible",
             key: "responsible",
-            
+
         },
         {
             title: "Nhóm",
             dataIndex: "listWork",
             key: "listWork",
-            width: "18%",
-          
+            width: "12%",
+
+        },
+        {
+            title: "File",
+            dataIndex: "upload",
+            key: "upload",
+            width: "10%",
+            render: (_, record) => (
+                <Upload {...props}>
+                    <Button icon={<UploadOutlined />}>Upload</Button>
+                </Upload>
+            ),
+
         },
         {
             title: "Chức năng",
@@ -67,9 +99,9 @@ const Task = () => {
             width: "17%",
             render: (_, record) => (
                 <Space size="middle">
-                   
+
                     <ButtonIcon handleEvent={() => handleCreateSubTask(record)}><Plus size={18} /></ButtonIcon>
-                 
+
                 </Space>
             ),
 
@@ -105,16 +137,16 @@ const Task = () => {
             responsible: 'Quy',
             listWork: "",
         },
-      
+
     ];
 
-    
-  
+
+
 
     return (
         <>
             <PageHeader title={"Công Việc"}>
-              
+
             </PageHeader>
 
             <div className="mt-5">
@@ -126,7 +158,7 @@ const Task = () => {
                 />
             </div>
 
-        
+
         </>
     )
 }

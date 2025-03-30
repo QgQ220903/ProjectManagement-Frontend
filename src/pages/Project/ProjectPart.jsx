@@ -18,7 +18,7 @@ import { taskAssignmentsPost } from "@/Services/TaskAssignmentsService";
 import { departmentTaskPost } from "@/Services/DepartmentTaskService";
 
 import { formatDate } from '@/utils/cn';
-import { Pencil, Trash2, Plus, MessageCircleMore} from 'lucide-react';
+import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History} from 'lucide-react';
 import ButtonIcon from '@/components/ButtonIcon'
 // import { FaEye } from "react-icons/fa";
 import ModalProjectPart from '@/components/modal/Modal';
@@ -29,6 +29,9 @@ import FormProjectTask from '@/components/form/Form'
 import { Chat, HeaderChat } from "./components/Chat";
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import ShowHistory from "@/pages/Project/components/ShowHistory";
+import { useNavigate } from "react-router-dom";
 
 
 const itemsBreadcrumb = [
@@ -67,6 +70,8 @@ const ProjectDetail = () => {
     const onClose = () => {
         setOpen(false);
     };
+
+    const [isModalHistoryOpen, setIsModalHistoryOpen] = useState(false);
 
     const [isSubTaskForm, setIsSubTaskForm] = useState(false);
 
@@ -353,6 +358,10 @@ const ProjectDetail = () => {
                     <Button  shape="circle" size="medium" type="primary" onClick={() => handleCreateSubTask(record)}><Plus size={18} /></Button>
 
                     <Button  shape="circle" size="medium" color="cyan" variant="solid" onClick={() => showDrawer(record)}><MessageCircleMore size={18} /></Button>
+                   
+                    <Button  shape="circle" size="medium" color="pink" variant="solid" onClick={() => console.log("bekk")}><Bell size={18} /></Button>
+                    
+                    <Button  shape="circle" size="medium" color="volcano" variant="solid" onClick={() => setIsModalHistoryOpen(true)}><History size={18} /></Button>
 
                   
                 </Space>
@@ -847,6 +856,7 @@ const ProjectDetail = () => {
                 <Chat></Chat>
             </Drawer>
 
+<ShowHistory isModalOpen={isModalHistoryOpen} setIsModalOpen={setIsModalHistoryOpen}></ShowHistory>
 
         </>
     )

@@ -10,8 +10,45 @@ import { Link } from "react-router-dom";
 
 import { Dropdown, Space } from 'antd';
 
+import {logOutAPI} from "@/services/AccountService";
+
+import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import { useNavigate } from "react-router-dom";
+
+import { useAuth } from "@/hooks/use-auth";
+
+import { removeLocalStorageWhenLogout } from "../utils/cn";
+
 export const Header = ({ collapsed, setCollapsed }) => {
+
     const { theme, setTheme } = useTheme();
+
+    const { features,setFeatures } = useAuth(); 
+    
+
+    const navigate = useNavigate();
+    const getRefreshToken = () => localStorage.getItem("refresh");
+    const queryClient = useQueryClient();
+
+    const { data: newData, mutate: mutatePost } = useMutation({
+        mutationFn: logOutAPI,
+        onSuccess: () => {
+            
+            removeLocalStorageWhenLogout()
+            setFeatures([])      
+            navigate('/login');
+        },
+        onError: (error) => {
+            console.log(error)
+        },
+    });
+
+    const handleLogout = () => {
+        mutatePost({
+            refresh: getRefreshToken(),
+        });
+    };
 
     const items = [
         {
@@ -25,11 +62,19 @@ export const Header = ({ collapsed, setCollapsed }) => {
         {
           key: '2',
           label: (
-            <Link to='/register'rel="noopener noreferrer" >
-              Register
+            <Link rel="noopener noreferrer" onClick={handleLogout}>
+                Logout
             </Link>
           ),
         },
+        {
+            key: '3',
+            label: (
+              <Link rel="noopener noreferrer" >
+                  Setting
+              </Link>
+            ),
+          },
        
       ];
 

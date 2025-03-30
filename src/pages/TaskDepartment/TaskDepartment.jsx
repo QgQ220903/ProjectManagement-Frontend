@@ -6,7 +6,26 @@ import ButtonIcon from "@/components/ButtonIcon";
 import { Table, Drawer, Form, Input, Select, Space, Avatar, Tag, Progress  } from "antd";
 import { Pencil, Trash2, Plus  } from "lucide-react";
 import Search from "@/components/Search";
+import { UploadOutlined } from '@ant-design/icons';
+import { Button, message, Upload } from 'antd';
 
+const props = {
+    name: 'file',
+    action: 'https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload',
+    headers: {
+        authorization: 'authorization-text',
+    },
+    onChange(info) {
+        if (info.file.status !== 'uploading') {
+            console.log(info.file, info.fileList);
+        }
+        if (info.file.status === 'done') {
+            message.success(`${info.file.name} file uploaded successfully`);
+        } else if (info.file.status === 'error') {
+            message.error(`${info.file.name} file upload failed.`);
+        }
+    },
+};
 const TaskDepartment = () => {
   
     
@@ -51,14 +70,26 @@ const TaskDepartment = () => {
             title: "Chịu trách nhiệm",
             dataIndex: "responsible",
             key: "responsible",
-            
+
         },
         {
             title: "Nhóm",
             dataIndex: "listWork",
             key: "listWork",
-            width: "18%",
-          
+            width: "12%",
+
+        },
+        {
+            title: "File",
+            dataIndex: "upload",
+            key: "upload",
+            width: "10%",
+            render: (_, record) => (
+                <Upload {...props}>
+                    <Button icon={<UploadOutlined />}>Upload</Button>
+                </Upload>
+            ),
+
         },
         {
             title: "Chức năng",
@@ -67,15 +98,16 @@ const TaskDepartment = () => {
             width: "17%",
             render: (_, record) => (
                 <Space size="middle">
-                   
+
                     <ButtonIcon handleEvent={() => handleCreateSubTask(record)}><Plus size={18} /></ButtonIcon>
-                 
+
                 </Space>
             ),
 
         },
 
     ];
+
 
     const data = [
         {

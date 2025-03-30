@@ -1,16 +1,48 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import ModalAccount from "@/components/modal/Modal";
 import FormAccount from "@/components/form/Form";
 import PageHeader from "@/components/PageHeader";
 import ButtonIcon from "@/components/ButtonIcon";
-import { Table, Drawer, Form, Input, Select } from "antd";
+import { Table, Drawer, Form, Input, Select, Space } from "antd";
 import { Pencil, Trash2, Plus  } from "lucide-react";
 import Search from "@/components/Search";
 import { useForm } from 'antd/es/form/Form';
+import {accountGetAPI} from "@/services/AccountService";
+import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { employeeGetAPI, employeePostAPI, employeePutAPI, employeeDeleteAPI } from "@/Services/EmployeeService";
+
+
 const Account = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [title, setTitle] = useState("");
     const [form] = Form.useForm();
+
+    const queryClient = useQueryClient();
+    //lấy ds nv
+    const { data: employees } = useQuery({
+        queryKey: ["employees"],
+        queryFn: employeeGetAPI,
+    });
+
+    const { data: accounts } = useQuery({
+        queryKey: ["accounts"],
+        queryFn: accountGetAPI,
+    });
+
+    useEffect(() => {
+        // const fetchData = async () => {
+        //     try {
+        //         const data = await getAccount();  // Chờ Promise hoàn thành
+        //         console.log("Account", data.data);
+        //         // setAccount(data);  // Lưu vào state nếu cần
+        //     } catch (error) {
+        //         console.error("Error fetching account:", error);
+        //     }
+        // };
+
+        // fetchData();  // Gọi hàm async
+    }, [])
+
     const columns = [
        
         { title: "ID", dataIndex: "key", key: "key" },
@@ -20,7 +52,10 @@ const Account = () => {
         { title: "Mật khẩu", dataIndex: "pass", key: "pass" },
         { title: "Chức năng", dataIndex: "action", key: "action" , render: (_, record) => (
             <>
-               thêm / sửa / xóa
+              <Space size="middle">
+                <a href=""><Pencil size={20} /></a>
+                <a href=""><Trash2 size={20}></Trash2></a>
+                </Space>
             </>
         ) },
     
@@ -75,37 +110,15 @@ const Account = () => {
         },
         {
             name: "name",
-            label: "Tên nhân viên",
-            component: <Input placeholder="Nhập tên nhân viên" />,
-            rules: [{ required: true, message: "Vui lòng nhập tên nhân viên" }],
+            label: "Tên đăng nhập",
+            component: <Input placeholder="Nhập tên đăng nhập" />,
+            rules: [{ required: true, message: "Vui lòng nhập tên đăng nhập" }],
         },
         {
-            name: "position",
-            label: "Chức vụ",
-            component: (
-                <Select
-                    // defaultValue={'NV'}
-                    placeholder="Chọn chức vụ"
-                    // onChange={handleChange}
-                    options={[
-                        { value: "NV", label: "Nhân Viên" },
-                        { value: "TP", label: "Trường Phòng" },
-                    ]}
-                ></Select>
-            ),
-            rules: [{ required: true, message: "Vui lòng chọn chức vụ" }],
-        },
-        {
-            name: "phone_number",
-            label: "Số điện thoại",
-            component: <Input placeholder="Nhập số điện thoại" />,
-            rules: [{ required: true, message: "Vui lòng nhập số điện thoại" }],
-        },
-        {
-            name: "email",
-            label: "Email",
-            component: <Input placeholder="Nhập email" />,
-            rules: [{ required: true, message: "Vui lòng nhập email" }],
+            name: "password",
+            label: "Mật khẩu",
+            component: <Input placeholder="Nhập Mật khẩu" />,
+            rules: [{ required: true, message: "Vui lòng nhập Mật khẩu" }],
         },
      
     ];
@@ -122,9 +135,9 @@ const Account = () => {
         <>
             <PageHeader title={"Quản Lý Tài Khoản"}>
                 <ButtonIcon
-                    // handleEvent={() => {
-
-                    // }}
+                    handleEvent={() => {
+                        showModal()
+                    }}
                 >
                     <Plus /> Thêm Tài Khoản
                 </ButtonIcon>
@@ -155,7 +168,7 @@ const Account = () => {
                 isModalOpen={isModalOpen}
                 handleOk={handleOk}
                 handleCancel={() => setIsModalOpen(false)}
-                title={title}
+                title={"Thêm tài khoản"}
                 form={form}
             >
                 <FormAccount

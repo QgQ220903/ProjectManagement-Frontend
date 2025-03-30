@@ -12,6 +12,8 @@ import ButtonIcon from "@/components/ButtonIcon";
 import { employeeGetAPI, employeePostAPI, employeePutAPI, employeeDeleteAPI } from "@/Services/EmployeeService";
 import { departmentGetAPI, departmentPostAPI, updateManagerForDepartmentAPI } from "@/Services/DepartmentService";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/use-auth";
+import { useNavigate  } from "react-router-dom";
 
 const Employee = () => {
     const [current, setCurrent] = useState(1);
@@ -27,6 +29,27 @@ const Employee = () => {
     const [mode, setMode] = useState("");
     const [form] = Form.useForm();
     const [data, setData] = useState(null);
+
+    const [roleEmployee, setRoleEmployee] = useState(null);
+
+    const navigate = useNavigate();
+
+
+    const { features } = useAuth()
+    useEffect(() => {
+        if (features) {
+            const featureEmployee = features.find((item) => item.feature.name === "Quản lý nhân viên");
+            setRoleEmployee(featureEmployee)
+            console.log("roleEmployee", roleEmployee)
+
+            if(!featureEmployee) {
+                navigate("/")
+            }
+
+
+        }
+    }, [features]);
+
 
     const handleChange = (value) => {
         console.log(`selected ${value}`);
@@ -111,7 +134,7 @@ const Employee = () => {
     useEffect(() => {
         updateDepartmentManager(employeData, departmentData, mutatePutDepartment);
     }, [employeData, departmentData, mutatePutDepartment]);
-    
+
     useEffect(() => {
         if (useData) {
             form.setFieldsValue(useData);
@@ -197,14 +220,17 @@ const Employee = () => {
             key: "action",
             render: (_, record) => (
                 <Space size="middle">
-                    <a
-                        onClick={() =>
-                            handleEditEmployee(record.position === "Trưởng Phòng" ? { ...record, position: "TP" } : { ...record, position: "NV" })
-                        }
-                    >
-                        <Pencil size={20} />
-                    </a>
-                    <Popconfirm
+                    {roleEmployee?.can_update && (
+                        <a
+                            onClick={() =>
+                                handleEditEmployee(record.position === "Trưởng Phòng" ? { ...record, position: "TP" } : { ...record, position: "NV" })
+                            }
+                        >
+                            <Pencil size={20} />
+                        </a>
+                    )}
+
+                    {roleEmployee?.can_delete && (<Popconfirm
                         title="Xóa nhân viên?"
                         onConfirm={() => handleDeleteEmployee(record.key)}
                         okText="Có"
@@ -213,7 +239,8 @@ const Employee = () => {
                         <a>
                             <Trash2 size={20} />
                         </a>
-                    </Popconfirm>
+                    </Popconfirm>)}
+
                 </Space>
             ),
         },
@@ -262,17 +289,21 @@ const Employee = () => {
     };
     return (
         <>
+            {roleEmployee && JSON.stringify(roleEmployee)}
             <PageHeader title={"Nhân Viên"}>
-                <ButtonIcon
-                    handleEvent={() => {
-                        setDepartmentDataFilter(departmentData), form.resetFields();
-                        setTitle("Thêm Nhân Viên");
-                        setMode("Add");
-                        showModal();
-                    }}
-                >
-                    <Plus /> Thêm Nhân Viên
-                </ButtonIcon>
+                {roleEmployee?.can_create && (
+                    <ButtonIcon
+                        handleEvent={() => {
+                            setDepartmentDataFilter(departmentData), form.resetFields();
+                            setTitle("Thêm Nhân Viên");
+                            setMode("Add");
+                            showModal();
+                        }}
+                    >
+                        <Plus /> Thêm Nhân Viên
+                    </ButtonIcon>
+                )}
+
             </PageHeader>
 
             <div className="mt-5">

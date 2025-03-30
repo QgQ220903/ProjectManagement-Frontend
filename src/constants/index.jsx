@@ -10,19 +10,7 @@ export const navbarLinks = [
             label: "Dashboard",
             icon: Home,
             path: "/",
-        },
-        // {
-        //     label: "Analytics",
-        //     icon: ChartColumn,
-        //     path: "/analytics",
-        // },
-        // {
-        //     label: "Reports",
-        //     icon: NotepadText,
-        //     path: "/reports",
-        // },
-        
-    
+        },  
         {
             label: "Nhân Viên",
             icon: User,
@@ -32,13 +20,7 @@ export const navbarLinks = [
             label: "Phòng Ban",
             icon: Users,
             path: "/Department",
-        },
-        // {
-        //     label: "Verified customers",
-        //     icon: UserCheck,
-        //     path: "/verified-customers",
-        // },
-       
+        },   
         {
             label: "Dự Án",
             icon: FolderOpen,
@@ -60,19 +42,13 @@ export const navbarLinks = [
             icon: ClipboardList,
             path: "/task",
         },
-
         {
             label: "Công Việc Phòng Ban",
             icon: Briefcase,
             path: "/task-department",
         },
 
-        {
-            label: "Thống Kê",
-            icon:ChartLine,
-            path: "/chart",
-        },
-        
+      
 ];
 
 export const overviewData = [

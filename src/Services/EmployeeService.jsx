@@ -6,7 +6,7 @@ export const employeeGetAPI = async () => {
     try {
         const response = await axios.get(api);
         console.log("employeeGetAPI", response);
-        return response.data.results;
+        return response.data;
     } catch (error) {
         console.log(error);
     }

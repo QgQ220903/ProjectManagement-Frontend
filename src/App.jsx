@@ -4,7 +4,7 @@ import { ThemeProvider } from "@/contexts/theme-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // import Layout from "@/routes/layout";
 import MainLayout from "@/layouts/MainLayout";
-import DashboardPage from "@/pages/Home";
+import Dashboard from "@/pages/Dashboard/Dashboard";
 import Employee from "@/pages/Employee/Employee.jsx";
 import Department from "@/pages/Department/department";
 import Project from "@/pages/Project/project";
@@ -15,9 +15,11 @@ import TaskDepartment from "@/pages/TaskDepartment/TaskDepartment";
 
 import { theme as antdTheme } from "antd";
 import { useTheme } from "@/hooks/use-theme";
+import { AuthProvider } from "@/contexts/authContext";
 
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import Login from "./pages/Authenticate/Login";
+
+// import Register from "./pages/Register";
 import Test from "./pages/Test";
 import ProjectPart from "./pages/Project/ProjectPart";
 
@@ -36,7 +38,7 @@ function App() {
             children: [
                 {
                     index: true,
-                    element: <DashboardPage />,
+                    element: <Dashboard />,
                 },
                 {
                     path: "analytics",
@@ -97,18 +99,17 @@ function App() {
             path: "login",
             element: <Login />,
         },
-        {
-            path: "register",
-            element: <Register />,
-        },
+    
     ]);
 
     return (
-        <ThemeProvider storageKey="theme">
-            <QueryClientProvider client={queryClient}>
-                <RouterProvider router={router} />
-            </QueryClientProvider>
-        </ThemeProvider>
+        <AuthProvider>
+            <ThemeProvider storageKey="theme">
+                <QueryClientProvider client={queryClient}>
+                    <RouterProvider router={router} />
+                </QueryClientProvider>
+            </ThemeProvider>
+        </AuthProvider>
     );
 }
 

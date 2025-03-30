@@ -18,3 +18,10 @@ export function formatDate(dateString) {
     return `${day}-${month}-${year}`;
 };
 
+export const removeLocalStorageWhenLogout = () => {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");      
+    localStorage.removeItem("auth");      
+}
+
+
