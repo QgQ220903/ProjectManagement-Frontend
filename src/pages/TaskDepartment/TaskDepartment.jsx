@@ -30,10 +30,12 @@ import { Chat, HeaderChat } from "@/components/Chat";
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import ShowHistory from "@/pages/Project/components/ShowHistory";
+import ShowHistory from "@/components/ShowHistory";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/hooks/use-auth";
+
+import TitleTooltip from "@/components/tooltip/TitleTooltip";
 
 const itemsBreadcrumb = [
     { title: <Link to='/'>Home</Link> },
@@ -175,19 +177,7 @@ const TaskDepartment = () => {
             key: "task" + task.id,
             created_at: formatDate(task.created_at),
             end_time: formatDate(task.end_time),
-            listWork: task.task_assignments
-                .filter((item) => item.role === "DOER")
-                .map((item) => ({
-                    id: item.id,
-                    employeeName: item.employee.name,  // Lấy tên nhân viên
-                })),
-            responsible: task.task_assignments
-                .filter((item) => item.role === "RESPONSIBLE")
-                .map((item) => ({
-                    id: item.id,
-                    employeeName: item.employee.name,  // Lấy tên nhân viên
-                })),
-            isCreateTask: employeeContext.position !== "NV" && task.task_assignments?.some(task => (task.employee?.id === auth.id && task.role === "RESPONSIBLE")) 
+            isCreateTask: employeeContext.position !== "NV" && task.responsible_person.id === auth.id 
 
         };
 
@@ -245,7 +235,10 @@ const TaskDepartment = () => {
                 value &&
                 (<Avatar.Group>
 
-                    <Tooltip key={value.id} placement="topRight" title={value.name}>
+                    <Tooltip key={value.id} placement="topRight"
+
+                        title={<TitleTooltip name={value.name} position={value.position} email={value.email}></TitleTooltip>}
+                    >
                         <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
                     </Tooltip>
 
@@ -263,7 +256,7 @@ const TaskDepartment = () => {
             render: (_, record) => (
                 <Space size="middle">
                     <ButtonIcon handleEvent={() => handleCreateProjectTask(record)}><Plus></Plus> Công việc</ButtonIcon>
-                 
+
 
                 </Space>
             ),
@@ -316,18 +309,23 @@ const TaskDepartment = () => {
         },
         {
             title: "Chịu trách nhiệm",
-            dataIndex: "responsible",
-            key: "responsible",
+            dataIndex: "responsible_person",
+            key: "responsible_person",
             render: (value) => (
 
 
                 value &&
                 (<Avatar.Group>
-                    {value.map((item) => (
-                        <Tooltip key={item.id} placement="topRight" title={item.employeeName}>
-                            <Avatar style={{ backgroundColor: getRandomColor() }}> {item.employeeName.split(" ").reverse().join(" ").charAt(0)}</Avatar>
+                    
+                        <Tooltip  placement="topRight"
+
+
+
+                            title={<TitleTooltip name={value.name} position={value.position} email={value.email}></TitleTooltip>}
+                        >
+                            <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
                         </Tooltip>
-                    ))}
+                 
                 </Avatar.Group>)
 
 
@@ -335,15 +333,20 @@ const TaskDepartment = () => {
         },
         {
             title: "Nhóm thực hiện",
-            dataIndex: "listWork",
-            key: "listWork",
+            dataIndex: "doers",
+            key: "doers",
             width: "18%",
             render: (value) => (
                 <> <Avatar.Group>
                     {value.map((item) => (
-                        <Tooltip key={item.id} placement="topRight" title={item.employeeName}>
-                            <Avatar style={{ backgroundColor: getRandomColor() }}> {item.employeeName.split(" ").reverse().join(" ").charAt(0)}</Avatar>
-                        </Tooltip>
+                          <Tooltip key={item.id} placement="topRight" 
+                   
+                        
+             
+                          title={<TitleTooltip name={item.name} position={item.position} email={item.email}></TitleTooltip>}
+                          >
+                             <Avatar style={{ backgroundColor: getRandomColor() }}> {item.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
+                         </Tooltip>
                     ))}
                 </Avatar.Group>
                 </>

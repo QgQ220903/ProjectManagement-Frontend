@@ -2,11 +2,11 @@ import axios from "axios";
 
 const api = "http://127.0.0.1:8000/api/projects/";
 
-export const projectGetAPI = async () => {
+export const projectGetAPI = async (page) => {
     try {
-        const response = await axios.get(api);
+        const response = await axios.get(`${api}?page=${page}`);
         console.log("projectGetAPI",response)
-        return response.data.results;
+        return response.data;
     } catch (error) {
         console.log(error);
     }

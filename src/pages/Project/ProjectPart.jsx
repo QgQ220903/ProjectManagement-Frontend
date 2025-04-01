@@ -26,14 +26,19 @@ import ModalProjectTask from '@/components/modal/Modal';
 
 import FormProjectPart from '@/components/form/Form'
 import FormProjectTask from '@/components/form/Form'
-import { Chat, HeaderChat } from "./components/Chat";
+import { Chat, HeaderChat } from "@/components/Chat";
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import ShowHistory from "@/pages/Project/components/ShowHistory";
+import ShowHistory from "@/components/ShowHistory";
 
 import { useNavigate } from "react-router-dom";
 
+import TitleTooltip from "@/components/tooltip/TitleTooltip";
+
+import { showToastMessage } from '@/utils/toast'
+
+import { ToastContainer, toast } from 'react-toastify';
 
 const itemsBreadcrumb = [
     { title: <Link to='/'>Home</Link> },
@@ -121,6 +126,10 @@ const ProjectDetail = () => {
             queryClient.invalidateQueries({
                 queryKey: ["project", id], // Chỉ refetch đúng project có id đó
             });
+            showToastMessage("Thêm phần dự án thành công!", "success", "top-right");
+        },
+        onError: () => {
+            showToastMessage("Thêm phần dự án thất bại!", "error", "top-right");
         },
     });
 
@@ -184,12 +193,16 @@ const ProjectDetail = () => {
                 .map((item) => ({
                     id: item.id,
                     employeeName: item.employee.name,  // Lấy tên nhân viên
+                    email: item.employee.email,
+                    position: item.employee.position,
                 })),
             responsible: task.task_assignments
                 .filter((item) => item.role === "RESPONSIBLE")
                 .map((item) => ({
                     id: item.id,
                     employeeName: item.employee.name,  // Lấy tên nhân viên
+                    email: item.employee.email,
+                    position: item.employee.position,
                 })),
         };
 
@@ -247,7 +260,10 @@ const ProjectDetail = () => {
                 value &&
                 (<Avatar.Group>
                     
-                    <Tooltip key={value.id} placement="topRight" title={value.name}>
+                    <Tooltip key={value.id} placement="topRight"              
+        
+                    title={<TitleTooltip name={value.name} position={value.position} email={value.email}></TitleTooltip>}
+                    >
                         <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
                     </Tooltip>
                    
@@ -269,6 +285,7 @@ const ProjectDetail = () => {
 
                 </Space>
             ),
+            hidden: true,
         },
     ];
 
@@ -283,10 +300,10 @@ const ProjectDetail = () => {
             title: "Tên công việc",
             dataIndex: "name",
             key: "name",
-            width: "20%",
+            width: "25%",
             render: (text, record) => (
                 <>
-                    <a onClick={() => showDrawer(record)}>{text}</a>
+                    <p>{text}</p>
                     <Progress percent={0} />
                 </>
             )
@@ -308,7 +325,7 @@ const ProjectDetail = () => {
             title: "Ưu tiên",
             dataIndex: "priority",
             key: "priority",
-            width: "10%",
+            // width: "10%",
             render: (text) => (
                 text === "Thấp" ? <Tag color="green">{text}</Tag> :
                     text === "Trung Bình" ? <Tag color="yellow">{text}</Tag> :
@@ -319,13 +336,20 @@ const ProjectDetail = () => {
             title: "Chịu trách nhiệm",
             dataIndex: "responsible",
             key: "responsible",
+            width: "18%",
             render: (value) => (
 
 
                 value &&
                 (<Avatar.Group>
                     {value.map((item) => (
-                        <Tooltip key={item.id} placement="topRight" title={item.employeeName}>
+                        // <Tooltip key={item.id} placement="topRight" title={item.employeeName}>
+                             <Tooltip key={item.id} placement="topRight" 
+                   
+                           
+                
+                            title={<TitleTooltip name={item.employeeName} position={item.position} email={item.email}></TitleTooltip>}
+                            >
                             <Avatar style={{ backgroundColor: getRandomColor() }}> {item.employeeName.split(" ").reverse().join(" ").charAt(0)}</Avatar>
                         </Tooltip>
                     ))}
@@ -335,14 +359,19 @@ const ProjectDetail = () => {
             )
         },
         {
-            title: "Nhóm",
+            title: "Thành viên thực hiện",
             dataIndex: "listWork",
             key: "listWork",
             width: "18%",
             render: (value) => (
                 <> <Avatar.Group>
                     {value.map((item) => (
-                        <Tooltip key={item.id} placement="topRight" title={item.employeeName}>
+                         <Tooltip key={item.id} placement="topRight" 
+                   
+                        
+             
+                         title={<TitleTooltip name={item.employeeName} position={item.position} email={item.email}></TitleTooltip>}
+                         >
                             <Avatar style={{ backgroundColor: getRandomColor() }}> {item.employeeName.split(" ").reverse().join(" ").charAt(0)}</Avatar>
                         </Tooltip>
                     ))}
@@ -369,6 +398,7 @@ const ProjectDetail = () => {
                   
                 </Space>
             ),
+            hidden: true    
 
         },
 
@@ -812,6 +842,8 @@ const ProjectDetail = () => {
             </Drawer>
 
 <ShowHistory isModalOpen={isModalHistoryOpen} setIsModalOpen={setIsModalHistoryOpen}></ShowHistory>
+
+<ToastContainer />
 
         </>
     )

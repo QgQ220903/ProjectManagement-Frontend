@@ -20,23 +20,24 @@ import PageHeader from '@/components/PageHeader'
 
 import ButtonIcon from '@/components/ButtonIcon'
 
-import {projectGetAPI, projectPostAPI, projectDeleteAPI, projectUpdateAPI} from '@/Services/ProjectService'
+import { projectGetAPI, projectPostAPI, projectDeleteAPI, projectUpdateAPI } from '@/Services/ProjectService'
 
-import {formatDate} from '@/utils/cn'
+import { formatDate } from '@/utils/cn'
 
-import {showToastMessage} from '@/utils/toast'
+import { showToastMessage } from '@/utils/toast'
 
 import { ToastContainer, toast } from 'react-toastify';
 
+import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 // import "react-toastify/dist/ReactToastify.css";
 
 const Project = () => {
 
-  
-  const [current,setCurrent] = useState(1)
 
-  const [total,setTotal] = useState(16)
+  const [current, setCurrent] = useState(1)
+
+  const [total, setTotal] = useState(0)
 
   const [useData, setUseData] = useState(null);
 
@@ -52,27 +53,80 @@ const Project = () => {
 
   const [data, setData] = useState(null);
 
-  useEffect(() => {
-    const test = async () => {
-      const data = await projectGetAPI(); // Gọi API
+  // const [isLoading, setIsloading] = useState(true)
+
+  const queryClient = useQueryClient();
+
+  const { data: projects, isLoading } = useQuery({
+    queryKey: ["projects", current], // Thêm `current` vào queryKey để refetch khi current thay đổi
+    queryFn: () => projectGetAPI(current),
+    enabled: !!current, // Chỉ chạy khi `current` có giá trị hợp lệ
+  });
+
+  const { mutate: addProject, isLoading: isAdding } = useMutation({
+    mutationFn: projectPostAPI,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["projects"]); // Fetch lại danh sách mà không cần current
+      showToastMessage('Thêm dự án thành công !', 'success', 'top-right')
+    },
+    onError: (error) => {
+      showToastMessage('Thêm dự án thất bại !', 'error', 'top-right')
+      console.log(error)
+    },
+  });
+
+  const { mutate: updateProject, isLoading: isUpdating } = useMutation({
+    mutationFn: ({ id, updatedProject }) => projectUpdateAPI(id, updatedProject), // Nhận tham số
+    onSuccess: () => {
+      queryClient.invalidateQueries(["projects"]); // Fetch lại danh sách
+      showToastMessage("Cập nhật dự án thành công!", "success", "top-right");
+    },
+    onError: (error) => {
+      showToastMessage("Cập nhật dự án thất bại!", "error", "top-right");
+      console.log(error);
+    },
+  });
+
+  const { mutate: deleteProject, isLoading: isDeleted } = useMutation({
+    mutationFn: projectDeleteAPI,
+    onSuccess: () => {
     
-      if (data) { // Kiểm tra dữ liệu trước khi gọi .map()
-        const dataItem = data.map((item) => ({
-          key: item.id,
-          name: item.name,
-          createdAt: formatDate(item.created_at),
-          updatedAt: formatDate(item.updated_at),
-        }));
-  
-        setData(dataItem); // Cập nhật state
-      } else {
-        console.error("Không có dữ liệu từ API");
+      
+      // If there are no projects left on this page, decrement the page number
+      if (data.length === 1 && current > 1) {
+        setCurrent(current - 1); // Go to the previous page
+      }else{
+      // After successful deletion, invalidate the query
+        queryClient.invalidateQueries(["projects", current]); 
       }
-    };
   
-    test();
-  }, []);
   
+      showToastMessage("Xóa dự án thành công!", "success", "top-right");
+    },
+    onError: (error) => {
+      showToastMessage("Xóa dự án thất bại!", "error", "top-right");
+      console.log(error);
+    },
+  });
+  
+
+
+
+
+  useEffect(() => {
+    if (projects) {
+      const results = projects.results.map((item) => ({
+        key: item.id,
+        name: item.name,
+        createdAt: formatDate(item.created_at),
+        updatedAt: formatDate(item.updated_at),
+      }));
+
+      setTotal(projects.count);
+      setData(results);
+    }
+  }, [projects]); // Chạy lại khi `projects` thay đổi
+
 
   useEffect(() => {
     if (useData) {
@@ -81,7 +135,7 @@ const Project = () => {
     }
   }, [form, useData]);
 
-// tùy chỉnh form kích thước input
+  // tùy chỉnh form kích thước input
   const formItemLayout = {
     labelCol: {
       span: 8,
@@ -97,7 +151,7 @@ const Project = () => {
     {
       name: "key",
       label: "Mã dự án: ",
-      component: <Input/>,
+      component: <Input />,
       props: { readOnly: true },
       hidden: mode === "Add" ? true : false
     },
@@ -113,7 +167,7 @@ const Project = () => {
         },
       ]
     },
-  
+
   ];
 
   // Đường dẫn
@@ -127,21 +181,22 @@ const Project = () => {
     },
   ]
 
-  const confirm = async (record) => {
-    console.log("confirm",record);
-    try {
-      const response = await projectDeleteAPI(record.key)
-      if(response.status === 200){
-        showToastMessage('Xóa dự án thành công!','success', 'top-right')
-        const newData = data.filter((item) => item.key !== record.key)
-        setData(newData)
-      }else{
-        showToastMessage('Xóa dự án thất bại!', 'error', 'top-right')
-      }
-    } catch (error) {
-      console.log(error)
-    }
-    
+  const handleDeleteProject = async (record) => {
+    console.log("confirm", record);
+    deleteProject(record.key); // Truyền đúng tham số 
+    // try {
+    //   const response = await projectDeleteAPI(record.key)
+    //   if (response.status === 200) {
+    //     showToastMessage('Xóa dự án thành công!', 'success', 'top-right')
+    //     const newData = data.filter((item) => item.key !== record.key)
+    //     setData(newData)
+    //   } else {
+    //     showToastMessage('Xóa dự án thất bại!', 'error', 'top-right')
+    //   }
+    // } catch (error) {
+    //   console.log(error)
+    // }
+
   }
 
   //  Tùy chỉnh cột của table
@@ -171,7 +226,7 @@ const Project = () => {
       render: (text) => <p className='capitalize'>{text}</p>,
     },
 
-   
+
     {
       title: 'Action',
       key: 'action',
@@ -185,13 +240,13 @@ const Project = () => {
             description="Bạn đã chắc chắn muốn xóa ?"
             okText="Có"
             cancelText="Không"
-            onConfirm={() => confirm(record)} // Sửa lại chỗ này
+            onConfirm={() => handleDeleteProject(record)} // Sửa lại chỗ này
           >
 
             <a className=' font-medium  '><Trash2 size={20} /></a>
           </Popconfirm>
 
-          <Link to={"/project/" + record.key } ><FaEye className='text-lg' /></Link>
+          <Link to={"/project/" + record.key} ><FaEye className='text-lg' /></Link>
 
         </Space>
       ),
@@ -205,73 +260,78 @@ const Project = () => {
   const createProject = async (values) => {
     const response = await projectPostAPI(values);
 
-    if(response.status === 201){
+    if (response.status === 201) {
       const dataNew = response.data;
       if (dataNew) {
         const dataItem = {
-            key: dataNew.id,
-            name: dataNew.name,
-            createdAt: formatDate(dataNew.created_at),
-            updatedAt: formatDate(dataNew.updated_at)
+          key: dataNew.id,
+          name: dataNew.name,
+          createdAt: formatDate(dataNew.created_at),
+          updatedAt: formatDate(dataNew.updated_at)
         }
-        setData([...data,dataItem])
-      }else{
+        // setIsloading(true)
+        setData([...data, dataItem])
+        // setIsloading(false)
+      } else {
         console.log('lỗi')
       }
       showToastMessage('Thêm dự án thành công !', 'success', 'top-right')
-    }else{
+    } else {
       showToastMessage('Thêm dự án thất bại !', 'error', 'top-right')
     }
   }
 
-  const updateProject = async (values) => {
-    const response = await projectUpdateAPI(values.key,values);
+  // const updateProject = async (values) => {
+  //   const response = await projectUpdateAPI(values.key, values);
 
-    if(response.status === 200){
-      const dataNew = response.data;
-      if (dataNew) {
-        const dataItem = {
-            key: dataNew.id,
-            name: dataNew.name,
-            createdAt: formatDate(dataNew.created_at),
-            updatedAt: formatDate(dataNew.updated_at)
-        }
-         // Tìm index của phần tử có key (id) tương ứng
-         const index = data.findIndex(item => item.key === dataNew.id);
-            
-         if (index !== -1) {
-             // Tạo bản sao của data, cập nhật phần tử tại index
-             const updatedData = [...data];
-             updatedData[index] = dataItem;
+  //   if (response.status === 200) {
+  //     const dataNew = response.data;
+  //     if (dataNew) {
+  //       const dataItem = {
+  //         key: dataNew.id,
+  //         name: dataNew.name,
+  //         createdAt: formatDate(dataNew.created_at),
+  //         updatedAt: formatDate(dataNew.updated_at)
+  //       }
+  //       // Tìm index của phần tử có key (id) tương ứng
+  //       const index = data.findIndex(item => item.key === dataNew.id);
 
-             setData(updatedData);
-         } else {
-             console.log('Không tìm thấy dự án trong danh sách, thêm mới...');
-         }
-      }else{
-        console.log('lỗi')
-      }
-      showToastMessage('Sửa tên dự án thành công !', 'success', 'top-right')
-    }else{
-      showToastMessage('Sửa tên dự án thất bại !', 'error', 'top-right')
-    }
-  }
+  //       if (index !== -1) {
+  //         // Tạo bản sao của data, cập nhật phần tử tại index
+  //         const updatedData = [...data];
+  //         updatedData[index] = dataItem;
+  //         //  setIsloading(true)
+  //         setData(updatedData);
+  //         //  setIsloading(false)
+  //       } else {
+  //         console.log('Không tìm thấy dự án trong danh sách, thêm mới...');
+  //       }
+  //     } else {
+  //       console.log('lỗi')
+  //     }
+  //     showToastMessage('Sửa tên dự án thành công !', 'success', 'top-right')
+  //   } else {
+  //     showToastMessage('Sửa tên dự án thất bại !', 'error', 'top-right')
+  //   }
+  // }
 
 
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
       console.log('Success:', values);
-      if(mode === 'Add'){
-        createProject(values)
-      }else if(mode === "Edit"){
+      if (mode === 'Add') {
+        // createProject(values)
+        addProject(values)
+      } else if (mode === "Edit") {
         console.log("EDIT")
-        updateProject(values)
+        updateProject({ id: values.key, updatedProject: values }); // Truyền đúng tham số
       }
-    
+
       setIsModalOpen(false);
-      
-    } catch (errorInfo) {``
+
+    } catch (errorInfo) {
+      ``
       console.log('Failed:', errorInfo);
     }
 
@@ -292,7 +352,7 @@ const Project = () => {
     setMode("Edit");
   }
 
-  const handleCreateProject =  () => {
+  const handleCreateProject = () => {
     form.resetFields()
     setTitle("Thêm dự án mới");
     setMode("Add");
@@ -310,11 +370,16 @@ const Project = () => {
   const handleShowData = (value) => {
     showDrawer();
     setMode('Info')
-    console.log(value,"value")
+    console.log(value, "value")
     setUseData(value)
   }
 
- 
+  const onChange = page => {
+    console.log(page);
+    setCurrent(page);
+  };
+
+
   return (
     <>
 
@@ -322,8 +387,8 @@ const Project = () => {
         title={'Dự Án'}
         itemsBreadcrumb={itemsBreadcrumb}
       >
-          <ButtonIcon handleEvent={handleCreateProject}>
-          <Plus /> Thêm Dự Án Mới 
+        <ButtonIcon handleEvent={handleCreateProject}>
+          <Plus /> Thêm Dự Án Mới
         </ButtonIcon>
 
       </PageHeader>
@@ -332,12 +397,14 @@ const Project = () => {
         <Search size={20} />
 
         <Table className='select-none' columns={columns} dataSource={data}
+          loading={isLoading}
           pagination={{
             total: total,
             defaultCurrent: current,
-            pageSize: 10, // Mặc định 10 dòng mỗi trang
-            showSizeChanger: true, // Cho phép chọn số dòng mỗi trang
-            pageSizeOptions: ['10', '20', '50', '100'], // Các tùy chọn số dòng
+            pageSize: 5, // Mặc định 10 dòng mỗi trang
+            onChange: onChange
+            // showSizeChanger: true, // Cho phép chọn số dòng mỗi trang
+
           }}
         />
       </div>
