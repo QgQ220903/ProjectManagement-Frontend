@@ -144,25 +144,6 @@ const ProjectDetail = () => {
     });
 
 
-    // Thêm 1 phòng ban vào công việc
-    const { data: newDepartmentTask, mutate: mutateDepartmentTask } = useMutation({
-        mutationFn: departmentTaskPost,
-        onSuccess: (data) => {
-            // Gọi mutateTaskAssignment với dữ liệu nhận được từ departmentTaskPost
-            mutateTaskAssignment({
-                employee: data.id_employee,
-                task: data.task,
-                role: 'RESPONSIBLE',
-            }, {
-                onSuccess: () => {
-                    queryClient.invalidateQueries({
-                        queryKey: ["project", id], // Chỉ refetch đúng project có id đó
-                    });
-                },
-            });
-        },
-    });
-
 
     //lấy ds nv
     const { data: employees } = useQuery({
@@ -183,6 +164,8 @@ const ProjectDetail = () => {
             name: part.name,
             created_at: formatDate(part.created_at),
             updated_at: formatDate(part.updated_at),
+            department_name: part.department.name,
+            department_manager: part.department.manager ? part.department.manager : "",
             tasks: part.tasks ? part.tasks.map(setDataTask) : [],
         }));
 
@@ -251,18 +234,37 @@ const ProjectDetail = () => {
     // Cấu hình cột PARTS
     const partColumns = [
         // { title: "Mã phần", dataIndex: "key", key: "key" },
-        { title: "Tên phần", dataIndex: "name", key: "name", width: "40%" },
+        { title: "Tên phần", dataIndex: "name", key: "name", width: "25%" },
+        { title: "Phòng ban", dataIndex: "department_name", key: "department_name" },
+        {
+            title: "Chịu trách nhiệm",
+            dataIndex: "department_manager",
+            key: "department_manager",
+            render: (value) => (
+
+
+                value &&
+                (<Avatar.Group>
+                    
+                    <Tooltip key={value.id} placement="topRight" title={value.name}>
+                        <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
+                    </Tooltip>
+                   
+                </Avatar.Group>)
+
+
+            )
+        },
         { title: "Ngày tạo", dataIndex: "created_at", key: "created_at" },
         { title: "Cập nhật gần nhất", dataIndex: "updated_at", key: "updated_at" },
-        // { title: "Tổng Hoàn thành", dataIndex: "completion", key: "completion", render: () => <Badge status="success" text={`0%`} /> },
-        {
+       {
             title: 'Chức Năng',
             key: 'action',
-            width: '20%',
+            width: '15%',
             render: (_, record) => (
                 <Space size="middle">
 
-                    <ButtonIcon handleEvent={() => handleCreateProjectTask(record)}><Plus></Plus> Thêm công việc</ButtonIcon>
+                    <ButtonIcon handleEvent={() => handleCreateProjectTask(record)}><Plus></Plus> Công việc</ButtonIcon>
 
                 </Space>
             ),
@@ -397,6 +399,31 @@ const ProjectDetail = () => {
                 },
             ]
         },
+        {
+            name: "department_id",
+            label: "Nhóm thực hiện:",
+            component:
+                <Select
+                    // mode="multiple"
+                    // allowClear
+                    showSearch
+                    placeholder="Vui lòng chọn phòng ban"
+                    optionFilterProp="label"
+                    // onChange={onChangeDepartmentTask}
+                    // options={options}
+                    options={departmentsData?.map((item) => ({
+                        value: item.id,
+                        label: item.name,
+                    }))}
+                />,
+            rules:  [
+                {
+                    required: true,
+                    message: 'Làm ơn chọn nhóm thực hiện',
+                },
+            ],
+
+        },
 
     ];
 
@@ -415,40 +442,7 @@ const ProjectDetail = () => {
 
     };
 
-    const onChangeEmployee = (value) => {
-        console.log(`selected ${value}`);
-        if (isDepartmentTask) {
-            setIsDepartmentTask(false)
-            // Reset validation lỗi cho DepartmentTask
-            formTask.setFields([
-                {
-                    name: "DepartmentTask",
-                    errors: [], // Xóa lỗi hiển thị trên field
-                },
-            ]);
-        }
-
-    };
-
-    const onChangeDepartmentTask = (value) => {
-        console.log(`selected ${value}`);
-
-        if (isEmployeeTask) {
-            setIsEmployeeTask(false)
-            // Reset validation lỗi cho DepartmentTask
-            formTask.setFields([
-                {
-                    name: "resEmployee",
-                    errors: [], // Xóa lỗi hiển thị trên field
-                },
-                {
-                    name: "WorksEmployee",
-                    errors: [], // Xóa lỗi hiển thị trên field
-                },
-            ]);
-        }
-
-    };
+   
     const onSearch = (value) => {
         console.log('search:', value);
     };
@@ -503,7 +497,7 @@ const ProjectDetail = () => {
                     showSearch
                     placeholder="Select a employee"
                     optionFilterProp="label"
-                    onChange={onChangeRes}
+                    // onChange={onChangeRes}
                     onSearch={onSearch}
                     options={employeesData?.map((item) => ({
                         value: item.id,
@@ -511,7 +505,7 @@ const ProjectDetail = () => {
                     }))}
                 />,
             props: { disabled: !isEmployeeTask },
-            rules: !isEmployeeTask ? [] : [
+            rules: [
                 {
                     required: true,
                     message: 'Làm ơn chọn người chịu trách nhiệm',
@@ -527,7 +521,7 @@ const ProjectDetail = () => {
                     mode="multiple"
                     allowClear
                     placeholder="Please select"
-                    onChange={onChangeEmployee}
+                    // onChange={onChangeEmployee}
                     // options={options}
                     options={employeesData?.map((item) => ({
                         value: item.id,
@@ -535,35 +529,10 @@ const ProjectDetail = () => {
                     }))}
                 />,
             props: { disabled: !isEmployeeTask },
-            rules: !isEmployeeTask ? [] : [
+            rules: [
                 {
                     required: true,
                     message: 'Làm ơn chọn người chịu trách nhiệm',
-                },
-            ],
-
-        },
-
-        {
-            name: "DepartmentTask",
-            label: "Nhóm thực hiện:",
-            component:
-                <Select
-                    mode="multiple"
-                    allowClear
-                    placeholder="Please select"
-                    onChange={onChangeDepartmentTask}
-                    // options={options}
-                    options={departmentsData?.map((item) => ({
-                        value: item.id,
-                        label: item.name,
-                    }))}
-                />,
-            props: { disabled: !isDepartmentTask },
-            rules: !isDepartmentTask ? [] : [
-                {
-                    required: true,
-                    message: 'Làm ơn chọn nhóm thực hiện',
                 },
             ],
 
@@ -622,6 +591,7 @@ const ProjectDetail = () => {
 
     ];
 
+    // Hàm thêm phần công việc
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
@@ -630,7 +600,7 @@ const ProjectDetail = () => {
 
             mutateProjectPart(values)
 
-
+       
             setIsModalOpen(false);
         } catch (error) {
             console.log('Failed:', error);
@@ -692,22 +662,6 @@ const ProjectDetail = () => {
         setIsModalTaskOpen(true);
     };
 
-    // const createTaskAssignments = async (value, role, taskId) => {
-    //     console.log("createTaskAssignments", value);
-    //     try {
-    //         const res = await taskAssignmentsPost({
-    //             ...value,
-    //             role: role,
-    //             task: taskId
-    //         });
-    //         return res;
-    //     } catch (error) {
-    //         console.error("Error in createTaskAssignments:", error);
-    //         return null;
-    //     }
-    // };
-
-
 
 
 
@@ -753,17 +707,17 @@ const ProjectDetail = () => {
                 );
             }
               // Gửi API tạo DepartmentTask
-        else if (values.DepartmentTask?.length > 0) {
-            await Promise.all(
-                values.DepartmentTask.map(department => 
-                    mutateDepartmentTask(
-                        { department: department, 
-                            task: dataTask.id 
-                        },
-                    )
-                )
-            );
-        }
+        // else if (values.DepartmentTask?.length > 0) {
+        //     await Promise.all(
+        //         values.DepartmentTask.map(department => 
+        //             mutateDepartmentTask(
+        //                 { department: department, 
+        //                     task: dataTask.id 
+        //                 },
+        //             )
+        //         )
+        //     );
+        // }
 
 
             setIsModalTaskOpen(false);

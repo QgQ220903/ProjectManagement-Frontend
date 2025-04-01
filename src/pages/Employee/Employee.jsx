@@ -42,9 +42,9 @@ const Employee = () => {
             setRoleEmployee(featureEmployee)
             console.log("roleEmployee", roleEmployee)
 
-            if(!featureEmployee) {
-                navigate("/")
-            }
+            // if(!featureEmployee) {
+            //     navigate("/")
+            // }
 
 
         }
@@ -64,7 +64,7 @@ const Employee = () => {
         return employees?.map((item) => ({
             key: item.id,
             name: item.name,
-            position: item.position === "TP" ? "Trưởng Phòng" : "Nhân Viên",
+            position: item.position === "TP" ? "Trưởng Phòng" : "TN" ? "Nhóm Trưởng" : "Nhân Viên",
             phone_number: item.phone_number,
             email: item.email,
             department: item.department,
@@ -124,7 +124,8 @@ const Employee = () => {
             console.log("employ", employeData);
             setData(setDataEmployees(employeData));
         }
-        dataDepartment ? setDepartmentData(dataDepartment.results) : "";
+        console.log("dataDepartment", dataDepartment);
+        dataDepartment ? setDepartmentData(dataDepartment) : "";
     }, [employees, dataDepartment]);
 
     useEffect(() => {
@@ -174,6 +175,7 @@ const Employee = () => {
                     onChange={handleChange}
                     options={[
                         { value: "NV", label: "Nhân Viên" },
+                        { value: "TN", label: "Nhóm Trưởng" },
                         { value: "TP", label: "Trường Phòng" },
                     ]}
                 ></Select>
@@ -200,7 +202,7 @@ const Employee = () => {
                     placeholder="Chọn phòng ban"
                     options={departmentDataFilter?.map((item) => ({
                         value: item.id,
-                        label: item.department_name,
+                        label: item.name,
                     }))}
                 ></Select>
             ),
@@ -289,7 +291,7 @@ const Employee = () => {
     };
     return (
         <>
-            {roleEmployee && JSON.stringify(roleEmployee)}
+            {/* {roleEmployee && JSON.stringify(roleEmployee)} */}
             <PageHeader title={"Nhân Viên"}>
                 {roleEmployee?.can_create && (
                     <ButtonIcon

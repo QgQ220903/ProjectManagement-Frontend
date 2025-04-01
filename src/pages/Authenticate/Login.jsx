@@ -16,16 +16,19 @@ const Login = () => {
     const { data: newData, mutate: mutatePost } = useMutation({
         mutationFn: logInAPI,
         onSuccess: (data) => {
-            if (data?.data) {
-                setAuth(data.data);
-                data.data.access && localStorage.setItem("access", data.data.access); // Lưu vào localStorageX
-                data.data.refresh && localStorage.setItem("refresh", data.data.refresh); // Lưu vào localStorageX
-                data.data.user && localStorage.setItem("auth", JSON.stringify(data.data.user)); // Lưu vào localStorageX
-                loadRoleUser(data.data.user.role);
+            if (data) {
+                setAuth(data);
+                console.log("logInAPI",data)
+                data.access && localStorage.setItem("access", data.access); // Lưu vào localStorageX
+                data.refresh && localStorage.setItem("refresh", data.refresh); // Lưu vào localStorageX
+                data.user && localStorage.setItem("auth", JSON.stringify(data.user)); // Lưu vào localStorageX
+                loadRoleUser(data.user.role.id);
+
+                navigate('/');
            
             }
     
-            navigate('/');
+         
             
         },
         onError: (error) => {

@@ -1,8 +1,32 @@
-// import axiosInstance from "./axiosInstance";
+import axiosInstance from "./AxiosInstance";
 import axios from "axios";
 
-export const accountGetAPI = () => {
-    return axiosInstance.get("/account/");
+export const accountGetAPI = async () => {
+    const res =  await axiosInstance.get("/account/");
+    console.log("accountGetAPI",res.data.results);
+    return res.data.results;
+}
+
+export const accountPostAPI = async (obj) => {
+    try {
+        const res =  await axiosInstance.post("/account/",obj);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+        throw error
+    }
+   
+}
+
+export const accountPutAPI = async (obj, id) => {
+    try {
+        const res =  await axiosInstance.put(`/account/${id}/update_account/`,obj);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+        throw error
+    }
+
 }
 
 export const logInAPI = async(obj) => {
@@ -10,7 +34,7 @@ export const logInAPI = async(obj) => {
     try {
         const response = await axios.post("http://127.0.0.1:8000/api/account/login/",obj);
         console.log("logInAPI", response)
-        return response;
+        return response.data;
     } catch (error) {
         console.log(error);
     }
@@ -27,4 +51,6 @@ export const logOutAPI = async(obj) => {
     }
    
 }
+
+
 

@@ -24,7 +24,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
 
     const { theme, setTheme } = useTheme();
 
-    const { features,setFeatures } = useAuth(); 
+    const { features,setFeatures,setAuth } = useAuth(); 
     
 
     const navigate = useNavigate();
@@ -36,7 +36,8 @@ export const Header = ({ collapsed, setCollapsed }) => {
         onSuccess: () => {
             
             removeLocalStorageWhenLogout()
-            setFeatures([])      
+            setFeatures([]) 
+            setAuth({})  
             navigate('/login');
         },
         onError: (error) => {

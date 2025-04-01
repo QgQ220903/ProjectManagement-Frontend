@@ -5,16 +5,17 @@ import axiosInstance from '@/Services/AxiosInstance';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [auth, setAuth] = useState(null);
+    const [auth, setAuth] = useState({});
     const [features, setFeatures] = useState([]);
-
+    // console.log("AuthProvider 1 lần", auth)
     const loadRoleUser = async (idRole) => {
-      
-        // const token = localStorage.getItem("access");
+       
+     
+       
         if (idRole) {
 
             const res = await axiosInstance.get(`/roles/${idRole}`);
-            console.log('loadRoleUser',res)
+            // console.log('loadRoleUser',res)
             setFeatures(res.data.role_details);
             // try {
             //     const res = await axios.get(`http://localhost:8000/api/roles/${authStorage.role}`, {
@@ -29,9 +30,10 @@ export const AuthProvider = ({ children }) => {
     };
 
     useEffect(() => {
+        // console.log("loadRoleUser useEffect")
         const authStorage = JSON.parse(localStorage.getItem("auth"));
         if(authStorage){
-
+            setAuth(authStorage);
             loadRoleUser(authStorage.id); // Load khi app chạy
         }
     }, []);

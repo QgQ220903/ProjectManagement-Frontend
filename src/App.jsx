@@ -13,6 +13,8 @@ import Role from "@/pages/Role/Role";
 import Task from "@/pages/Task/Task";
 import TaskDepartment from "@/pages/TaskDepartment/TaskDepartment";
 
+import RequireAuth from "@/components/RequireAuth";
+
 import { theme as antdTheme } from "antd";
 import { useTheme } from "@/hooks/use-theme";
 import { AuthProvider } from "@/contexts/authContext";
@@ -41,20 +43,12 @@ function App() {
                     element: <Dashboard />,
                 },
                 {
-                    path: "analytics",
-                    element: <h1 className="title">Analytics</h1>,
-                },
-                {
-                    path: "reports",
-                    element: <h1 className="title">Reports</h1>,
-                },
-                {
                     path: "employees",
-                    element: <Employee />,
+                    element: <RequireAuth><Employee /></RequireAuth>,
                 },
                 {
                     path: "department",
-                    element: <Department />,
+                    element: <RequireAuth><Department /></RequireAuth>,
                 },
                 {
                     path: "verified-customers",

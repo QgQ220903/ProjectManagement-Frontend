@@ -16,7 +16,7 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
     const [filteredSidebarLinks, setFilteredSidebarLinks] = useState([]);
 
     useEffect(() => {
-        console.log("features", features);
+        // console.log("features", features);
         const featuresWithIsShow = features
             .filter(item => item.can_view) // Chỉ lấy các item có can_view = true
             .map(item => ({
@@ -31,7 +31,7 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
             "Quản lý tài khoản": "Tài Khoản",
             "Quản lý nhóm quyền": "Nhóm Quyền",
             "Quản lý công việc phòng ban": "Công Việc Phòng Ban",
-            "Quản lý công việc": "Công Việc"
+            "Quản lý công việc": "Công Việc",
         };
 
         // Lọc navbarLinks theo featuresWithIsShow
@@ -41,7 +41,7 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
             )
         );
 
-        console.log("filteredSidebarLinks", filteredSidebarLinks);
+        // console.log("filteredSidebarLinks", filteredSidebarLinks);
         setFilteredSidebarLinks(filteredSidebarLinks)
     }, [features])
 

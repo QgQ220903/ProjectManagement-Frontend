@@ -14,6 +14,7 @@ const Role = () => {
     const [title, setTitle] = useState("");
     const [isEditRole, setIsEditRole] = useState(false);
     const [form] = Form.useForm();
+    
     const columns = [
 
         { title: "ID", dataIndex: "key", key: "key" },
@@ -83,7 +84,13 @@ const Role = () => {
     const columns2 = [
 
         { title: "Chức năng", dataIndex: "role", key: "role" },
-
+        {
+            title: "Xem", dataIndex: "add", key: "add", render: (_, record) => (
+                <>
+                  <Checkbox></Checkbox>
+                </>
+            )
+        },
         {
             title: "Thêm", dataIndex: "add", key: "add", render: (_, record) => (
                 <>
@@ -111,13 +118,12 @@ const Role = () => {
     const data2 = [
         {
             key: '1',
-            role: 'Quản lý thành viên',
+            role: 'Quản lý dự án',
 
         },
         {
             key: '2',
-
-            role: 'Quản lý công việc',
+            role: 'Quản lý nhân viên',
 
         },
         {
@@ -129,7 +135,25 @@ const Role = () => {
         {
             key: '4',
 
+            role: 'Quản lý công việc phòng ban',
+
+        },
+        {
+            key: '5',
+
+            role: 'Quản lý công việc',
+
+        },
+        {
+            key: '6',
+
             role: 'Quản lý tài khoản',
+
+        },
+        {
+            key: '7',
+
+            role: 'Quản lý nhóm quyền',
 
         },
     ];
@@ -182,17 +206,7 @@ const Role = () => {
                 />
             </div>
 
-            {/* <Drawer
-                title="Thông tin tài khoản"
-                onClose={() => setOpen(false)}
-                open={open}
-                width={"30%"}
-            >
-                <FormAccount
-                    form={form}
-                    formItems={formItems}
-                /> 
-            </Drawer> */}
+           
 
             <ModalAccount
                 isModalOpen={isModalOpen}

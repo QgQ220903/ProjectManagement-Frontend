@@ -85,7 +85,7 @@ const Department = () => {
                         ? { 
                             ...item, 
                             ...payload, 
-                            manager: payload.manager ? payload.manager.name || payload.manager : "Chưa có trưởng phòng"
+                            manager: payload.manager ? payload.manager.name  : "Chưa có trưởng phòng"
                           } 
                         : item
                 )
@@ -93,12 +93,13 @@ const Department = () => {
         } else {
             const newDept = await departmentPostAPI(payload);
             if (newDept) {
+              console.log("New Department:", newDept);
                 setData([
                     ...data,
                     {
                         key: newDept.id,
                         name: newDept.name,
-                        manager: newDept.manager ? newDept.manager.name || newDept.manager : "Chưa có trưởng phòng",
+                        manager: newDept.manager ? newDept.manager.name  : "Chưa có trưởng phòng",
                         description: newDept.description || "Không có mô tả phòng ban",
                         // is_deleted: newDept.is_deleted ? "Ngừng hoạt động" : "Hoạt động",
                     }
