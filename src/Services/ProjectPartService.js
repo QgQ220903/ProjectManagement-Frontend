@@ -23,12 +23,22 @@ export const projectPartPostAPI = async (obj) => {
     }
 }
 
-// lấy ds phần công việc của 1 dự án theo id 
+// lấy ds phần công việc của 1 dự án theo id manager
 export const projectPartGetAPIForIdUser = async (id) => {
     try {
         const response = await axiosInstance.get(`/project-parts/by_manager/?manager_id=${id}`);
         console.log("projectPartGetAPIForIdUser", response);
         return response.data.results;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export const projectPartGetAPIWithIdDepartment = async (idDepartment) => {
+    try {
+        const response = await axiosInstance.get(`/project-parts/by_department/${idDepartment}/`);
+        console.log("projectPartGetAPIWithIdDepartment", response);
+        return response.data;
     } catch (error) {
         console.log(error);
     }

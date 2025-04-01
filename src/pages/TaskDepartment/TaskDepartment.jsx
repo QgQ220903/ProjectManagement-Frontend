@@ -5,7 +5,7 @@ import PageHeader from '@/components/PageHeader';
 import { Link, useParams } from 'react-router-dom';
 
 import { projectPartGetAPI } from "@/Services/ProjectService";
-import { projectPartPostAPI, projectPartGetAPIForIdUser } from "@/Services/ProjectPartService";
+import { projectPartPostAPI, projectPartGetAPIForIdUser, projectPartGetAPIWithIdDepartment } from "@/Services/ProjectPartService";
 // Employee API
 import { employeeGetAllAPI, employeeGetAllAPIWithDepartment } from "@/Services/EmployeeService";
 
@@ -57,7 +57,7 @@ const { TextArea } = Input;
 const TaskDepartment = () => {
 
     // const { id } = useParams();
-    const { auth } = useAuth();
+    const { auth, employeeContext } = useAuth();
 
     // Drawer
     const [open, setOpen] = useState(false);
@@ -104,8 +104,8 @@ const TaskDepartment = () => {
     //láy dự án với id được truyền qua url
     const { data: project_part } = useQuery({
         queryKey: ["taskDepartment"], // Thêm id vào queryKey để cache riêng biệt
-        queryFn: () => projectPartGetAPIForIdUser(auth.id), // Để React Query tự gọi API khi cần
-        enabled: !!auth.id, // Chỉ chạy khi id có giá trị hợp lệ
+        queryFn: () => projectPartGetAPIWithIdDepartment(employeeContext.department), // Để React Query tự gọi API khi cần
+        enabled: !!employeeContext.department, // Chỉ chạy khi id có giá trị hợp lệ
     });
 
     // Thêm 1 phần dự án
@@ -143,7 +143,7 @@ const TaskDepartment = () => {
     //lấy ds nv
     const { data: employees } = useQuery({
         queryKey: ["employees"],
-        queryFn: ()=>employeeGetAllAPIWithDepartment(auth?.employee?.department),
+        queryFn: () => employeeGetAllAPIWithDepartment(auth?.employee?.department),
         enabled: !!auth?.employee?.department,
     });
 
@@ -163,6 +163,7 @@ const TaskDepartment = () => {
             department_name: part.department.name,
             department_manager: part.department.manager ? part.department.manager : "",
             tasks: part.tasks ? part.tasks.map(setDataTask) : [],
+            // isCreateProjectPart: employeeContext.position === "TP"
         }));
 
         return dataNew
@@ -175,7 +176,7 @@ const TaskDepartment = () => {
             created_at: formatDate(task.created_at),
             end_time: formatDate(task.end_time),
             listWork: task.task_assignments
-                .filter((item) => item.role !== "RESPONSIBLE")
+                .filter((item) => item.role === "DOER")
                 .map((item) => ({
                     id: item.id,
                     employeeName: item.employee.name,  // Lấy tên nhân viên
@@ -186,6 +187,8 @@ const TaskDepartment = () => {
                     id: item.id,
                     employeeName: item.employee.name,  // Lấy tên nhân viên
                 })),
+            isCreateTask: employeeContext.position !== "NV" && task.task_assignments?.some(task => (task.employee?.id === auth.id && task.role === "RESPONSIBLE")) 
+
         };
 
         // Nếu task có subtasks, gọi đệ quy để xử lý tất cả các cấp
@@ -203,7 +206,7 @@ const TaskDepartment = () => {
     useEffect(() => {
         console.log("chạy 1 lần");
         console.log("project_part", project_part);
-        console.log("auth", auth?.employee?.department);
+        console.log("employeeContext", employeeContext.department);
         if (project_part) {
             console.log("TaskDepartment", project_part);
             setProjectdata(project_part)
@@ -259,11 +262,12 @@ const TaskDepartment = () => {
             width: '15%',
             render: (_, record) => (
                 <Space size="middle">
-
                     <ButtonIcon handleEvent={() => handleCreateProjectTask(record)}><Plus></Plus> Công việc</ButtonIcon>
+                 
 
                 </Space>
             ),
+            hidden: employeeContext.position !== "TP",
         },
     ];
 
@@ -354,8 +358,23 @@ const TaskDepartment = () => {
                 <Space size={[8, 16]} wrap >
 
 
+                    {console.log("record", record)}
 
-                    <Button shape="circle" size="medium" type="primary" onClick={() => handleCreateSubTask(record)}><Plus size={18} /></Button>
+                    {record.isCreateTask && (
+                        <>
+                            <Button shape="circle" size="medium" type="primary" onClick={() => handleCreateSubTask(record)}><Plus size={18} /></Button>
+
+                            <Button shape="circle" size="medium" color="pink" variant="solid" onClick={() => console.log("bekk")}><Bell size={18} /></Button>
+
+                            <Button shape="circle" size="medium" color="gold" variant="solid" ><File size={18} /></Button>
+
+
+                            <Button shape="circle" size="medium" color="purple" variant="solid" ><Pen size={18} /></Button>
+
+                            <Button shape="circle" size="medium" color="lime" variant="solid" ><ArrowLeftRight size={18} /></Button>
+                        </>
+                    )}
+
 
 
 
@@ -363,7 +382,6 @@ const TaskDepartment = () => {
 
 
 
-                    <Button shape="circle" size="medium" color="pink" variant="solid" onClick={() => console.log("bekk")}><Bell size={18} /></Button>
 
 
 
@@ -371,12 +389,7 @@ const TaskDepartment = () => {
 
 
 
-                    <Button shape="circle" size="medium" color="gold" variant="solid" ><File size={18} /></Button>
 
-
-                    <Button shape="circle" size="medium" color="purple" variant="solid" ><Pen size={18} /></Button>
-
-                    <Button shape="circle" size="medium" color="lime" variant="solid" ><ArrowLeftRight size={18} /></Button>
 
 
 
@@ -451,7 +464,7 @@ const TaskDepartment = () => {
                     onSearch={onSearch}
                     options={employeesData?.map((item) => ({
                         value: item.id,
-                        label: item.name,
+                        label: `${item.name} - ${item.position === "TP" ? "Trưởng phòng" : item.position === "TN" ? "Trưởng nhóm" : "Nhân viên"}`,
                     }))}
                 />,
             // props: { disabled: !isEmployeeTask },
@@ -473,10 +486,12 @@ const TaskDepartment = () => {
                     placeholder="Please select"
                     // onChange={onChangeEmployee}
                     // options={options}
-                    options={employeesData?.map((item) => ({
-                        value: item.id,
-                        label: item.name,
-                    }))}
+                    options={employeesData
+                        ?.filter(item => item.position !== "TP") // Lọc bỏ Trưởng phòng
+                        .map(item => ({
+                            value: item.id,
+                            label: `${item.name} - ${item.position === "TN" ? "Trưởng nhóm" : "Nhân viên"}`
+                        }))}
                 />,
             // props: { disabled: !isEmployeeTask },
             rules: [

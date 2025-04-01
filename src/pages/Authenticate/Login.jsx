@@ -11,13 +11,14 @@ const Login = () => {
 
     const navigate = useNavigate();
 
-    const { loadRoleUser, setAuth } = useAuth();  // Lấy hàm loadUserData từ context
+    const { loadRoleUser, setAuth, setEmployeeContext } = useAuth();  // Lấy hàm loadUserData từ context
 
     const { data: newData, mutate: mutatePost } = useMutation({
         mutationFn: logInAPI,
         onSuccess: (data) => {
             if (data) {
-                setAuth(data);
+                setAuth(data.user);
+                setEmployeeContext(data.user.employee)
                 console.log("logInAPI",data)
                 data.access && localStorage.setItem("access", data.access); // Lưu vào localStorageX
                 data.refresh && localStorage.setItem("refresh", data.refresh); // Lưu vào localStorageX
