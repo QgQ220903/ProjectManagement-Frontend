@@ -18,7 +18,7 @@ import { taskPost } from "@/Services/TaskService";
 import { taskAssignmentsPost } from "@/Services/TaskAssignmentsService";
 import { departmentTaskPost } from "@/Services/DepartmentTaskService";
 
-import { formatDate } from '@/utils/cn';
+import { formatDate, getRandomColor } from '@/utils/cn';
 import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History, File, Pen, ArrowLeftRight } from 'lucide-react';
 import ButtonIcon from '@/components/ButtonIcon'
 // import { FaEye } from "react-icons/fa";
@@ -209,14 +209,14 @@ const TaskDepartment = () => {
         console.log('setDataTask', part)
         const taskData = {
             ...task,
-            project_part: part,
+          
             priority: task.priority === 0 ? "Thấp" : task.priority === 1 ? "Trung Bình" : "Cao",
             key: "task" + task.id,
             created_at: formatDate(task.created_at),
             end_time: formatDate(task.end_time),
-            isCreateTask: employeeContext.position !== "NV" && task.responsible_person.id === auth.id,
-            isDoers: task.doers.some(doer => doer.id === auth.id) || task.responsible_person.id === auth.id,
-            isRes: task.responsible_person.id === auth.id,
+            isCreateTask: task?.responsible_person ? employeeContext.position !== "NV" && task.responsible_person.id === auth.id : false,
+            isDoers: task?.responsible_person ? task.doers.some(doer => doer.id === auth.id) || task.responsible_person.id === auth.id : false,
+            isRes: task?.responsible_person ? task.responsible_person.id === auth.id : false,
 
 
         };
@@ -225,7 +225,7 @@ const TaskDepartment = () => {
         if (task.subtasks && task.subtasks.length > 0) {
             taskData.subtasks = task.subtasks.map(sub => ({
                 ...setDataTask(sub), // Gọi đệ quy
-                project_part: part,
+   
                 key: "sub" + sub.id,
             }));
         } else {
@@ -290,9 +290,9 @@ const TaskDepartment = () => {
         }
     }, [formTask, projectPartSelect]);
 
-    const getRandomColor = () => {
-        return "#" + Math.floor(Math.random() * 16777215).toString(16);
-    };
+    // const getRandomColor = () => {
+    //     return "#" + Math.floor(Math.random() * 16777215).toString(16);
+    // };
 
 
     // Cấu hình cột PARTS
@@ -777,7 +777,7 @@ const TaskDepartment = () => {
                 priority: values.Priority,
                 start_time: values.date?.[0] || null,
                 end_time: values.date?.[1] || null,
-                task_status: 'TO_DO',
+                task_status: 'IN_PROGRESS',
                 completion_percentage: "0",
                 is_deleted: false,
                 project_part: values.projectPart,

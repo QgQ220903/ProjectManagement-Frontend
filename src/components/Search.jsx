@@ -5,7 +5,7 @@ import { Search as IconSearch } from 'lucide-react';
 const Search = ({ size }) => {
 
     return (
-        <div className="input bg-white mb-5 dark:bg-slate-900">
+        <div className="input bg-white dark:bg-slate-900">
             <IconSearch
                 size={size}
                 className="text-slate-300"

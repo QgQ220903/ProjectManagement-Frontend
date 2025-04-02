@@ -24,4 +24,7 @@ export const removeLocalStorageWhenLogout = () => {
     localStorage.removeItem("auth");      
 }
 
+export const getRandomColor = () => {
+    return "#" + Math.floor(Math.random() * 16777215).toString(16);
+};
 

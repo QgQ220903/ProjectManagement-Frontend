@@ -55,6 +55,7 @@ const MainLayout = () => {
           },
           Tooltip: {
             colorBgSpotlight: theme === 'dark' ? "#0f172a" : "#fff",
+            colorTextLightSolid: theme === 'dark' ? "#fff" : "0f172a",
           }
         }
 

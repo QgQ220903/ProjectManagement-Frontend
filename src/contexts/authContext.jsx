@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
                 setEmployeeContext(authStorage.employee);
                 console.log('authStorage.employee',employeeContext)
             }
-            loadRoleUser(authStorage.id); // Load khi app chạy
+            loadRoleUser(authStorage.role.id); // Load khi app chạy
         }
     }, []);
 

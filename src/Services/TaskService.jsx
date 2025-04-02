@@ -11,3 +11,13 @@ export const taskPost = async (obj) => {
         console.log(error);
     }
 };
+
+export const taskGetWithId = async (id) => {
+    try {
+        const response = await axios.get(`${api}employee-leaf-tasks/${id}/`);
+        console.log("taskGetWithId",response.data)
+        return response.data;
+    } catch (error) {
+        console.log(error); 
+    }
+};
