@@ -18,7 +18,7 @@ import { taskAssignmentsPost } from "@/Services/TaskAssignmentsService";
 import { departmentTaskPost } from "@/Services/DepartmentTaskService";
 
 import { formatDate } from '@/utils/cn';
-import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History} from 'lucide-react';
+import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History } from 'lucide-react';
 import ButtonIcon from '@/components/ButtonIcon'
 // import { FaEye } from "react-icons/fa";
 import ModalProjectPart from '@/components/modal/Modal';
@@ -188,22 +188,6 @@ const ProjectDetail = () => {
             key: "task" + task.id,
             created_at: formatDate(task.created_at),
             end_time: formatDate(task.end_time),
-            listWork: task.task_assignments
-                .filter((item) => item.role !== "RESPONSIBLE")
-                .map((item) => ({
-                    id: item.id,
-                    employeeName: item.employee.name,  // Lấy tên nhân viên
-                    email: item.employee.email,
-                    position: item.employee.position,
-                })),
-            responsible: task.task_assignments
-                .filter((item) => item.role === "RESPONSIBLE")
-                .map((item) => ({
-                    id: item.id,
-                    employeeName: item.employee.name,  // Lấy tên nhân viên
-                    email: item.employee.email,
-                    position: item.employee.position,
-                })),
         };
 
         // Nếu task có subtasks, gọi đệ quy để xử lý tất cả các cấp
@@ -219,6 +203,13 @@ const ProjectDetail = () => {
 
         return taskData;
     }
+
+
+    const priorityOrder = {
+        "Thấp": 1,
+        "Trung Bình": 2,
+        "Cao": 3
+    };
 
     useEffect(() => {
         console.log("chạy 1 lần");
@@ -248,8 +239,82 @@ const ProjectDetail = () => {
     // Cấu hình cột PARTS
     const partColumns = [
         // { title: "Mã phần", dataIndex: "key", key: "key" },
-        { title: "Tên phần", dataIndex: "name", key: "name", width: "25%" },
-        { title: "Phòng ban", dataIndex: "department_name", key: "department_name" },
+        {
+            title: "Tên phần",
+            dataIndex: "name",
+            key: "name",
+            width: "25%",
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    {/* Tùy chỉnh dropdown filter */}
+                    <Input
+                        autoFocus
+                        placeholder="Tìm kiếm theo tên phần"
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => clearFilters && clearFilters()}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => confirm()}
+                        >
+                            Tìm
+                        </Button>
+                    </Space>
+                </div>
+            ),
+
+            onFilter: (value, record) => record.name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            filterSearch: true,
+
+        },
+        {
+            title: "Phòng ban",
+            dataIndex: "department_name",
+            key: "department_name",
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    {/* Tùy chỉnh dropdown filter */}
+                    <Input
+                        autoFocus
+                        placeholder="Tìm kiếm theo tên phòng ban"
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => clearFilters && clearFilters()}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => confirm()}
+                        >
+                            Tìm
+                        </Button>
+                    </Space>
+                </div>
+            ),
+
+            onFilter: (value, record) => record.department_name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            filterSearch: true,
+        },
         {
             title: "Chịu trách nhiệm",
             dataIndex: "department_manager",
@@ -259,22 +324,32 @@ const ProjectDetail = () => {
 
                 value &&
                 (<Avatar.Group>
-                    
-                    <Tooltip key={value.id} placement="topRight"              
-        
-                    title={<TitleTooltip name={value.name} position={value.position} email={value.email}></TitleTooltip>}
+
+                    <Tooltip key={value.id} placement="topRight"
+
+                        title={<TitleTooltip name={value.name} position={value.position} email={value.email}></TitleTooltip>}
                     >
                         <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
                     </Tooltip>
-                   
+
                 </Avatar.Group>)
 
 
-            )
+            ),
+
         },
-        { title: "Ngày tạo", dataIndex: "created_at", key: "created_at" },
-        { title: "Cập nhật gần nhất", dataIndex: "updated_at", key: "updated_at" },
-       {
+        {
+            title: "Ngày tạo",
+            dataIndex: "created_at",
+            key: "created_at",
+            sorter: (a, b) => {
+                const dateA = new Date(a.created_at.split("-").reverse().join("-"));
+                const dateB = new Date(b.created_at.split("-").reverse().join("-"));
+                return dateA - dateB; // Sắp xếp theo số (timestamp)
+            },
+        },
+        // { title: "Cập nhật gần nhất", dataIndex: "updated_at", key: "updated_at" },
+        {
             title: 'Chức Năng',
             key: 'action',
             width: '15%',
@@ -306,19 +381,61 @@ const ProjectDetail = () => {
                     <p>{text}</p>
                     <Progress percent={0} />
                 </>
-            )
+            ),
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    {/* Tùy chỉnh dropdown filter */}
+                    <Input
+                        autoFocus
+                        placeholder="Tìm kiếm theo tên công việc"
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => clearFilters && clearFilters()}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => confirm()}
+                        >
+                            Tìm
+                        </Button>
+                    </Space>
+                </div>
+            ),
+
+            onFilter: (value, record) => record.name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            filterSearch: true,
         },
         {
             title: "Ngày bắt đầu",
             dataIndex: "created_at",
             key: "created_at",
             width: "11%",
+            sorter: (a, b) => {
+                const dateA = new Date(a.created_at.split("-").reverse().join("-"));
+                const dateB = new Date(b.created_at.split("-").reverse().join("-"));
+                return dateA - dateB; // Sắp xếp theo số (timestamp)
+            },
         },
         {
             title: "Ngày kết thúc",
             dataIndex: "end_time",
             key: "end_time",
             width: "11%",
+            sorter: (a, b) => {
+                const dateA = new Date(a.end_time.split("-").reverse().join("-"));
+                const dateB = new Date(b.end_time.split("-").reverse().join("-"));
+                return dateA - dateB; // Sắp xếp theo số (timestamp)
+            },
         },
         // { title: "Mô tả", dataIndex: "description", key: "description" },
         {
@@ -331,48 +448,80 @@ const ProjectDetail = () => {
                     text === "Trung Bình" ? <Tag color="yellow">{text}</Tag> :
                         <Tag color="red">{text}</Tag>
             ),
+            sorter: (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority], // Sắp xếp theo số
+
         },
         {
             title: "Chịu trách nhiệm",
-            dataIndex: "responsible",
-            key: "responsible",
-            width: "18%",
+            dataIndex: "responsible_person",
+            key: "responsible_person",
             render: (value) => (
 
 
                 value &&
                 (<Avatar.Group>
-                    {value.map((item) => (
-                        // <Tooltip key={item.id} placement="topRight" title={item.employeeName}>
-                             <Tooltip key={item.id} placement="topRight" 
-                   
-                           
-                
-                            title={<TitleTooltip name={item.employeeName} position={item.position} email={item.email}></TitleTooltip>}
-                            >
-                            <Avatar style={{ backgroundColor: getRandomColor() }}> {item.employeeName.split(" ").reverse().join(" ").charAt(0)}</Avatar>
-                        </Tooltip>
-                    ))}
+
+                    <Tooltip placement="topRight"
+
+
+
+                        title={<TitleTooltip name={value.name} position={value.position} email={value.email}></TitleTooltip>}
+                    >
+                        <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
+                    </Tooltip>
+
                 </Avatar.Group>)
 
 
-            )
+            ),
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    {/* Tùy chỉnh dropdown filter */}
+                    <Input
+                        autoFocus
+                        placeholder="Tìm kiếm theo tên "
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => clearFilters && clearFilters()}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => confirm()}
+                        >
+                            Tìm
+                        </Button>
+                    </Space>
+                </div>
+            ),
+
+            onFilter: (value, record) => record.responsible_person.name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            filterSearch: true,
         },
         {
-            title: "Thành viên thực hiện",
-            dataIndex: "listWork",
-            key: "listWork",
+            title: "Nhóm thực hiện",
+            dataIndex: "doers",
+            key: "doers",
             width: "18%",
             render: (value) => (
                 <> <Avatar.Group>
                     {value.map((item) => (
-                         <Tooltip key={item.id} placement="topRight" 
-                   
-                        
-             
-                         title={<TitleTooltip name={item.employeeName} position={item.position} email={item.email}></TitleTooltip>}
-                         >
-                            <Avatar style={{ backgroundColor: getRandomColor() }}> {item.employeeName.split(" ").reverse().join(" ").charAt(0)}</Avatar>
+                        <Tooltip key={item.id} placement="topRight"
+
+
+
+                            title={<TitleTooltip name={item.name} position={item.position} email={item.email}></TitleTooltip>}
+                        >
+                            <Avatar style={{ backgroundColor: getRandomColor() }}> {item.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
                         </Tooltip>
                     ))}
                 </Avatar.Group>
@@ -387,25 +536,30 @@ const ProjectDetail = () => {
             render: (_, record) => (
                 <Space size={[8, 16]} wrap >
 
-                    <Button  shape="circle" size="medium" type="primary" onClick={() => handleCreateSubTask(record)}><Plus size={18} /></Button>
+                    <Button shape="circle" size="medium" type="primary" onClick={() => handleCreateSubTask(record)}><Plus size={18} /></Button>
 
-                    <Button  shape="circle" size="medium" color="cyan" variant="solid" onClick={() => showDrawer(record)}><MessageCircleMore size={18} /></Button>
-                   
-                    <Button  shape="circle" size="medium" color="pink" variant="solid" onClick={() => console.log("bekk")}><Bell size={18} /></Button>
-                    
-                    <Button  shape="circle" size="medium" color="volcano" variant="solid" onClick={() => setIsModalHistoryOpen(true)}><History size={18} /></Button>
+                    <Button shape="circle" size="medium" color="cyan" variant="solid" onClick={() => showDrawer(record)}><MessageCircleMore size={18} /></Button>
 
-                  
+                    <Button shape="circle" size="medium" color="pink" variant="solid" onClick={() => console.log("bekk")}><Bell size={18} /></Button>
+
+                    <Button shape="circle" size="medium" color="volcano" variant="solid" onClick={() => setIsModalHistoryOpen(true)}><History size={18} /></Button>
+
+
                 </Space>
             ),
-            hidden: true    
+            hidden: true
 
         },
 
     ];
 
     const expandedRowRender = (part) => (
-        <Table columns={taskColumns} dataSource={part.tasks} pagination={false} indentSize={20} childrenColumnName={'subtasks'} />
+        <Table columns={taskColumns} dataSource={part.tasks} pagination={false} indentSize={20} childrenColumnName={'subtasks'}    
+        locale={{
+            triggerDesc: "Sắp xếp giảm dần",
+            triggerAsc: "Sắp xếp tăng dần",
+            cancelSort: "Hủy sắp xếp"
+        }}/>
     );
 
 
@@ -447,7 +601,7 @@ const ProjectDetail = () => {
                         label: item.name,
                     }))}
                 />,
-            rules:  [
+            rules: [
                 {
                     required: true,
                     message: 'Làm ơn chọn nhóm thực hiện',
@@ -473,7 +627,7 @@ const ProjectDetail = () => {
 
     };
 
-   
+
     const onSearch = (value) => {
         console.log('search:', value);
     };
@@ -631,7 +785,7 @@ const ProjectDetail = () => {
 
             mutateProjectPart(values)
 
-       
+
             setIsModalOpen(false);
         } catch (error) {
             console.log('Failed:', error);
@@ -737,18 +891,18 @@ const ProjectDetail = () => {
                     ))
                 );
             }
-              // Gửi API tạo DepartmentTask
-        // else if (values.DepartmentTask?.length > 0) {
-        //     await Promise.all(
-        //         values.DepartmentTask.map(department => 
-        //             mutateDepartmentTask(
-        //                 { department: department, 
-        //                     task: dataTask.id 
-        //                 },
-        //             )
-        //         )
-        //     );
-        // }
+            // Gửi API tạo DepartmentTask
+            // else if (values.DepartmentTask?.length > 0) {
+            //     await Promise.all(
+            //         values.DepartmentTask.map(department => 
+            //             mutateDepartmentTask(
+            //                 { department: department, 
+            //                     task: dataTask.id 
+            //                 },
+            //             )
+            //         )
+            //     );
+            // }
 
 
             setIsModalTaskOpen(false);
@@ -770,22 +924,27 @@ const ProjectDetail = () => {
 
             </PageHeader>
 
-            <div className='mt-5'>
-                <Search size={20} />
-            </div>
+          
 
-            <Table
-                columns={partColumns}
-                dataSource={projectPartData}
-                // rowKey={(record) => getRowKey("part", record.id)}
-                expandable={{
-                    expandedRowRender: (part) => expandedRowRender(part),
-                    rowExpandable: (record) => record.tasks.length > 0,
-                }}
-                pagination={false}
-
-
-            />
+           <div className="mt-5">
+                <Table
+                    columns={partColumns}
+                    dataSource={projectPartData}
+                    // rowKey={(record) => getRowKey("part", record.id)}
+                    expandable={{
+                        expandedRowRender: (part) => expandedRowRender(part),
+                        rowExpandable: (record) => record.tasks.length > 0,
+                    }}
+                    pagination={false}
+                    locale={{
+                        triggerDesc: "Sắp xếp giảm dần",
+                        triggerAsc: "Sắp xếp tăng dần",
+                        cancelSort: "Hủy sắp xếp"
+                    }}
+    
+    
+                />
+           </div>
 
             <ModalProjectPart
                 isModalOpen={isModalOpen}
@@ -841,9 +1000,9 @@ const ProjectDetail = () => {
                 <Chat></Chat>
             </Drawer>
 
-<ShowHistory isModalOpen={isModalHistoryOpen} setIsModalOpen={setIsModalHistoryOpen}></ShowHistory>
+            <ShowHistory isModalOpen={isModalHistoryOpen} setIsModalOpen={setIsModalHistoryOpen}></ShowHistory>
 
-<ToastContainer />
+            <ToastContainer />
 
         </>
     )

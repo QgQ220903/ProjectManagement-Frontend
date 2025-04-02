@@ -4,8 +4,10 @@ import ModalUpload from "@/components/modal/Modal";
 import FormAccount from "@/components/form/Form";
 import PageHeader from "@/components/PageHeader";
 import ButtonIcon from "@/components/ButtonIcon";
-import { Table, Tooltip, Badge, Popconfirm, Space, Input, Form, Select, DatePicker, Tag, Progress, Avatar, Drawer, Col, Row, Switch } from "antd";
+import { Table, Tooltip, Badge, Popconfirm, Space, Input, Select, DatePicker, Tag, Progress, Avatar, Drawer, Col, Row, Switch } from "antd";
 
+import {Link} from 'react-router-dom'
+import { showToastMessage } from '@/utils/toast'
 import { Pencil, Trash2, Plus } from "lucide-react";
 import Search from "@/components/Search";
 
@@ -17,65 +19,56 @@ import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/re
 import { useAuth } from "@/hooks/use-auth";
 import { formatDate, getRandomColor } from '@/utils/cn';
 import TitleTooltip from "@/components/tooltip/TitleTooltip";
+import FileUpload from './test';
+import {fileAssignmentPostAPI} from '@/services/FileService';
+
+
+import { ToastContainer, toast } from 'react-toastify';
+
 const { Dragger } = Upload;
+
 const getAccessToken = () => localStorage.getItem("access");
-const props = {
-    name: 'file',
-    data: {
-        name: 'file',  // Thêm tên file hoặc bất kỳ dữ liệu bổ sung nào
-        link: 'http://example.com/link',  // Thêm đường dẫn nếu cần
-    },
-    action: 'http://localhost:8000/api/files/',
-    headers: {
-        Authorization: `Bearer ${getAccessToken()}`,  // If using authentication
-    },
-    onChange(info) {
-        const { status } = info.file;
-        if (status !== 'uploading') {
-            console.log(info.file, info.fileList);
-        }
-        if (status === 'done') {
-            message.success(`${info.file.name} file uploaded successfully.`);
-        } else if (status === 'error') {
-            message.error(`${info.file.name} file upload failed.`);
-        }
-    },
-    onDrop(e) {
-        console.log('Dropped files', e.dataTransfer.files);
-    },
-};
-// const props = {
-//     name: 'file',
-//     action: 'http://localhost:8000/api/files/',
-//     headers: {
-//         Authorization: `Bearer ${getAccessToken()}`,  // If using authentication
-//     },
-//     onChange(info) {
-//         const { status, name, response } = info.file;
 
-//         // Check for upload status
-//         if (status !== 'uploading') {
-//             console.log(info.file, info.fileList);
-//         }
+const itemsBreadcrumb = [
+    { title: <Link to='/'>Home</Link> },
+    { title: 'Công việc' },
+];
 
-//         // Handle success or error
-//         if (status === 'done') {
-//             message.success(`${name} file uploaded successfully.`);
-//             // Retrieve file name and link from the server response
-//             const fileName = name; // File name
-//             const fileLink = response?.link || ''; // Assuming response contains the link
-//             console.log('Uploaded file details:', { fileName, fileLink });
-//         } else if (status === 'error') {
-//             message.error(`${name} file upload failed.`);
-//         }
-//     },
-//     onDrop(e) {
-//         console.log('Dropped files', e.dataTransfer.files);
-//     },
-// };
 
 const Task = () => {
 
+    const [fileList, setFileList] = useState([]);
+
+    
+const props = {
+    name: 'link',
+    action: 'http://localhost:8000/api/files/',
+    data: (file) => ({
+        name: file.name,  // Gửi tên file
+    }),
+    fileList: fileList,
+    multiple: true,
+    onChange(info) {
+        let newFileList = [...info.fileList];
+  
+      if (info.file.status === 'done') {
+        message.success(`${info.file.name} tải file lên thành công!.`);
+        // newFileList = newFileList.filter(file => file.status !== 'done'); // Xóa file đã upload xong
+
+      } else if (info.file.status === 'error') {
+        message.error(`${info.file.name} file upload failed.`);
+      }
+  
+      setFileList(newFileList);
+    
+      },
+      onDrop(e) {
+        console.log('Dropped files', e.dataTransfer.files);
+      },
+   
+  
+
+};
     const { auth, employeeContext } = useAuth();
 
     const queryClient = useQueryClient();
@@ -88,12 +81,28 @@ const Task = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    const [taskSelectData, setTaskSelectData] = useState([]);
+
     //láy dự án với id được truyền qua url
     const { data: tasks, isLoading } = useQuery({
         queryKey: ["tasks"], // Thêm id vào queryKey để cache riêng biệt
         queryFn: () => taskGetWithId(employeeContext?.id), // Để React Query tự gọi API khi cần
         enabled: !!employeeContext?.id, // Chỉ chạy khi id có giá trị hợp lệ
     });
+
+    const { mutate: addFileAssignment, isLoading: isAdding } = useMutation({
+        mutationFn: fileAssignmentPostAPI,
+        onSuccess: () => {
+        //   queryClient.invalidateQueries(["projects"]); // Fetch lại danh sách mà không cần current
+          showToastMessage('Lưu file thành công !', 'success', 'top-right')
+          setFileList([]);
+          setIsModalOpen(false);
+        },
+        onError: (error) => {
+          showToastMessage('Lưu file thất bại !', 'error', 'top-right')
+          console.log(error)
+        },
+      });
 
 
 
@@ -188,7 +197,7 @@ const Task = () => {
                 </div>
             ),
 
-            onFilter: (value, record) => record.name.toLowerCase().startsWith(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            onFilter: (value, record) => record.name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
             filterSearch: true,
         },
         {
@@ -261,7 +270,11 @@ const Task = () => {
             width: "10%",
             render: (_, record) => (
 
-                <Button onClick={handleOpen} icon={<UploadOutlined />}>Upload</Button>
+            <>
+                    <Button onClick={()=>handleOpen(record)} icon={<UploadOutlined />}>Upload</Button>
+    
+                    {/* <FileUpload></FileUpload>  */}
+            </>
 
             ),
 
@@ -283,48 +296,33 @@ const Task = () => {
 
     ];
 
-    const data = [
-        {
-            key: '1',
-            name: 'Công Việc 1',
-            created_at: '1/1/2025',
-            end_time: "10/1/2025",
-            priority: "Trung Bình",
-            responsible: "Trần Quang Trường",
-            listWork: ""
-        },
-        {
-            key: '2',
-            name: 'Công Việc 2',
-            created_at: '1/1/2025',
-            end_time: "10/1/2025",
-            priority: "Thấp",
-            responsible: 'Duy Cửu',
-            listWork: "",
-        },
-        {
-            key: '3',
-            name: 'Công Việc 3',
-            created_at: '1/1/2025',
-            end_time: "10/1/2025",
-            priority: "Cao",
-            responsible: 'Quy',
-            listWork: "",
-        },
-
-    ];
+  
 
     const onChange = page => {
         console.log(page);
         setCurrent(page);
     };
 
-    const handleOpen = () => {
+    const handleOpen = (record) => {
+        setTaskSelectData(record);
+        console.log("record", record)
         setIsModalOpen(true);
     }
 
     const handleUpload = () => {
+        if(taskSelectData){
+            const task_assignment_id = taskSelectData.assignment_id;
 
+            if(fileList) {
+                fileList.map((file)=>{
+                    addFileAssignment({
+                        task_assignment_id: task_assignment_id,
+                        file_id: file.response.id
+                    })
+                })
+            }
+        }
+        console.log("upload",fileList)
     }
 
     const handleCancel = () => {
@@ -333,7 +331,7 @@ const Task = () => {
 
     return (
         <>
-            <PageHeader title={"Công Việc"}>
+            <PageHeader title={"Công Việc"} itemsBreadcrumb={itemsBreadcrumb}>
 
             </PageHeader>
 
@@ -382,7 +380,11 @@ const Task = () => {
                 title={"Tải file"}
 
             >
-                <Dragger {...props}>
+                <Dragger 
+                {...props}
+                
+                
+                >
                     <p className="ant-upload-drag-icon">
                         <InboxOutlined />
                     </p>
@@ -392,8 +394,11 @@ const Task = () => {
                         banned files.
                     </p>
                 </Dragger>
+                {/* <FileUpload></FileUpload> */}
 
             </ModalUpload>
+
+            <ToastContainer />
 
 
         </>

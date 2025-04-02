@@ -199,14 +199,14 @@ const TaskDepartment = () => {
             updated_at: formatDate(part.updated_at),
             department_name: part.department.name,
             department_manager: part.department.manager ? part.department.manager : "",
-            tasks: part.tasks ? part.tasks.map((item) => setDataTask(item, part.id)) : [],
+            tasks: part.tasks ? part.tasks.map((item) => setDataTask(item)) : [],
             // isCreateProjectPart: employeeContext.position === "TP"
         }));
 
         return dataNew
     }
-    const setDataTask = (task, part) => {
-        console.log('setDataTask', part)
+    const setDataTask = (task) => {
+      
         const taskData = {
             ...task,
           
@@ -262,6 +262,13 @@ const TaskDepartment = () => {
     //     return taskData;
     // };
 
+    
+    const priorityOrder = {
+        "Thấp": 1,
+        "Trung Bình": 2,
+        "Cao": 3
+    };
+
 
     useEffect(() => {
         console.log("chạy 1 lần");
@@ -298,8 +305,81 @@ const TaskDepartment = () => {
     // Cấu hình cột PARTS
     const partColumns = [
         // { title: "Mã phần", dataIndex: "key", key: "key" },
-        { title: "Tên phần", dataIndex: "name", key: "name", width: "25%" },
-        { title: "Phòng ban", dataIndex: "department_name", key: "department_name" },
+        { 
+            title: "Tên phần", 
+            dataIndex: "name", 
+            key: "name", 
+            width: "25%" ,
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    {/* Tùy chỉnh dropdown filter */}
+                    <Input
+                        autoFocus
+                        placeholder="Tìm kiếm theo tên phần"
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => clearFilters && clearFilters()}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => confirm()}
+                        >
+                            Tìm
+                        </Button>
+                    </Space>
+                </div>
+            ),
+
+            onFilter: (value, record) => record.name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            filterSearch: true,
+        },
+        { 
+            title: "Phòng ban", 
+            dataIndex: "department_name", 
+            key: "department_name" ,
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    {/* Tùy chỉnh dropdown filter */}
+                    <Input
+                        autoFocus
+                        placeholder="Tìm kiếm theo tên phòng ban"
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => clearFilters && clearFilters()}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => confirm()}
+                        >
+                            Tìm
+                        </Button>
+                    </Space>
+                </div>
+            ),
+
+            onFilter: (value, record) => record.department_name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            filterSearch: true,
+        },
         {
             title: "Chịu trách nhiệm",
             dataIndex: "department_manager",
@@ -322,8 +402,17 @@ const TaskDepartment = () => {
 
             )
         },
-        { title: "Ngày tạo", dataIndex: "created_at", key: "created_at" },
-        { title: "Cập nhật gần nhất", dataIndex: "updated_at", key: "updated_at" },
+        { 
+            title: "Ngày tạo", 
+            dataIndex: "created_at", 
+            key: "created_at" ,
+            sorter: (a, b) => {
+                const dateA = new Date(a.created_at.split("-").reverse().join("-"));
+                const dateB = new Date(b.endTime.split("-").reverse().join("-"));
+                return dateA - dateB; // Sắp xếp theo số (timestamp)
+            },
+        },
+        // { title: "Cập nhật gần nhất", dataIndex: "updated_at", key: "updated_at" },
         {
             title: 'Chức Năng',
             key: 'action',
@@ -352,19 +441,61 @@ const TaskDepartment = () => {
                     <a onClick={() => showDrawer(record)}>{text}</a>
                     <Progress percent={record.completion_percentage} />
                 </>
-            )
+            ),
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    {/* Tùy chỉnh dropdown filter */}
+                    <Input
+                        autoFocus
+                        placeholder="Tìm kiếm theo tên công việc"
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => clearFilters && clearFilters()}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => confirm()}
+                        >
+                            Tìm
+                        </Button>
+                    </Space>
+                </div>
+            ),
+
+            onFilter: (value, record) => record.name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            filterSearch: true,
         },
         {
             title: "Ngày bắt đầu",
             dataIndex: "created_at",
             key: "created_at",
             width: "11%",
+            sorter: (a, b) => {
+                const dateA = new Date(a.created_at.split("-").reverse().join("-"));
+                const dateB = new Date(b.created_at.split("-").reverse().join("-"));
+                return dateA - dateB; // Sắp xếp theo số (timestamp)
+            },
         },
         {
             title: "Ngày kết thúc",
             dataIndex: "end_time",
             key: "end_time",
             width: "11%",
+            sorter: (a, b) => {
+                const dateA = new Date(a.end_time.split("-").reverse().join("-"));
+                const dateB = new Date(b.end_time.split("-").reverse().join("-"));
+                return dateA - dateB; // Sắp xếp theo số (timestamp)
+            },
         },
         // { title: "Mô tả", dataIndex: "description", key: "description" },
         {
@@ -377,6 +508,8 @@ const TaskDepartment = () => {
                     text === "Trung Bình" ? <Tag color="yellow">{text}</Tag> :
                         <Tag color="red">{text}</Tag>
             ),
+            sorter: (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority], // Sắp xếp theo số
+
         },
         {
             title: "Chịu trách nhiệm",
@@ -400,7 +533,40 @@ const TaskDepartment = () => {
                 </Avatar.Group>)
 
 
-            )
+            ),
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    {/* Tùy chỉnh dropdown filter */}
+                    <Input
+                        autoFocus
+                        placeholder="Tìm kiếm theo tên "
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => clearFilters && clearFilters()}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => confirm()}
+                        >
+                            Tìm
+                        </Button>
+                    </Space>
+                </div>
+            ),
+
+            onFilter: (value, record) => record.responsible_person.name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            filterSearch: true,
+            
         },
         {
             title: "Nhóm thực hiện",
@@ -560,6 +726,12 @@ const TaskDepartment = () => {
             //     .map(task => setDataTask(task, part)) // Xử lý task
             //     .filter(task => task.isCreateTask || task.isDoers || (task.subtasks && task.subtasks.length > 0)) // Lọc các task hợp lệ
             //   }
+
+            locale={{
+                triggerDesc: "Sắp xếp giảm dần",
+                triggerAsc: "Sắp xếp tăng dần",
+                cancelSort: "Hủy sắp xếp"
+            }}
 
             pagination={false} indentSize={20} childrenColumnName={'subtasks'} />
     );
@@ -830,28 +1002,32 @@ const TaskDepartment = () => {
     return (
         <>
             {/* <div>{projectPartData && JSON.stringify(projectPartData)}</div> */}
-            <PageHeader title={(projectdata && projectdata.name)} itemsBreadcrumb={itemsBreadcrumb}>
+            <PageHeader title={"Công việc Phòng Ban"} itemsBreadcrumb={itemsBreadcrumb}>
 
 
 
             </PageHeader>
 
-            <div className='mt-5'>
-                <Search size={20} />
-            </div>
 
-            <Table
-                columns={partColumns}
-                dataSource={projectPartData}
-                // rowKey={(record) => getRowKey("part", record.id)}
-                expandable={{
-                    expandedRowRender: (part) => expandedRowRender(part),
-                    rowExpandable: (record) => record.tasks.length > 0,
-                }}
-                pagination={false}
-
-
-            />
+         <div className="mt-5">
+                <Table
+                    columns={partColumns}
+                    dataSource={projectPartData}
+                    // rowKey={(record) => getRowKey("part", record.id)}
+                    expandable={{
+                        expandedRowRender: (part) => expandedRowRender(part),
+                        rowExpandable: (record) => record.tasks.length > 0,
+                    }}
+                    pagination={false}
+                    locale={{
+                        triggerDesc: "Sắp xếp giảm dần",
+                        triggerAsc: "Sắp xếp tăng dần",
+                        cancelSort: "Hủy sắp xếp"
+                    }}
+    
+    
+                />
+         </div>
 
             <ModalProjectTask
                 isModalOpen={isModalTaskOpen}

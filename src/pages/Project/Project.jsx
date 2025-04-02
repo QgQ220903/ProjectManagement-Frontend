@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { Space, Popconfirm, Form, Input, message } from 'antd';
+import { Space, Popconfirm, Form, Input, message, Button } from 'antd';
 
 import { Pencil, Trash2, Plus } from 'lucide-react';
 
@@ -211,24 +211,61 @@ const Project = () => {
       dataIndex: 'name',
       key: 'name',
       render: (text, record) => <a onClick={() => handleShowData(record)} className='text-blue-600 '>{text}</a>,
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+            {/* Tùy chỉnh dropdown filter */}
+            <Input
+                autoFocus
+                placeholder="Tìm kiếm theo tên phần"
+                value={selectedKeys[0]}
+                onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                onPressEnter={() => confirm()}
+                style={{ marginBottom: 8, display: 'block' }}
+            />
+            <Space>
+                <Button
+                    type="link"
+                    size="small"
+                    onClick={() => clearFilters && clearFilters()}
+                >
+                    Reset
+                </Button>
+                <Button
+                    type="primary"
+                    size="small"
+                    onClick={() => confirm()}
+                >
+                    Tìm
+                </Button>
+            </Space>
+        </div>
+    ),
+
+    onFilter: (value, record) => record.name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+    filterSearch: true,
     },
     {
-      title: 'Ngày Bắt Đầu',
+      title: 'Ngày Tạo',
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (text) => <p className='capitalize'>{text}</p>,
+      sorter: (a, b) => {
+        const dateA = new Date(a.createdAt.split("-").reverse().join("-"));
+        const dateB = new Date(b.createdAt.split("-").reverse().join("-"));
+        return dateA - dateB; // Sắp xếp theo số (timestamp)
+    },
     },
 
-    {
-      title: 'Ngày Kết Thúc',
-      dataIndex: 'updatedAt',
-      key: 'updatedAt',
-      render: (text) => <p className='capitalize'>{text}</p>,
-    },
+    // {
+    //   title: 'Ngày Kết Thúc',
+    //   dataIndex: 'updatedAt',
+    //   key: 'updatedAt',
+    //   render: (text) => <p className='capitalize'>{text}</p>,
+    // },
 
 
     {
-      title: 'Action',
+      title: 'Chức năng',
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
@@ -394,7 +431,7 @@ const Project = () => {
       </PageHeader>
 
       <div className='mt-5'>
-        <Search size={20} />
+       
 
         <Table className='select-none' columns={columns} dataSource={data}
           loading={isLoading}
@@ -404,8 +441,14 @@ const Project = () => {
             pageSize: 5, // Mặc định 10 dòng mỗi trang
             onChange: onChange
             // showSizeChanger: true, // Cho phép chọn số dòng mỗi trang
+            
 
           }}
+          locale={{
+            triggerDesc: "Sắp xếp giảm dần",
+            triggerAsc: "Sắp xếp tăng dần",
+            cancelSort: "Hủy sắp xếp"
+        }}
         />
       </div>
 
