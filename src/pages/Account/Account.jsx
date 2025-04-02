@@ -57,6 +57,7 @@ const Account = () => {
             queryClient.invalidateQueries({
                 queryKey: ["accounts"],
             });
+            setIsModalOpen(false)
         },
         onError: (err) => {
             // console.error("API Error:", err);
@@ -92,6 +93,7 @@ const Account = () => {
             queryClient.invalidateQueries({
                 queryKey: ["accounts"],
             });
+            setIsModalOpen(false)
         },
     });
 
@@ -294,7 +296,7 @@ const Account = () => {
                 updateAccount(values)
             }
 
-            setIsModalOpen(false)
+            // setIsModalOpen(false)
 
         } catch (error) {
             console.error("Validation failed:", error);

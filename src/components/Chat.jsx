@@ -74,14 +74,14 @@ export const HeaderChat = ({ data, onClose }) => {
                                 <Title level={4}>{data.name}</Title>
                               
                                 <Flex justify={"space-between"} >
-                                <p className='ml-3 font-light'>Người chịu trách nhiệm :
-                                    {data.responsible.map((item, index) => (
-                                        <Tag key={item.id} color="green" className='ml-2'>
-                                            <p className='font-medium'>{item.employeeName}</p>
-                                        </Tag>))
+                                <span className='ml-3 font-light'>Người chịu trách nhiệm :
+                                    {
+                                        <Tag color="green" className='ml-2'>
+                                            <p className='font-medium'>{data.responsible_person.name}</p>
+                                        </Tag>
                                     }
 
-                                </p>
+                                </span>
                                     <div>
                                         <Tag color='red'>End Task: {data.end_time}</Tag>
                                     </div>
@@ -97,9 +97,9 @@ export const HeaderChat = ({ data, onClose }) => {
 
                         <div className='ml-5 mt-5'>
                             <Title level={5}>Thành viên:</Title>
-                            {data.listWork.map((item, index) => (
+                            {data.doers.map((item, index) => (
                                 <Tag key={item.id} color="red" className=''>
-                                    <p className='font-medium'>{item.employeeName}</p>
+                                    <p className='font-medium'>{item.name}</p>
                                 </Tag>))
                             }
                         </div>

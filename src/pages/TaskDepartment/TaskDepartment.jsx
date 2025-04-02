@@ -1,5 +1,6 @@
 import React, { Children, useEffect, useState } from "react";
-import { Table, Tooltip, Badge, Popconfirm, Space, Input, Form, Select, DatePicker, Tag, Progress, Button, Avatar, Drawer, Col, Row } from "antd";
+import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
+import { Table, Tooltip, Badge, Popconfirm, Space, Input, Form, Select, DatePicker, Tag, Progress, Button, Avatar, Drawer, Col, Row, Switch } from "antd";
 import Search from '@/components/Search';
 import PageHeader from '@/components/PageHeader';
 import { Link, useParams } from 'react-router-dom';
@@ -52,6 +53,25 @@ const formItemLayout = {
     },
 };
 
+
+const props = {
+    name: 'file',
+    action: 'https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload',
+    headers: {
+        authorization: 'authorization-text',
+    },
+    onChange(info) {
+        if (info.file.status !== 'uploading') {
+            console.log(info.file, info.fileList);
+        }
+        if (info.file.status === 'done') {
+            message.success(`${info.file.name} file uploaded successfully`);
+        } else if (info.file.status === 'error') {
+            message.error(`${info.file.name} file upload failed.`);
+        }
+    },
+};
+
 const { RangePicker } = DatePicker;
 
 const { TextArea } = Input;
@@ -63,6 +83,10 @@ const TaskDepartment = () => {
 
     // Drawer
     const [open, setOpen] = useState(false);
+
+    // Drawer check task
+    const [openDrawerCheckList, setOpenDrawerCheckList] = useState(false);
+
     const [drawerData, setDrawerData] = useState("");
 
     const showDrawer = (record) => {
@@ -70,8 +94,19 @@ const TaskDepartment = () => {
         setDrawerData(record);
         setOpen(true);
     };
+
+    const showDrawerCheckList = (record) => {
+        console.log(record)
+        setDrawerData(record);
+        setOpenDrawerCheckList(true);
+    };
+
     const onClose = () => {
         setOpen(false);
+    };
+
+    const onCloseDrawerCheckList = () => {
+        setOpenDrawerCheckList(false);
     };
 
     const [isModalHistoryOpen, setIsModalHistoryOpen] = useState(false);
@@ -177,7 +212,7 @@ const TaskDepartment = () => {
             key: "task" + task.id,
             created_at: formatDate(task.created_at),
             end_time: formatDate(task.end_time),
-            isCreateTask: employeeContext.position !== "NV" && task.responsible_person.id === auth.id 
+            isCreateTask: employeeContext.position !== "NV" && task.responsible_person.id === auth.id
 
         };
 
@@ -219,6 +254,11 @@ const TaskDepartment = () => {
             formTask.setFieldsValue(projectPartSelect)
         }
     }, [formTask, projectPartSelect]);
+
+    const getRandomColor = () => {
+        return "#" + Math.floor(Math.random() * 16777215).toString(16);
+    };
+
 
     // Cấu hình cột PARTS
     const partColumns = [
@@ -264,10 +304,6 @@ const TaskDepartment = () => {
         },
     ];
 
-    const getRandomColor = () => {
-        return "#" + Math.floor(Math.random() * 16777215).toString(16);
-    };
-
 
     // Cấu hình cột TASKS
     const taskColumns = [
@@ -279,7 +315,7 @@ const TaskDepartment = () => {
             render: (text, record) => (
                 <>
                     <a onClick={() => showDrawer(record)}>{text}</a>
-                    <Progress percent={0} />
+                    <Progress percent={record.completion_percentage} />
                 </>
             )
         },
@@ -316,16 +352,16 @@ const TaskDepartment = () => {
 
                 value &&
                 (<Avatar.Group>
-                    
-                        <Tooltip  placement="topRight"
+
+                    <Tooltip placement="topRight"
 
 
 
-                            title={<TitleTooltip name={value.name} position={value.position} email={value.email}></TitleTooltip>}
-                        >
-                            <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
-                        </Tooltip>
-                 
+                        title={<TitleTooltip name={value.name} position={value.position} email={value.email}></TitleTooltip>}
+                    >
+                        <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
+                    </Tooltip>
+
                 </Avatar.Group>)
 
 
@@ -339,14 +375,14 @@ const TaskDepartment = () => {
             render: (value) => (
                 <> <Avatar.Group>
                     {value.map((item) => (
-                          <Tooltip key={item.id} placement="topRight" 
-                   
-                        
-             
-                          title={<TitleTooltip name={item.name} position={item.position} email={item.email}></TitleTooltip>}
-                          >
-                             <Avatar style={{ backgroundColor: getRandomColor() }}> {item.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
-                         </Tooltip>
+                        <Tooltip key={item.id} placement="topRight"
+
+
+
+                            title={<TitleTooltip name={item.name} position={item.position} email={item.email}></TitleTooltip>}
+                        >
+                            <Avatar style={{ backgroundColor: getRandomColor() }}> {item.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
+                        </Tooltip>
                     ))}
                 </Avatar.Group>
                 </>
@@ -369,7 +405,7 @@ const TaskDepartment = () => {
 
                             <Button shape="circle" size="medium" color="pink" variant="solid" onClick={() => console.log("bekk")}><Bell size={18} /></Button>
 
-                            <Button shape="circle" size="medium" color="gold" variant="solid" ><File size={18} /></Button>
+                            <Button shape="circle" size="medium" color="gold" variant="solid" onClick={() => showDrawerCheckList(record)} ><File size={18} /></Button>
 
 
                             <Button shape="circle" size="medium" color="purple" variant="solid" ><Pen size={18} /></Button>
@@ -403,6 +439,86 @@ const TaskDepartment = () => {
         },
 
     ];
+
+    const onChangeCheckBox = (checked, record) => {
+        console.log(`switch to ${checked}`);
+    
+        console.log(record);
+      };
+
+    const checkListFileColumns = [
+        {
+            title: "Tên nhân viên",
+            dataIndex: "name",
+            key: "name",
+            width: "18%",
+            render: (text) => (
+                <>
+                    <p>{text}</p>
+                </>
+            )
+        },
+        {
+            title: "Số điện thoại",
+            dataIndex: "phone_number",
+            key: "phone_number",
+            width: "12%",
+        },
+        {
+            title: "Email",
+            dataIndex: "email",
+            key: "email",
+            width: "15%",
+            render: (text) => (
+                <>
+                    <p>{text}</p>
+                </>
+            )
+        },
+        {
+            title: "Chức vụ",
+            dataIndex: "position",
+            key: "position",
+            render: (text) => (
+                text === "TP" ? 'Trưởng Phòng' :
+                    text === "TN" ? 'Trưởng nhóm' :
+                        'Nhân viên'
+            ),
+            width: "12%",
+        },
+        {
+            title: "File",
+            dataIndex: "upload",
+            key: "upload",
+            width: "15%",
+            // render: (_, record) => (
+            // //    <Upload {...props}>
+            // //         <Button icon={<UploadOutlined />}>Upload</Button>
+            // //     </Upload>
+            // ),
+
+        },
+        {
+            title: "Chức năng",
+            dataIndex: "action",
+            key: "action",
+            width: "17%",
+            render: (_, record) => (
+                <Space size="middle">
+                    <Switch
+                    onChange={(checked)=>onChangeCheckBox(checked,record)}
+                        checkedChildren={<CheckOutlined />}
+                        unCheckedChildren={<CloseOutlined />}
+                        // defaultChecked={false}
+                    />
+                   
+
+                </Space>
+            ),
+
+        },
+
+    ]
 
     const expandedRowRender = (part) => (
         <Table columns={taskColumns} dataSource={part.tasks} pagination={false} indentSize={20} childrenColumnName={'subtasks'} />
@@ -726,6 +842,24 @@ const TaskDepartment = () => {
                 closable={false}
             >
                 <Chat></Chat>
+            </Drawer>
+
+            {/* Drawr check list File */}
+            <Drawer
+                // title={''}
+                title={<HeaderChat data={drawerData} onClose={onCloseDrawerCheckList}></HeaderChat>}
+                onClose={onCloseDrawerCheckList}
+                open={openDrawerCheckList}
+                width={'50%'}
+                maskClosable={false}
+                loading={false}
+                closable={false}
+            >
+                <Table
+                    columns={checkListFileColumns}
+                    dataSource={drawerData.doers}
+                ></Table>
+
             </Drawer>
 
             <ShowHistory isModalOpen={isModalHistoryOpen} setIsModalOpen={setIsModalHistoryOpen}></ShowHistory>

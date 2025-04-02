@@ -64,7 +64,7 @@ const Employee = () => {
         return employees?.map((item) => ({
             key: item.id,
             name: item.name,
-            position: item.position === "TP" ? "Trưởng Phòng" : "TN" ? "Trưởng Nhóm" : "Nhân Viên",
+            position: item.position === "TP" ? "Trưởng Phòng" : item.position === "TN" ? "Trưởng Nhóm" : "Nhân Viên",
             phone_number: item.phone_number,
             email: item.email,
             department: item.department,
