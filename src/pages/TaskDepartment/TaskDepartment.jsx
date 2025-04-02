@@ -199,20 +199,25 @@ const TaskDepartment = () => {
             updated_at: formatDate(part.updated_at),
             department_name: part.department.name,
             department_manager: part.department.manager ? part.department.manager : "",
-            tasks: part.tasks ? part.tasks.map(setDataTask) : [],
+            tasks: part.tasks ? part.tasks.map((item) => setDataTask(item, part.id)) : [],
             // isCreateProjectPart: employeeContext.position === "TP"
         }));
 
         return dataNew
     }
-    const setDataTask = (task) => {
+    const setDataTask = (task, part) => {
+        console.log('setDataTask', part)
         const taskData = {
             ...task,
+            project_part: part,
             priority: task.priority === 0 ? "Thấp" : task.priority === 1 ? "Trung Bình" : "Cao",
             key: "task" + task.id,
             created_at: formatDate(task.created_at),
             end_time: formatDate(task.end_time),
-            isCreateTask: employeeContext.position !== "NV" && task.responsible_person.id === auth.id
+            isCreateTask: employeeContext.position !== "NV" && task.responsible_person.id === auth.id,
+            isDoers: task.doers.some(doer => doer.id === auth.id) || task.responsible_person.id === auth.id,
+            isRes: task.responsible_person.id === auth.id,
+
 
         };
 
@@ -220,6 +225,7 @@ const TaskDepartment = () => {
         if (task.subtasks && task.subtasks.length > 0) {
             taskData.subtasks = task.subtasks.map(sub => ({
                 ...setDataTask(sub), // Gọi đệ quy
+                project_part: part,
                 key: "sub" + sub.id,
             }));
         } else {
@@ -227,6 +233,35 @@ const TaskDepartment = () => {
         }
         return taskData;
     }
+
+    // const setDataTask = (task, part) => {
+    //     const taskData = {
+    //         ...task,
+    //         project_part: part,
+    //         priority: task.priority === 0 ? "Thấp" : task.priority === 1 ? "Trung Bình" : "Cao",
+    //         key: "task" + task.id,
+    //         created_at: formatDate(task.created_at),
+    //         end_time: formatDate(task.end_time),
+    //         isCreateTask: employeeContext.position !== "NV" && task.responsible_person.id === auth.id,
+    //         isDoers: task.doers.some(doer => doer.id === auth.id)
+    //     };
+
+    //     // Nếu task có subtasks, xử lý đệ quy và lọc các subtasks hợp lệ
+    //     if (task.subtasks && task.subtasks.length > 0) {
+    //         const filteredSubtasks = task.subtasks
+    //             .map(sub => setDataTask(sub, part)) // Gọi đệ quy
+    //             .filter(sub => sub.isCreateTask || sub.isDoers || (sub.subtasks && sub.subtasks.length > 0)); // Lọc task hợp lệ hoặc có subtasks hợp lệ
+
+    //         if (filteredSubtasks.length > 0) {
+    //             taskData.subtasks = filteredSubtasks;
+    //         }
+    //     }else{
+    //         delete taskData.subtasks;
+    //     }
+
+    //     return taskData;
+    // };
+
 
     useEffect(() => {
         console.log("chạy 1 lần");
@@ -396,42 +431,39 @@ const TaskDepartment = () => {
             render: (_, record) => (
                 <Space size={[8, 16]} wrap >
 
-
-                    {console.log("record", record)}
-
                     {record.isCreateTask && (
                         <>
                             <Button shape="circle" size="medium" type="primary" onClick={() => handleCreateSubTask(record)}><Plus size={18} /></Button>
 
-                            <Button shape="circle" size="medium" color="pink" variant="solid" onClick={() => console.log("bekk")}><Bell size={18} /></Button>
 
-                            <Button shape="circle" size="medium" color="gold" variant="solid" onClick={() => showDrawerCheckList(record)} ><File size={18} /></Button>
-
-
-                            <Button shape="circle" size="medium" color="purple" variant="solid" ><Pen size={18} /></Button>
-
-                            <Button shape="circle" size="medium" color="lime" variant="solid" ><ArrowLeftRight size={18} /></Button>
                         </>
                     )}
 
+                    {
+                        record.isRes && (
+
+                            <>
+                                <Button shape="circle" size="medium" color="pink" variant="solid" onClick={() => console.log("bekk")}><Bell size={18} /></Button>
+
+                                <Button shape="circle" size="medium" color="gold" variant="solid" onClick={() => showDrawerCheckList(record)} ><File size={18} /></Button>
 
 
+                                <Button shape="circle" size="medium" color="purple" variant="solid" ><Pen size={18} /></Button>
 
-                    <Button shape="circle" size="medium" color="cyan" variant="solid" onClick={() => showDrawer(record)}><MessageCircleMore size={18} /></Button>
-
-
-
-
-
-
-                    <Button shape="circle" size="medium" color="volcano" variant="solid" onClick={() => setIsModalHistoryOpen(true)}><History size={18} /></Button>
+                                <Button shape="circle" size="medium" color="lime" variant="solid" ><ArrowLeftRight size={18} /></Button>
+                            </>
+                        )
+                    }
 
 
-
-
-
-
-
+                    {
+                        (record.isDoers) && (
+                            <>
+                                <Button shape="circle" size="medium" color="cyan" variant="solid" onClick={() => showDrawer(record)}><MessageCircleMore size={18} /></Button>
+                                <Button shape="circle" size="medium" color="volcano" variant="solid" onClick={() => setIsModalHistoryOpen(true)}><History size={18} /></Button>
+                            </>
+                        )
+                    }
 
                 </Space>
             ),
@@ -442,9 +474,9 @@ const TaskDepartment = () => {
 
     const onChangeCheckBox = (checked, record) => {
         console.log(`switch to ${checked}`);
-    
+
         console.log(record);
-      };
+    };
 
     const checkListFileColumns = [
         {
@@ -506,12 +538,12 @@ const TaskDepartment = () => {
             render: (_, record) => (
                 <Space size="middle">
                     <Switch
-                    onChange={(checked)=>onChangeCheckBox(checked,record)}
+                        onChange={(checked) => onChangeCheckBox(checked, record)}
                         checkedChildren={<CheckOutlined />}
                         unCheckedChildren={<CloseOutlined />}
-                        // defaultChecked={false}
+                    // defaultChecked={false}
                     />
-                   
+
 
                 </Space>
             ),
@@ -521,7 +553,15 @@ const TaskDepartment = () => {
     ]
 
     const expandedRowRender = (part) => (
-        <Table columns={taskColumns} dataSource={part.tasks} pagination={false} indentSize={20} childrenColumnName={'subtasks'} />
+        <Table columns={taskColumns}
+            dataSource={part.tasks}
+            // dataSource={part.tasks.filter(task => task.isCreateTask === true || task.isDoers === true)}
+            // dataSource={part.tasks
+            //     .map(task => setDataTask(task, part)) // Xử lý task
+            //     .filter(task => task.isCreateTask || task.isDoers || (task.subtasks && task.subtasks.length > 0)) // Lọc các task hợp lệ
+            //   }
+
+            pagination={false} indentSize={20} childrenColumnName={'subtasks'} />
     );
 
 
@@ -689,8 +729,8 @@ const TaskDepartment = () => {
     // }
 
     const handleCreateProjectTask = (value) => {
-
         setIsSubTaskForm(false)
+        setEmployeesdata(employees)
         formTask.resetFields()
         console.log("handleCreateProjectTask", value)
         value && setProjectPartSelect({
@@ -703,6 +743,7 @@ const TaskDepartment = () => {
 
     const handleCreateSubTask = (value) => {
         setIsSubTaskForm(true)
+        setEmployeesdata(value.doers)
         formTask.resetFields()
         console.log("handleCreateSubTask", value)
         value && setProjectPartSelect({
