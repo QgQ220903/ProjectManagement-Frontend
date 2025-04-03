@@ -1,6 +1,6 @@
 import React, { Children, useEffect, useState } from "react";
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import { Table, Tooltip, Badge, Popconfirm, Space, Input, Form, Select, DatePicker, Tag, Progress, Button, Avatar, Drawer, Col, Row, Switch } from "antd";
+import { Table, Tooltip, Badge, Popconfirm, Space, Input, Form, Select, DatePicker, Tag, Progress, Button, Avatar, Drawer, Col, Row, Switch, Flex } from "antd";
 import Search from '@/components/Search';
 import PageHeader from '@/components/PageHeader';
 import { Link, useParams } from 'react-router-dom';
@@ -13,13 +13,15 @@ import { employeeGetAllAPI, employeeGetAllAPIWithDepartment } from "@/Services/E
 // Department API
 import { departmentGetAPI } from "@/Services/DepartmentService"
 
+import {workHistoriesPostAPI, workHistoriesGetAPI} from "@/Services/WorkHistoryService"
+
 // Task API
 import { taskPost } from "@/Services/TaskService";
-import { taskAssignmentsPost } from "@/Services/TaskAssignmentsService";
+import { taskAssignmentsPost, taskAssignmentsPatch } from "@/Services/TaskAssignmentsService";
 import { departmentTaskPost } from "@/Services/DepartmentTaskService";
 
 import { formatDate, getRandomColor } from '@/utils/cn';
-import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History, File, Pen, ArrowLeftRight } from 'lucide-react';
+import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History, File, Pen, ArrowLeftRight, FileCheck2 } from 'lucide-react';
 import ButtonIcon from '@/components/ButtonIcon'
 // import { FaEye } from "react-icons/fa";
 import ModalProjectPart from '@/components/modal/Modal';
@@ -31,12 +33,15 @@ import { Chat, HeaderChat } from "@/components/Chat";
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { FileCard } from "@/components/FileCard"
+
 import ShowHistory from "@/components/ShowHistory";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/hooks/use-auth";
 
 import TitleTooltip from "@/components/tooltip/TitleTooltip";
+import { FaRegFileCode } from "react-icons/fa6";
 
 const itemsBreadcrumb = [
     { title: <Link to='/'>Home</Link> },
@@ -87,17 +92,34 @@ const TaskDepartment = () => {
     // Drawer check task
     const [openDrawerCheckList, setOpenDrawerCheckList] = useState(false);
 
-    const [drawerData, setDrawerData] = useState("");
+    //task đc chọn để 
+    const [taskSelected, setTaskSelected] = useState([]);
+
+    const [drawerData, setDrawerData] = useState([]);
+
+    const [doersData, setDoersData] = useState([]);
+
+    const [doerSelected, setDoerSelected] = useState([]);
+
+    const [childrenDrawer, setChildrenDrawer] = useState(false);
 
     const showDrawer = (record) => {
         console.log(record)
+
         setDrawerData(record);
+
         setOpen(true);
     };
 
     const showDrawerCheckList = (record) => {
         console.log(record)
         setDrawerData(record);
+        setDoersData(record.doers.map((doer) => ({
+            key: doer.id,
+            isDone: doer.status === 'DONE',
+            ...doer,
+
+        })));
         setOpenDrawerCheckList(true);
     };
 
@@ -113,9 +135,11 @@ const TaskDepartment = () => {
 
     const [isSubTaskForm, setIsSubTaskForm] = useState(false);
 
-    const [projectPartData, setProjectPartData] = useState(null);
+    const [projectPartData, setProjectPartData] = useState([]);
 
     const [projectdata, setProjectdata] = useState(null);
+
+    const [historiesData, setHistoriesData] = useState([]);
 
     // Chứa danh sách nhân viên
     const [employeesData, setEmployeesdata] = useState(null);
@@ -139,9 +163,15 @@ const TaskDepartment = () => {
     const queryClient = useQueryClient();
 
     //láy dự án với id được truyền qua url
-    const { data: project_part } = useQuery({
+    const { data: project_part, isLoading } = useQuery({
         queryKey: ["taskDepartment"], // Thêm id vào queryKey để cache riêng biệt
         queryFn: () => projectPartGetAPIWithIdDepartment(employeeContext.department), // Để React Query tự gọi API khi cần
+        enabled: !!employeeContext.department, // Chỉ chạy khi id có giá trị hợp lệ
+    });
+
+    const { data: workHistories, isLoading: historyLoading } = useQuery({
+        queryKey: ["workHistories"], // Thêm id vào queryKey để cache riêng biệt
+        queryFn: workHistoriesGetAPI, // Để React Query tự gọi API khi cần
         enabled: !!employeeContext.department, // Chỉ chạy khi id có giá trị hợp lệ
     });
 
@@ -156,22 +186,58 @@ const TaskDepartment = () => {
     // });
 
     // Thêm 1 công việc vào dự án
-    const { mutateAsync: mutateTask } = useMutation({
+    const { mutateAsync: mutateTask, isLoading: addLoading } = useMutation({
         mutationFn: taskPost,
-        onSuccess: () => {
+        onSuccess: (data) => {
             queryClient.invalidateQueries({
                 queryKey: ["taskDepartment"],
+            });
+            console.log("mutateTask",data)
+            mutateHistory({
+                task: data.id,
+                updated_date: data.created_at,
+                content: "Tạo công việc mới",
             });
         },
     });
 
+    // thêm lịch sử
+    const { mutateAsync: mutateHistory, isLoading: historyPostLoading } = useMutation({
+        mutationFn: workHistoriesPostAPI,
+        onSuccess: () => {
+            console.log("mutateHistory thành công")
+            // queryClient.invalidateQueries({
+            //     queryKey: ["taskDepartment"],
+            // });
+        },
+    });
+
     // Thêm 1 nhân viên vào công việc
-    const { data: newTaskAssignments, mutate: mutateTaskAssignment } = useMutation({
+    const { data: newTaskAssignments, mutate: mutateTaskAssignment, isLoading: addTaskAssLoading } = useMutation({
         mutationFn: taskAssignmentsPost,
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({
+                queryKey: ["taskDepartment"], // Chỉ refetch đúng project có id đó
+            });
+            console.log("newTaskAssignments",data)
+            mutateHistory({
+                task: data.task_details.id,
+                updated_date: data.task_details.created_at,
+                content: `Thêm ${data.employee_details.name} vào ${data.task_details.name} với vai trò ${data.role === "DOER" ? "thực hiện" : "chịu trách nghiệm"}`,
+            });
+        },
+    });
+    // sửa 1 thông tin
+    const { mutate: mutatePatchTaskAssignment, isLoading: addPatchtaskAssLoading } = useMutation({
+        mutationFn: ({ id, obj, status }) => taskAssignmentsPatch(id, obj, status),
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: ["taskDepartment"], // Chỉ refetch đúng project có id đó
             });
+            console.log("mutatePatchTaskAssignment thành công")
+        },
+        onError: (error) => {
+            console.log("mutatePatchTaskAssignment thất bại", error)
         },
     });
 
@@ -206,10 +272,10 @@ const TaskDepartment = () => {
         return dataNew
     }
     const setDataTask = (task) => {
-      
+
         const taskData = {
             ...task,
-          
+
             priority: task.priority === 0 ? "Thấp" : task.priority === 1 ? "Trung Bình" : "Cao",
             key: "task" + task.id,
             created_at: formatDate(task.created_at),
@@ -225,7 +291,7 @@ const TaskDepartment = () => {
         if (task.subtasks && task.subtasks.length > 0) {
             taskData.subtasks = task.subtasks.map(sub => ({
                 ...setDataTask(sub), // Gọi đệ quy
-   
+
                 key: "sub" + sub.id,
             }));
         } else {
@@ -262,7 +328,7 @@ const TaskDepartment = () => {
     //     return taskData;
     // };
 
-    
+
     const priorityOrder = {
         "Thấp": 1,
         "Trung Bình": 2,
@@ -276,7 +342,7 @@ const TaskDepartment = () => {
         console.log("employeeContext", employeeContext.department);
         if (project_part) {
             console.log("TaskDepartment", project_part);
-            setProjectdata(project_part)
+            // setProjectdata(project_part)
             const dataFillter = setDataProjectPart(project_part);
             console.log("dataFillterv ", dataFillter);
             setProjectPartData(dataFillter);
@@ -289,6 +355,12 @@ const TaskDepartment = () => {
             setEmployeesdata(employees)
         }
     }, [employees])
+
+    useEffect(()=>{
+        if (workHistories) {
+            setHistoriesData(workHistories)
+        }
+    }, [workHistories])
 
     useEffect(() => {
         if (projectPartSelect) {
@@ -305,11 +377,11 @@ const TaskDepartment = () => {
     // Cấu hình cột PARTS
     const partColumns = [
         // { title: "Mã phần", dataIndex: "key", key: "key" },
-        { 
-            title: "Tên phần", 
-            dataIndex: "name", 
-            key: "name", 
-            width: "25%" ,
+        {
+            title: "Tên phần",
+            dataIndex: "name",
+            key: "name",
+            width: "25%",
             filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
                 <div style={{ padding: 8 }}>
                     {/* Tùy chỉnh dropdown filter */}
@@ -343,10 +415,10 @@ const TaskDepartment = () => {
             onFilter: (value, record) => record.name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
             filterSearch: true,
         },
-        { 
-            title: "Phòng ban", 
-            dataIndex: "department_name", 
-            key: "department_name" ,
+        {
+            title: "Phòng ban",
+            dataIndex: "department_name",
+            key: "department_name",
             filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
                 <div style={{ padding: 8 }}>
                     {/* Tùy chỉnh dropdown filter */}
@@ -402,13 +474,13 @@ const TaskDepartment = () => {
 
             )
         },
-        { 
-            title: "Ngày tạo", 
-            dataIndex: "created_at", 
-            key: "created_at" ,
+        {
+            title: "Ngày tạo",
+            dataIndex: "created_at",
+            key: "created_at",
             sorter: (a, b) => {
                 const dateA = new Date(a.created_at.split("-").reverse().join("-"));
-                const dateB = new Date(b.endTime.split("-").reverse().join("-"));
+                const dateB = new Date(b.created_at.split("-").reverse().join("-"));
                 return dateA - dateB; // Sắp xếp theo số (timestamp)
             },
         },
@@ -428,6 +500,11 @@ const TaskDepartment = () => {
         },
     ];
 
+    const showHistoryModal = (record) => {
+        console.log("showHistoryModal", record)
+        setTaskSelected(record)
+        setIsModalHistoryOpen(true)
+    }
 
     // Cấu hình cột TASKS
     const taskColumns = [
@@ -566,7 +643,7 @@ const TaskDepartment = () => {
 
             onFilter: (value, record) => record.responsible_person.name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
             filterSearch: true,
-            
+
         },
         {
             title: "Nhóm thực hiện",
@@ -626,7 +703,7 @@ const TaskDepartment = () => {
                         (record.isDoers) && (
                             <>
                                 <Button shape="circle" size="medium" color="cyan" variant="solid" onClick={() => showDrawer(record)}><MessageCircleMore size={18} /></Button>
-                                <Button shape="circle" size="medium" color="volcano" variant="solid" onClick={() => setIsModalHistoryOpen(true)}><History size={18} /></Button>
+                                <Button shape="circle" size="medium" color="volcano" variant="solid" onClick={() => showHistoryModal(record)}><History size={18} /></Button>
                             </>
                         )
                     }
@@ -640,8 +717,27 @@ const TaskDepartment = () => {
 
     const onChangeCheckBox = (checked, record) => {
         console.log(`switch to ${checked}`);
-
         console.log(record);
+        try {
+            const data = {
+                employee: record.id,
+                task: drawerData.id,
+            }
+            console.log("data", data)
+            if (checked) {
+               
+                mutatePatchTaskAssignment({ id: record.id_assignment, obj: data, status: "DONE" });
+
+            } else {
+                // mutatePatchTaskAssignment(record.id_assignment, data, "IN_PROGRESS")
+                mutatePatchTaskAssignment({ id: record.id_assignment, obj: data, status: "IN_PROGRESS" });
+            }
+
+
+        } catch (error) {
+            console.log("onChangeCheckBox error", error);
+        }
+
     };
 
     const checkListFileColumns = [
@@ -689,11 +785,9 @@ const TaskDepartment = () => {
             dataIndex: "upload",
             key: "upload",
             width: "15%",
-            // render: (_, record) => (
-            // //    <Upload {...props}>
-            // //         <Button icon={<UploadOutlined />}>Upload</Button>
-            // //     </Upload>
-            // ),
+            render: (_, record) => (
+                <Button shape="circle" size="medium" color="gold" variant="solid" onClick={() => showChildrenDrawer(record)}><FileCheck2 size={18} /></Button>
+            )
 
         },
         {
@@ -707,9 +801,9 @@ const TaskDepartment = () => {
                         onChange={(checked) => onChangeCheckBox(checked, record)}
                         checkedChildren={<CheckOutlined />}
                         unCheckedChildren={<CloseOutlined />}
-                    // defaultChecked={false}
+                        defaultChecked={record.isDone}
                     />
-
+                
 
                 </Space>
             ),
@@ -732,6 +826,7 @@ const TaskDepartment = () => {
                 triggerAsc: "Sắp xếp tăng dần",
                 cancelSort: "Hủy sắp xếp"
             }}
+            loading={addLoading && addTaskAssLoading && addPatchtaskAssLoading}
 
             pagination={false} indentSize={20} childrenColumnName={'subtasks'} />
     );
@@ -997,6 +1092,20 @@ const TaskDepartment = () => {
         }
     };
 
+    const showChildrenDrawer = (record) => {
+        setDoerSelected(record);
+        setChildrenDrawer(true);
+    };
+
+    const onChildrenDrawerClose = () => {
+        setChildrenDrawer(false);
+    };
+
+    const handleCancelSelctTask = () => {
+        setIsModalHistoryOpen(false)
+        setTaskSelected([])
+    }
+
 
 
     return (
@@ -1009,7 +1118,7 @@ const TaskDepartment = () => {
             </PageHeader>
 
 
-         <div className="mt-5">
+            <div className="mt-5">
                 <Table
                     columns={partColumns}
                     dataSource={projectPartData}
@@ -1024,10 +1133,12 @@ const TaskDepartment = () => {
                         triggerAsc: "Sắp xếp tăng dần",
                         cancelSort: "Hủy sắp xếp"
                     }}
-    
-    
+
+                    loading={isLoading}
+
+
                 />
-         </div>
+            </div>
 
             <ModalProjectTask
                 isModalOpen={isModalTaskOpen}
@@ -1058,7 +1169,7 @@ const TaskDepartment = () => {
                 loading={false}
                 closable={false}
             >
-                <Chat></Chat>
+                <Chat roomName={drawerData.id} user={employeeContext}></Chat>
             </Drawer>
 
             {/* Drawr check list File */}
@@ -1074,12 +1185,29 @@ const TaskDepartment = () => {
             >
                 <Table
                     columns={checkListFileColumns}
-                    dataSource={drawerData.doers}
+                    dataSource={doersData}
                 ></Table>
+
+                <Drawer
+                    title={`File của ${doerSelected ? doerSelected.name : ''}`}
+                    width={'30%'}
+                    // closable={false}
+                    onClose={onChildrenDrawerClose}
+                    open={childrenDrawer}
+                >
+                    {console.log("doerSelected", doerSelected)}
+
+                    <Flex gap={'middle'}>
+                        {doerSelected.files && doerSelected.files.map((file, index) => (
+                            <div key={index} className={'w-32'}><FileCard file={file} /></div>
+                        ))}
+                    </Flex>
+
+                </Drawer>
 
             </Drawer>
 
-            <ShowHistory isModalOpen={isModalHistoryOpen} setIsModalOpen={setIsModalHistoryOpen}></ShowHistory>
+            <ShowHistory handleCancel={handleCancelSelctTask} isModalOpen={isModalHistoryOpen} setIsModalOpen={setIsModalHistoryOpen} items={historiesData.filter((item)=>item.task.id === taskSelected.id)}></ShowHistory>
 
         </>
     )
