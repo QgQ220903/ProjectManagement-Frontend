@@ -13,8 +13,8 @@ import { employeeGetAPI, employeePostAPI, employeePutAPI, employeeDeleteAPI } fr
 import { departmentGetAPI, departmentPostAPI, updateManagerForDepartmentAPI } from "@/Services/DepartmentService";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
-import { useNavigate  } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
 const Employee = () => {
     const [current, setCurrent] = useState(1);
     const [total, setTotal] = useState(16);
@@ -32,24 +32,22 @@ const Employee = () => {
 
     const [roleEmployee, setRoleEmployee] = useState(null);
 
+    const previousManagerRef = useRef({});
+
     const navigate = useNavigate();
 
-
-    const { features } = useAuth()
+    const { features } = useAuth();
     useEffect(() => {
         if (features) {
             const featureEmployee = features.find((item) => item.feature.name === "Quản lý nhân viên");
-            setRoleEmployee(featureEmployee)
-            console.log("roleEmployee", roleEmployee)
+            setRoleEmployee(featureEmployee);
+            console.log("roleEmployee", roleEmployee);
 
             // if(!featureEmployee) {
             //     navigate("/")
             // }
-
-
         }
     }, [features]);
-
 
     const handleChange = (value) => {
         console.log(`selected ${value}`);
@@ -77,7 +75,14 @@ const Employee = () => {
             const department = departmentData.find((item) => item.id === newData.department);
 
             if (department) {
+                // Nếu manager không thay đổi, không cập nhật
+                if (previousManagerRef.current[department.id] === newData.id) return;
+
                 const updatedDepartment = { ...department, manager: newData.id };
+                console.log("departmentPUT", updatedDepartment);
+
+                // Cập nhật reference
+                previousManagerRef.current[department.id] = newData.id;
                 mutatePutDepartment(updatedDepartment);
             }
         }
@@ -89,7 +94,7 @@ const Employee = () => {
         queryFn: employeeGetAPI,
     });
     //lấy ds phòng ban
-    const { data: dataDepartment } = useQuery({
+    const { data: departments } = useQuery({
         queryKey: ["departments"],
         queryFn: departmentGetAPI,
     });
@@ -114,6 +119,11 @@ const Employee = () => {
     //cap nhat lại trưởng phòng trong phòng ban
     const { mutate: mutatePutDepartment } = useMutation({
         mutationFn: updateManagerForDepartmentAPI,
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["departments"],
+            });
+        },
     });
     // Cập nhật state chỉ khi `employees` thay đổi
     useEffect(() => {
@@ -124,9 +134,9 @@ const Employee = () => {
             console.log("employ", employeData);
             setData(setDataEmployees(employeData));
         }
-        console.log("dataDepartment", dataDepartment);
-        dataDepartment ? setDepartmentData(dataDepartment) : "";
-    }, [employees, dataDepartment]);
+        console.log("dataDepartment", departments);
+        departments ? setDepartmentData(departments) : "";
+    }, [employees, departments]);
 
     useEffect(() => {
         updateDepartmentManager(newData, departmentData, mutatePutDepartment);
@@ -232,17 +242,18 @@ const Employee = () => {
                         </a>
                     )}
 
-                    {roleEmployee?.can_delete && (<Popconfirm
-                        title="Xóa nhân viên?"
-                        onConfirm={() => handleDeleteEmployee(record.key)}
-                        okText="Có"
-                        cancelText="Không"
-                    >
-                        <a>
-                            <Trash2 size={20} />
-                        </a>
-                    </Popconfirm>)}
-
+                    {roleEmployee?.can_delete && (
+                        <Popconfirm
+                            title="Xóa nhân viên?"
+                            onConfirm={() => handleDeleteEmployee(record.key)}
+                            okText="Có"
+                            cancelText="Không"
+                        >
+                            <a>
+                                <Trash2 size={20} />
+                            </a>
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },
@@ -305,7 +316,6 @@ const Employee = () => {
                         <Plus /> Thêm Nhân Viên
                     </ButtonIcon>
                 )}
-
             </PageHeader>
 
             <div className="mt-5">
