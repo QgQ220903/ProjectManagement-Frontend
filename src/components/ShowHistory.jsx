@@ -51,6 +51,7 @@ const ShowHistory = ({ isModalOpen, setIsModalOpen, items, handleCancel }) => {
                 mode='alternate'
                     items={items.map((item, index) => ({
                         ...item,
+                        is_deleted: item.is_deleted+"",
                         label:  formatDate(item.created_at),
                         children: `${item.content} `,
                     }))}
