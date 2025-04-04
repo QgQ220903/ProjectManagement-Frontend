@@ -37,6 +37,7 @@ export const logInAPI = async(obj) => {
         return response.data;
     } catch (error) {
         console.log(error);
+        throw error
     }
 }
 

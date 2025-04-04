@@ -11,6 +11,8 @@ import { showToastMessage } from '@/utils/toast'
 import { Pencil, Trash2, Plus } from "lucide-react";
 import Search from "@/components/Search";
 
+import { CalendarSchedule } from "@/components/CalendarSchedule"
+
 import { UploadOutlined, SearchOutlined, InboxOutlined } from '@ant-design/icons';
 
 import { Button, message, Upload } from 'antd';
@@ -334,6 +336,8 @@ const props = {
             <PageHeader title={"Công Việc"} itemsBreadcrumb={itemsBreadcrumb}>
 
             </PageHeader>
+
+            <CalendarSchedule ></CalendarSchedule>
 
             <div className="mt-5">
                 {/* <Space align="center" className='mb-5'>

@@ -6,6 +6,10 @@ import { getRolesAPI } from "@/services/RoleService";
 import { useNavigate } from "react-router-dom";
 import FormLogin from "@/components/form/Form";
 import { useAuth } from "@/hooks/use-auth";
+import { showToastMessage } from '@/utils/toast'
+
+import { ToastContainer, toast } from 'react-toastify';
+
 const Login = () => {
     const queryClient = useQueryClient();
 
@@ -19,26 +23,32 @@ const Login = () => {
             if (data) {
                 setAuth(data.user);
                 setEmployeeContext(data.user.employee)
-                console.log("logInAPI",data)
+                console.log("logInAPI", data)
                 data.access && localStorage.setItem("access", data.access); // Lưu vào localStorageX
                 data.refresh && localStorage.setItem("refresh", data.refresh); // Lưu vào localStorageX
                 data.user && localStorage.setItem("auth", JSON.stringify(data.user)); // Lưu vào localStorageX
                 loadRoleUser(data.user.role.id);
 
-                navigate('/');
-           
+                // showToastMessage('Đăng nhập thành công !', 'success', 'top-right')
+
+                // Sau khi login thành công
+                navigate('/', { state: { toast: { message: 'Đăng nhập thành công!', type: 'success' } } });
+
+                // navigate('/');
+
             }
-    
-         
-            
+
+
+
         },
         onError: (error) => {
+            showToastMessage('Đăng nhập thất bại !', 'error', 'top-right')
             console.log(error);
         },
     });
 
 
- 
+
 
     const handleSubmit = (event) => {
         event.preventDefault(); // Ngăn chặn reload trang
@@ -57,11 +67,11 @@ const Login = () => {
                 <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
                     <a href="#" className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
                         <img className="w-8 h-8 mr-2" src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/logo.svg" alt="logo" />
-                        TQT
+                        Quản dự án
                     </a>
                     <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
                         <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-                            <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
+                            <h1 className="text-xl text-center font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
                                 Đăng nhập bằng tài khoản của bạn
                             </h1>
                             <form className="space-y-4 md:space-y-6" action="Post" onSubmit={handleSubmit}>
@@ -85,15 +95,18 @@ const Login = () => {
                                     <a href="#" className="text-sm font-medium text-primary-600 hover:underline dark:text-blue-600">Quên mật khẩu ?</a>
                                 </div>
                                 <button type="submit" className="w-full btn-primary ">Đăng nhập</button>
-                                <p className="text-sm font-light text-gray-500 dark:text-gray-400">
+                                {/* <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                                     Bạn chưa có tài khoản ? <Link to='/register' className="font-medium text-primary-600 hover:underline dark:text-primary-500">Đăng ký</Link>
-                                </p>
+                                </p> */}
                             </form>
                         </div>
                     </div>
                 </div>
             </section>
+            <ToastContainer />
         </>
+
+
     )
 }
 

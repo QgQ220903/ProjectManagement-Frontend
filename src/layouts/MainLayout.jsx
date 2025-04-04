@@ -13,6 +13,11 @@ import { useEffect, useRef, useState } from "react";
 import { ConfigProvider, Modal, Button, Table, Space, Tag } from "antd";
 import { theme as antdTheme } from 'antd';
 import { useTheme } from "@/hooks/use-theme";
+import { useLocation } from 'react-router-dom';
+
+import { showToastMessage } from '@/utils/toast'
+
+import { ToastContainer, toast } from 'react-toastify';
 
 const MainLayout = () => {
   const { theme } = useTheme();
@@ -21,6 +26,15 @@ const MainLayout = () => {
   const [collapsed, setCollapsed] = useState(!isDesktopDevice);
 
   const sidebarRef = useRef(null);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.toast) {
+      const { message, type } = location.state.toast;
+      showToastMessage(message, type);
+    }
+  }, []);
 
   useEffect(() => {
     setCollapsed(!isDesktopDevice);
@@ -88,6 +102,8 @@ const MainLayout = () => {
           <Footer />
         </div>
       </div>
+      <ToastContainer/>
+      
     </ConfigProvider>
   );
 }

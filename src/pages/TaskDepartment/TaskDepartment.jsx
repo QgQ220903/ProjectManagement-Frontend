@@ -5,6 +5,8 @@ import Search from '@/components/Search';
 import PageHeader from '@/components/PageHeader';
 import { Link, useParams } from 'react-router-dom';
 
+import { CalendarSchedule } from '@/components/CalendarSchedule'
+
 import { projectPartGetAPI } from "@/Services/ProjectService";
 import { projectPartPostAPI, projectPartGetAPIForIdUser, projectPartGetAPIWithIdDepartment } from "@/Services/ProjectPartService";
 // Employee API
@@ -13,7 +15,7 @@ import { employeeGetAllAPI, employeeGetAllAPIWithDepartment } from "@/Services/E
 // Department API
 import { departmentGetAPI } from "@/Services/DepartmentService"
 
-import {workHistoriesPostAPI, workHistoriesGetAPI} from "@/Services/WorkHistoryService"
+import { workHistoriesPostAPI, workHistoriesGetAPI } from "@/Services/WorkHistoryService"
 
 // Task API
 import { taskPost } from "@/Services/TaskService";
@@ -99,6 +101,8 @@ const TaskDepartment = () => {
 
     const [doersData, setDoersData] = useState([]);
 
+    const [taskSelectData, setTaskSelectData] = useState([]);
+
     const [doerSelected, setDoerSelected] = useState([]);
 
     const [childrenDrawer, setChildrenDrawer] = useState(false);
@@ -112,8 +116,11 @@ const TaskDepartment = () => {
     };
 
     const showDrawerCheckList = (record) => {
-        console.log(record)
+        console.log("record.subtasks", record)
+
+        console.log("record.subtasks", record.subtasks)
         setDrawerData(record);
+        setTaskSelectData(record)
         setDoersData(record.doers.map((doer) => ({
             key: doer.id,
             isDone: doer.status === 'DONE',
@@ -192,7 +199,7 @@ const TaskDepartment = () => {
             queryClient.invalidateQueries({
                 queryKey: ["taskDepartment"],
             });
-            console.log("mutateTask",data)
+            console.log("mutateTask", data)
             mutateHistory({
                 task: data.id,
                 updated_date: data.created_at,
@@ -219,7 +226,7 @@ const TaskDepartment = () => {
             queryClient.invalidateQueries({
                 queryKey: ["taskDepartment"], // Chỉ refetch đúng project có id đó
             });
-            console.log("newTaskAssignments",data)
+            console.log("newTaskAssignments", data)
             mutateHistory({
                 task: data.task_details.id,
                 updated_date: data.task_details.created_at,
@@ -356,7 +363,7 @@ const TaskDepartment = () => {
         }
     }, [employees])
 
-    useEffect(()=>{
+    useEffect(() => {
         if (workHistories) {
             setHistoriesData(workHistories)
         }
@@ -506,6 +513,38 @@ const TaskDepartment = () => {
         setIsModalHistoryOpen(true)
     }
 
+    const searchSubtasks = (subtasks, value, key) => {
+        return subtasks.some(subtask => {
+            // Kiểm tra trường key có trong subtask và có chứa giá trị tìm kiếm
+            if (subtask[key] && subtask[key].toLowerCase().includes(value.toLowerCase())) {
+                return true;
+            }
+
+            // Nếu có các subtasks con, tiếp tục tìm kiếm đệ quy
+            if (subtask.subtasks && Array.isArray(subtask.subtasks)) {
+                return searchSubtasks(subtask.subtasks, value, key); // Đệ quy vào subtasks con
+            }
+
+            return false;
+        });
+    };
+
+    const searchSubtasksResponsible_person = (subtasks, value) => {
+        return subtasks.some(subtask => {
+            // Kiểm tra trường key có trong subtask và có chứa giá trị tìm kiếm
+            if (subtask.responsible_person && subtask.responsible_person.name.toLowerCase().includes(value.toLowerCase())) {
+                return true;
+            }
+
+            // Nếu có các subtasks con, tiếp tục tìm kiếm đệ quy
+            if (subtask.subtasks && Array.isArray(subtask.subtasks)) {
+                return searchSubtasksResponsible_person(subtask.subtasks, value); // Đệ quy vào subtasks con
+            }
+
+            return false;
+        });
+    };
+
     // Cấu hình cột TASKS
     const taskColumns = [
         {
@@ -549,7 +588,12 @@ const TaskDepartment = () => {
                 </div>
             ),
 
-            onFilter: (value, record) => record.name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+
+            onFilter: (value, record) => {
+                // Tìm kiếm theo name và các thuộc tính khác trong subtasks (ví dụ: created_at, description)
+                return record.name.toLowerCase().includes(value.toLowerCase()) ||
+                    (record.subtasks && searchSubtasks(record.subtasks, value, 'name'))
+            },
             filterSearch: true,
         },
         {
@@ -641,7 +685,13 @@ const TaskDepartment = () => {
                 </div>
             ),
 
-            onFilter: (value, record) => record.responsible_person.name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            // onFilter: (value, record) => record.responsible_person.name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            onFilter: (value, record) => {
+                // Kiểm tra nếu responsible_person tồn tại và tìm kiếm trong các thuộc tính (name, position, email)
+                const responsiblePerson = record.responsible_person;
+                return (responsiblePerson && responsiblePerson.name.toLowerCase().includes(value.toLowerCase())) ||
+                    (record.subtasks && searchSubtasksResponsible_person(record.subtasks, value, 'responsible_person')); // Tìm kiếm trong subtasks nếu có
+            },
             filterSearch: true,
 
         },
@@ -688,8 +738,8 @@ const TaskDepartment = () => {
                             <>
                                 <Button shape="circle" size="medium" color="pink" variant="solid" onClick={() => console.log("bekk")}><Bell size={18} /></Button>
 
-                                <Button shape="circle" size="medium" color="gold" variant="solid" onClick={() => showDrawerCheckList(record)} ><File size={18} /></Button>
 
+                                <Button shape="circle" size="medium" color="gold" variant="solid" onClick={() => showDrawerCheckList(record)} ><File size={18} /></Button>
 
                                 <Button shape="circle" size="medium" color="purple" variant="solid" ><Pen size={18} /></Button>
 
@@ -697,7 +747,13 @@ const TaskDepartment = () => {
                             </>
                         )
                     }
+                    {
+                        (record.isRes || employeeContext.position === "TP") && (
 
+                            <Button shape="circle" size="medium" color="gold" variant="solid" onClick={() => showDrawerCheckList(record)} ><File size={18} /></Button>
+
+                        )
+                    }
 
                     {
                         (record.isDoers) && (
@@ -725,7 +781,7 @@ const TaskDepartment = () => {
             }
             console.log("data", data)
             if (checked) {
-               
+
                 mutatePatchTaskAssignment({ id: record.id_assignment, obj: data, status: "DONE" });
 
             } else {
@@ -803,12 +859,107 @@ const TaskDepartment = () => {
                         unCheckedChildren={<CloseOutlined />}
                         defaultChecked={record.isDone}
                     />
-                
+
 
                 </Space>
             ),
 
         },
+
+    ]
+
+    const checkListTaskColumns = [
+        {
+            title: "Tên công việc",
+            dataIndex: "name",
+            key: "name",
+            width: "20%",
+            render: (text, record) => (
+                <>
+                    <a onClick={() => showDrawer(record)}>{text}</a>
+
+                </>
+            ),
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    {/* Tùy chỉnh dropdown filter */}
+                    <Input
+                        autoFocus
+                        placeholder="Tìm kiếm theo tên công việc"
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => clearFilters && clearFilters()}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => confirm()}
+                        >
+                            Tìm
+                        </Button>
+                    </Space>
+                </div>
+            ),
+
+            onFilter: (value, record) => record.name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            filterSearch: true,
+        },
+        {
+            title: "Ngày bắt đầu",
+            dataIndex: "created_at",
+            key: "created_at",
+            width: "11%",
+            sorter: (a, b) => {
+                const dateA = new Date(a.created_at.split("-").reverse().join("-"));
+                const dateB = new Date(b.created_at.split("-").reverse().join("-"));
+                return dateA - dateB; // Sắp xếp theo số (timestamp)
+            },
+        },
+        {
+            title: "Ngày kết thúc",
+            dataIndex: "end_time",
+            key: "end_time",
+            width: "11%",
+            sorter: (a, b) => {
+                const dateA = new Date(a.end_time.split("-").reverse().join("-"));
+                const dateB = new Date(b.end_time.split("-").reverse().join("-"));
+                return dateA - dateB; // Sắp xếp theo số (timestamp)
+            },
+        },
+        // { title: "Mô tả", dataIndex: "description", key: "description" },
+        {
+            title: "Ưu tiên",
+            dataIndex: "priority",
+            key: "priority",
+            width: "10%",
+            render: (text) => (
+                text === "Thấp" ? <Tag color="green">{text}</Tag> :
+                    text === "Trung Bình" ? <Tag color="yellow">{text}</Tag> :
+                        <Tag color="red">{text}</Tag>
+            ),
+            sorter: (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority], // Sắp xếp theo số
+
+        },
+        {
+            title: "File",
+            dataIndex: "upload",
+            key: "upload",
+            width: "15%",
+            render: (_, record) => (
+                <Button shape="circle" size="medium" color="gold" variant="solid" onClick={() => showChildrenDrawer(record)}><FileCheck2 size={18} /></Button>
+            )
+
+        },
+
 
     ]
 
@@ -1093,7 +1244,62 @@ const TaskDepartment = () => {
     };
 
     const showChildrenDrawer = (record) => {
-        setDoerSelected(record);
+        let allFiles = [];
+        console.log("showChildrenDrawer record", record)
+        // console.log("showChildrenDrawer file",record.doers.flatMap(doer => doer.files || []))
+        if ('subtasks' in record && Array.isArray(record.subtasks) && record.subtasks.length > 0) {
+            console.log("Có subtasks và có phần tử");
+            record.subtasks.forEach(subtask => {
+                if ('doers' in subtask && Array.isArray(subtask.doers)) {
+                    subtask.doers.forEach(doer => {
+                        if ('files' in doer && Array.isArray(doer.files)) {
+                            allFiles.push(...doer.files);
+                        }
+                    });
+                }
+            });
+            console.log("allFiles", allFiles)
+            setDoerSelected({
+                name: record.name,
+                files: allFiles
+            });
+        }
+        // if ('subtasks' in record && Array.isArray(record.subtasks) && record.subtasks.length > 0) {
+        //     console.log("Có subtasks và có phần tử");
+
+        //     record.subtasks.forEach(subtask => {
+        //       if ('doers' in subtask && Array.isArray(subtask.doers)) {
+        //         const files = subtask.doers.flatMap(doer => doer.files || []);
+
+        //         allFiles.push({
+        //           name: subtask.name,  // Lấy tên của subtask
+        //           files: files        // Lấy tất cả files của doers trong subtask này
+        //         });
+        //       }
+        //     });
+
+        //     console.log("Kết quả", allFiles);
+        //   }
+        else if ('doers' in record && Array.isArray(record.doers) && record.doers.length > 0) {
+            console.log("Có doers và có phần tử");
+            // console.log("showChildrenDrawer file doers",record.doers.flatMap(doer => doer.files || []))
+            const files = record.doers.flatMap(doer => doer.files || []);
+
+            allFiles.push({
+                name: record.name,
+                files: files
+            });
+
+            console.log("allFiles", allFiles)
+            setDoerSelected({
+                name: record.name,
+                files: files
+            });
+        } else {
+            console.log("Không có subtasks hoặc doers");
+            setDoerSelected(record);
+        }
+
         setChildrenDrawer(true);
     };
 
@@ -1116,6 +1322,8 @@ const TaskDepartment = () => {
 
 
             </PageHeader>
+
+            {/* <CalendarSchedule></CalendarSchedule> */}
 
 
             <div className="mt-5">
@@ -1184,8 +1392,8 @@ const TaskDepartment = () => {
                 closable={false}
             >
                 <Table
-                    columns={checkListFileColumns}
-                    dataSource={doersData}
+                    columns={taskSelectData?.subtasks === undefined ? checkListFileColumns : checkListTaskColumns}
+                    dataSource={taskSelectData?.subtasks === undefined ? doersData : taskSelectData.subtasks}
                 ></Table>
 
                 <Drawer
@@ -1207,7 +1415,7 @@ const TaskDepartment = () => {
 
             </Drawer>
 
-            <ShowHistory handleCancel={handleCancelSelctTask} isModalOpen={isModalHistoryOpen} setIsModalOpen={setIsModalHistoryOpen} items={historiesData.filter((item)=>item.task.id === taskSelected.id)}></ShowHistory>
+            <ShowHistory handleCancel={handleCancelSelctTask} isModalOpen={isModalHistoryOpen} setIsModalOpen={setIsModalHistoryOpen} items={historiesData.filter((item) => item.task.id === taskSelected.id)}></ShowHistory>
 
         </>
     )
