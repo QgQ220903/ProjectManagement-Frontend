@@ -26,13 +26,13 @@ import ModalProjectTask from "@/components/modal/Modal";
 
 import FormProjectPart from "@/components/form/Form";
 import FormProjectTask from "@/components/form/Form";
-import { Chat, HeaderChat } from "@/components/Chat";
+import { Chat, HeaderChat } from "@/components/chatRoom/Chat";
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import ShowHistory from "@/components/ShowHistory";
 
-import { useNavigate } from "react-router-dom";
+
 
 import TitleTooltip from "@/components/tooltip/TitleTooltip";
 
@@ -115,11 +115,7 @@ const ProjectDetail = () => {
         queryFn: () => projectPartGetAPI(id), // Để React Query tự gọi API khi cần
         enabled: !!id, // Chỉ chạy khi id có giá trị hợp lệ
     });
-    useEffect(() => {
-        if (Project_parts_List) {
-            queryClient.invalidateQueries(["project", id]);
-        }
-    }, [Project_parts_List, queryClient, id]);
+    
     // Thêm 1 phần dự án
     const { data: newProjectPart, mutate: mutateProjectPart } = useMutation({
         mutationFn: projectPartPostAPI,
@@ -201,11 +197,13 @@ const ProjectDetail = () => {
         return taskData;
     };
 
-    const priorityOrder = {
-        Thấp: 1,
-        "Trung Bình": 2,
-        Cao: 3,
-    };
+ 
+
+    useEffect(() => {
+        if (Project_parts_List) {
+            queryClient.invalidateQueries(["project", id]);
+        }
+    }, [Project_parts_List, queryClient, id]);
 
     useEffect(() => {
         console.log("chạy 1 lần");
@@ -230,6 +228,12 @@ const ProjectDetail = () => {
             formTask.setFieldsValue(projectPartSelect);
         }
     }, [formTask, projectPartSelect]);
+
+    const priorityOrder = {
+        "Thấp": 1,
+        "Trung Bình": 2,
+        "Cao": 3,
+    };
 
     // Cấu hình cột PARTS
     const partColumns = [
@@ -1017,10 +1021,10 @@ const ProjectDetail = () => {
                 <Chat></Chat>
             </Drawer>
 
-            <ShowHistory
+            {/* <ShowHistory
                 isModalOpen={isModalHistoryOpen}
                 setIsModalOpen={setIsModalHistoryOpen}
-            ></ShowHistory>
+            ></ShowHistory> */}
 
             <ToastContainer />
         </>

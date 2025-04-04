@@ -6,29 +6,36 @@ import interactionPlugin from '@fullcalendar/interaction'; // cho kéo/thả, cl
 
 
 
-export const CalendarSchedule = ({events, dateClick, eventClick}) => {
+export const CalendarSchedule = ({events, dateClick, eventClick, calendarRef}) => {
     return (
-        <FullCalendar
+    
+            <FullCalendar
+            ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
-            editable={true}
-            selectable={true}
-            // events={[
-            //     { title: 'Họp nhóm', start: '2025-04-06T10:00:00', end: '2025-04-10T11:00:00' },
-            //     { title: 'Làm bài tập', date: '2025-04-07' }
-            // ]}
-            events={events}
+            // height="auto"
+            // contentHeight="auto"
+            // aspectRatio={1.5} // hoặc điều chỉnh theo nhu cầu
+            // editable={true}
+            // selectable={true}
+            eventTimeFormat={{
+              hour: '2-digit',
+              minute: '2-digit',
+              meridiem: 'short', // hoặc 'narrow' | 'long'
+              hour12: true       // dùng định dạng 12 giờ (AM/PM)
+            }}
+        
+    
+            events ={events}
             dateClick={(info) => {
-                alert('Bạn đã click vào ngày: ' + info.dateStr);
-                dateClick(info)
-                // có thể mở form tạo sự kiện ở đây
+                // dateClick(info);
             }}
             eventClick={(info) => {
-                alert('Sự kiện: ' + info.event.title);
-                eventClick(info)
-                // có thể mở form sửa/xoá sự kiện ở đây
+            
+            //   eventClick(info);
             }}
-        />
+          />
+   
 
     )
 }

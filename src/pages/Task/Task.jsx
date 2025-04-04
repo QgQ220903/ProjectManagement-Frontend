@@ -1,15 +1,19 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 // import ModalAccount from "@/components/modal/Modal";
 import ModalUpload from "@/components/modal/Modal";
-import FormAccount from "@/components/form/Form";
+
+
 import PageHeader from "@/components/PageHeader";
 import ButtonIcon from "@/components/ButtonIcon";
-import { Table, Tooltip, Badge, Popconfirm, Space, Input, Select, DatePicker, Tag, Progress, Avatar, Drawer, Col, Row, Switch } from "antd";
+import { Flex, Table, Tooltip, Badge, Popconfirm, Space, Input, Select, DatePicker, Tag, Progress, Avatar, Drawer, Col, Row, Switch, Modal } from "antd";
 
-import {Link} from 'react-router-dom'
+import EmptyTemplate from "@/components/emptyTemplate/EmptyTemplate";
+
+import { Link } from 'react-router-dom'
 import { showToastMessage } from '@/utils/toast'
-import { Pencil, Trash2, Plus } from "lucide-react";
-import Search from "@/components/Search";
+import { Pencil, Trash2, Plus, File } from "lucide-react";
+
+
 
 import { CalendarSchedule } from "@/components/CalendarSchedule"
 
@@ -22,10 +26,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { formatDate, getRandomColor } from '@/utils/cn';
 import TitleTooltip from "@/components/tooltip/TitleTooltip";
 import FileUpload from './test';
-import {fileAssignmentPostAPI} from '@/services/FileService';
+import { fileAssignmentPostAPI } from '@/services/FileService';
+
+import { FileCard } from "@/components/FileCard"
 
 
 import { ToastContainer, toast } from 'react-toastify';
+
 
 const { Dragger } = Upload;
 
@@ -41,36 +48,8 @@ const Task = () => {
 
     const [fileList, setFileList] = useState([]);
 
-    
-const props = {
-    name: 'link',
-    action: 'http://localhost:8000/api/files/',
-    data: (file) => ({
-        name: file.name,  // Gửi tên file
-    }),
-    fileList: fileList,
-    multiple: true,
-    onChange(info) {
-        let newFileList = [...info.fileList];
-  
-      if (info.file.status === 'done') {
-        message.success(`${info.file.name} tải file lên thành công!.`);
-        // newFileList = newFileList.filter(file => file.status !== 'done'); // Xóa file đã upload xong
+    const calendarRef = useRef(null);
 
-      } else if (info.file.status === 'error') {
-        message.error(`${info.file.name} file upload failed.`);
-      }
-  
-      setFileList(newFileList);
-    
-      },
-      onDrop(e) {
-        console.log('Dropped files', e.dataTransfer.files);
-      },
-   
-  
-
-};
     const { auth, employeeContext } = useAuth();
 
     const queryClient = useQueryClient();
@@ -83,7 +62,42 @@ const props = {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    const [isModalCalendarOpen, setIsModalCalendarOpen] = useState(false);
+
+
     const [taskSelectData, setTaskSelectData] = useState([]);
+
+    const [openDrawerCheckList, setOpenDrawerCheckList] = useState(false);
+
+    const props = {
+        name: 'link',
+        action: 'http://localhost:8000/api/files/',
+        data: (file) => ({
+            name: file.name,  // Gửi tên file
+        }),
+        fileList: fileList,
+        multiple: true,
+        onChange(info) {
+            let newFileList = [...info.fileList];
+
+            if (info.file.status === 'done') {
+                message.success(`${info.file.name} tải file lên thành công!.`);
+                // newFileList = newFileList.filter(file => file.status !== 'done'); // Xóa file đã upload xong
+
+            } else if (info.file.status === 'error') {
+                message.error(`${info.file.name} file upload failed.`);
+            }
+
+            setFileList(newFileList);
+
+        },
+        onDrop(e) {
+            console.log('Dropped files', e.dataTransfer.files);
+        },
+
+
+
+    };
 
     //láy dự án với id được truyền qua url
     const { data: tasks, isLoading } = useQuery({
@@ -95,17 +109,27 @@ const props = {
     const { mutate: addFileAssignment, isLoading: isAdding } = useMutation({
         mutationFn: fileAssignmentPostAPI,
         onSuccess: () => {
-        //   queryClient.invalidateQueries(["projects"]); // Fetch lại danh sách mà không cần current
-          showToastMessage('Lưu file thành công !', 'success', 'top-right')
-          setFileList([]);
-          setIsModalOpen(false);
+            //   queryClient.invalidateQueries(["projects"]); // Fetch lại danh sách mà không cần current
+            showToastMessage('Lưu file thành công !', 'success', 'top-right')
+            setFileList([]);
+            setIsModalOpen(false);
         },
         onError: (error) => {
-          showToastMessage('Lưu file thất bại !', 'error', 'top-right')
-          console.log(error)
+            showToastMessage('Lưu file thất bại !', 'error', 'top-right')
+            console.log(error)
         },
-      });
+    });
 
+
+
+
+    useEffect(() => {
+        if (isModalCalendarOpen && calendarRef.current) {
+            setTimeout(() => {
+                calendarRef.current.getApi().updateSize();
+            }, 1); // Chờ modal render xong rồi mới resize lịch
+        }
+    }, [isModalCalendarOpen]);
 
 
     useEffect(() => {
@@ -133,26 +157,17 @@ const props = {
         "Cao": 3
     };
 
-    // filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-    //     <div style={{ padding: 8 }}>
-    //         <Input
-    //             placeholder="Nhập từ khóa..."
-    //             value={selectedKeys[0]}
-    //             onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-    //             onPressEnter={() => confirm()}
-    //             style={{ marginBottom: 8, display: "block" }}
-    //         />
-    //         <Button type="primary" onClick={() => confirm()} icon={<SearchOutlined />} size="small" style={{ width: 90 }}>
-    //             Tìm
-    //         </Button>
-    //         <Button onClick={() => clearFilters()} size="small" style={{ width: 90, marginTop: 8 }}>
-    //             Xóa
-    //         </Button>
-    //     </div>
-    // ),
-    // onFilter: (value, record) => record.name.toLowerCase().includes(value.toLowerCase()),
-    // filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />,
+    const showDrawerCheckList = (record) => {
+        console.log("record.subtasks", record)
+        setTaskSelectData(record);
+        setOpenDrawerCheckList(true);
+    }
 
+    const onCloseDrawerCheckList = () => {
+        setOpenDrawerCheckList(false);
+    }
+
+   
     const columns = [
         {
             title: "Tên công việc",
@@ -272,11 +287,11 @@ const props = {
             width: "10%",
             render: (_, record) => (
 
-            <>
-                    <Button onClick={()=>handleOpen(record)} icon={<UploadOutlined />}>Upload</Button>
-    
+                <>
+                    <Button onClick={() => handleOpen(record)} icon={<UploadOutlined />}>Upload</Button>
+
                     {/* <FileUpload></FileUpload>  */}
-            </>
+                </>
 
             ),
 
@@ -288,8 +303,9 @@ const props = {
             width: "17%",
             render: (_, record) => (
                 <Space size="middle">
+                    <Button shape="circle" size="medium" color="gold" variant="solid" onClick={() => showDrawerCheckList(record)} ><File size={18} /></Button>
 
-                    <ButtonIcon handleEvent={() => handleCreateSubTask(record)}><Plus size={18} /></ButtonIcon>
+                    {/* <ButtonIcon handleEvent={() => handleCreateSubTask(record)}><Plus size={18} /></ButtonIcon> */}
 
                 </Space>
             ),
@@ -298,7 +314,7 @@ const props = {
 
     ];
 
-  
+
 
     const onChange = page => {
         console.log(page);
@@ -312,11 +328,11 @@ const props = {
     }
 
     const handleUpload = () => {
-        if(taskSelectData){
+        if (taskSelectData) {
             const task_assignment_id = taskSelectData.assignment_id;
 
-            if(fileList) {
-                fileList.map((file)=>{
+            if (fileList) {
+                fileList.map((file) => {
                     addFileAssignment({
                         task_assignment_id: task_assignment_id,
                         file_id: file.response.id
@@ -324,38 +340,49 @@ const props = {
                 })
             }
         }
-        console.log("upload",fileList)
+        console.log("upload", fileList)
     }
 
     const handleCancel = () => {
         setIsModalOpen(false);
     }
 
+    const handleCalendarCancel = () => {
+        setIsModalCalendarOpen(false)
+    }
+
     return (
         <>
             <PageHeader title={"Công Việc"} itemsBreadcrumb={itemsBreadcrumb}>
-
+                <ButtonIcon handleEvent={() => setIsModalCalendarOpen(true)}>
+                    <Plus /> Xem lịch biểu
+                </ButtonIcon>
             </PageHeader>
 
-            <CalendarSchedule ></CalendarSchedule>
+
+
+
+            <Modal
+                title={"Lịch biểu công việc"}
+                open={isModalCalendarOpen}
+                footer={null} // hoặc true nếu bạn có custom footer
+                onCancel={handleCalendarCancel}
+                width={'50%'}
+
+            >
+                <CalendarSchedule
+                    calendarRef={calendarRef}
+                    // thêm dòng này để tránh bị thu nhỏ
+                    events={taskData.map((task) => ({
+                        title: task.name,
+                        start: task.start_time,
+                        end: task.end_time,
+                    }))}
+                />
+            </Modal>
 
             <div className="mt-5">
-                {/* <Space align="center" className='mb-5'>
-                    <Search size={20} />
-                    <Select
-                       placeholder='Lọc theo '
-                        size='large'
-                        // style={{ width: 120 }}
-                        // onChange={handleChange}
-                        options={[
-                            { value: 'priority', label: 'Ưu tiên' },
-                            { value: 'lucy', label: 'Lucy' },
-                            { value: 'Yiminghe', label: 'yiminghe' },
-                            { value: 'disabled', label: 'Disabled', disabled: true },
-                        ]}
-                    />
-
-                </Space> */}
+               
                 <Table
                     columns={columns}
                     dataSource={taskData}
@@ -371,7 +398,9 @@ const props = {
                     locale={{
                         triggerDesc: "Sắp xếp giảm dần",
                         triggerAsc: "Sắp xếp tăng dần",
-                        cancelSort: "Hủy sắp xếp"
+                        cancelSort: "Hủy sắp xếp",
+                        emptyText:
+                            <EmptyTemplate title={'Bạn không có công việc nào được giao!'} />
                     }}
                 />
             </div>
@@ -384,10 +413,10 @@ const props = {
                 title={"Tải file"}
 
             >
-                <Dragger 
-                {...props}
-                
-                
+                <Dragger
+                    {...props}
+
+
                 >
                     <p className="ant-upload-drag-icon">
                         <InboxOutlined />
@@ -401,6 +430,23 @@ const props = {
                 {/* <FileUpload></FileUpload> */}
 
             </ModalUpload>
+
+            <Drawer
+                // title={''}
+                title={`File của ${taskSelectData ? taskSelectData.name : ''}`}
+                onClose={onCloseDrawerCheckList}
+                open={openDrawerCheckList}
+                width={'40%'}
+                maskClosable={false}
+                loading={false}
+                closable={true}
+            >
+                <Flex gap={'middle'} wrap>
+                    {taskSelectData.files && taskSelectData.files.map((file, index) => (
+                        <div key={index} className={'w-32'}><FileCard file={file} /></div>
+                    ))}
+                </Flex>
+            </Drawer>
 
             <ToastContainer />
 

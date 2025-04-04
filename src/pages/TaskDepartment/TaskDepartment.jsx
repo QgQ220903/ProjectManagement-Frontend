@@ -1,9 +1,10 @@
 import React, { Children, useEffect, useState } from "react";
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import { Table, Tooltip, Badge, Popconfirm, Space, Input, Form, Select, DatePicker, Tag, Progress, Button, Avatar, Drawer, Col, Row, Switch, Flex } from "antd";
+import { Table, Tooltip, Badge, Popconfirm, Space, Input, Form, Select, DatePicker, Tag, Progress, Button, Avatar, Drawer, Col, Row, Switch, Flex, message } from "antd";
 import Search from '@/components/Search';
 import PageHeader from '@/components/PageHeader';
 import { Link, useParams } from 'react-router-dom';
+
 
 import { CalendarSchedule } from '@/components/CalendarSchedule'
 
@@ -11,6 +12,8 @@ import { projectPartGetAPI } from "@/Services/ProjectService";
 import { projectPartPostAPI, projectPartGetAPIForIdUser, projectPartGetAPIWithIdDepartment } from "@/Services/ProjectPartService";
 // Employee API
 import { employeeGetAllAPI, employeeGetAllAPIWithDepartment } from "@/Services/EmployeeService";
+
+import EmptyTemplate from "@/components/emptyTemplate/EmptyTemplate";
 
 // Department API
 import { departmentGetAPI } from "@/Services/DepartmentService"
@@ -22,6 +25,8 @@ import { taskPost } from "@/Services/TaskService";
 import { taskAssignmentsPost, taskAssignmentsPatch } from "@/Services/TaskAssignmentsService";
 import { departmentTaskPost } from "@/Services/DepartmentTaskService";
 
+import { sendEmail } from "@/Services/EmailService."
+
 import { formatDate, getRandomColor } from '@/utils/cn';
 import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History, File, Pen, ArrowLeftRight, FileCheck2 } from 'lucide-react';
 import ButtonIcon from '@/components/ButtonIcon'
@@ -31,7 +36,7 @@ import ModalProjectTask from '@/components/modal/Modal';
 
 import FormProjectPart from '@/components/form/Form'
 import FormProjectTask from '@/components/form/Form'
-import { Chat, HeaderChat } from "@/components/Chat";
+import { Chat, HeaderChat } from "@/components/chatRoom/Chat";
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -205,6 +210,7 @@ const TaskDepartment = () => {
                 updated_date: data.created_at,
                 content: "Tạo công việc mới",
             });
+
         },
     });
 
@@ -231,6 +237,136 @@ const TaskDepartment = () => {
                 task: data.task_details.id,
                 updated_date: data.task_details.created_at,
                 content: `Thêm ${data.employee_details.name} vào ${data.task_details.name} với vai trò ${data.role === "DOER" ? "thực hiện" : "chịu trách nghiệm"}`,
+            });
+            sendEmail({
+                recipient: data.employee_details.email,
+                subject: "Thông báo công việc mới",
+                message: `
+                <div style={{
+        fontFamily: 'Arial, sans-serif',
+        backgroundColor: '#fff3cd',
+        color: '#856404',
+        padding: '20px',
+        borderRadius: '8px',
+        maxWidth: '600px',
+        margin: '20px auto',
+        border: '1px solid #ffeeba',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
+      }}>
+        <h2 style={{ color: '#856404' }}>Nhắc nhỡ: Công việc sắp đến hạn !, Bạn đã hoàn thành chưa ?</h2>
+        <p>Kính gửi Anh/Chị <strong>${data.employee_details.name}</strong>,</p>
+        <p>
+          Công việc sau đây đang sắp đến hạn hoàn thành 
+        </p>
+
+        <table width="100%" cellPadding="10" style={{ borderCollapse: 'collapse', marginTop: '15px' }}>
+          <tbody>
+            <tr style={{ backgroundColor: '#ffeeba' }}>
+              <td style={{ border: '1px solid #dee2e6', fontWeight: 'bold' }}>Tên công việc</td>
+              <td style={{ border: '1px solid #dee2e6' }}>${data.task_details.name}</td>
+            </tr>
+            <tr>
+              <td style={{ border: '1px solid #dee2e6', fontWeight: 'bold' }}>Ngày bắt đầu</td>
+              <td style={{ border: '1px solid #dee2e6' }}>${formatDate(data.task_details.start_time) }</td>
+            </tr>
+            <tr style={{ backgroundColor: '#ffeeba' }}>
+              <td style={{ border: '1px solid #dee2e6', fontWeight: 'bold' }}>Hạn hoàn thành</td>
+              <td style={{ border: '1px solid #dee2e6', color: '#dc3545', fontWeight: 'bold' }}>${formatDate(data.task_details.end_time) }</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p style={{ marginTop: '20px' }}>
+          Bạn đã hoàn thành công việc chưa ? Nếu chưa hãy bắt tay vào làm hoặc liên hệ với người quản lý để được hỗ trợ.
+        </p>
+
+
+        <p style={{ fontSize: '12px', marginTop: '30px', textAlign: 'center', color: '#6c757d' }}>
+          © 2025 TQT - Mọi quyền được bảo lưu.
+        </p>
+      </div>
+                
+                `,
+                send_at: new Date(new Date(data.task_details.end_time).getTime() - 24 * 60 * 60 * 1000).toISOString(),
+            })
+            sendEmail({
+                recipient: data.employee_details.email,
+                subject: "Thông báo công việc mới",
+                // message: `Thêm ${data.employee_details.name} vào ${data.task_details.name} với vai trò ${data.role === "DOER" ? "thực hiện" : "chịu trách nghiệm"}`,
+                message:
+                    `
+                     <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4;">
+      <tr>
+        <td align="center">
+          <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <!-- Header -->
+            <tr>
+              <td style="padding: 30px; text-align: center; background-color: #4a6fa5; border-radius: 8px 8px 0 0;">
+                <h1 style="margin: 0; color: #ffffff;">THÔNG BÁO PHÂN CÔNG CÔNG VIỆC</h1>
+              </td>
+            </tr>
+
+            <!-- Content -->
+            <tr>
+              <td style="padding: 30px;">
+                <h2 style="margin-top: 0; color: #4a6fa5;">Gửi đến Anh/Chị: ${data.employee_details.name},</h2>
+                <p style="line-height: 1.6;">
+                  Căn cứ vào nhu cầu công việc hiện tại, Ban quản lý đã phân công công việc sau cho Anh/Chị:
+                </p>
+
+                <table width="100%" cellpadding="10" cellspacing="0" style="margin: 20px 0; border: 1px solid #ddd; border-collapse: collapse;">
+                  <tr style="background-color: #f0f0f0;">
+                    <td style="border: 1px solid #ddd; font-weight: bold;">Tên công việc</td>
+                    <td style="border: 1px solid #ddd;">${data.task_details.name}</td>
+                  </tr>
+                  <tr style="background-color: #f0f0f0;">
+                    <td style="border: 1px solid #ddd; font-weight: bold;">Vai trò</td>
+                    <td style="border: 1px solid #ddd;">${data.role === "DOER" ? "thực hiện" : "chịu trách nghiệm"}</td>
+                  </tr>
+                  <tr>
+                    <td style="border: 1px solid #ddd; font-weight: bold;">Mô tả</td>
+                    <td style="border: 1px solid #ddd;">${data.task_details.description}</td>
+                  </tr>
+                  <tr>
+                    <td style="border: 1px solid #ddd; font-weight: bold;">Ngày bắt đầu</td>
+                    <td style="border: 1px solid #ddd;">${formatDate(data.task_details.start_time) }</td>
+                  </tr>
+                  <tr style="background-color: #f0f0f0;">
+                    <td style="border: 1px solid #ddd; font-weight: bold;">Hạn hoàn thành</td>
+                    <td style="border: 1px solid #ddd;">${formatDate(data.task_details.end_time) }</td>
+                  </tr>
+               
+                </table>
+
+                <p style="line-height: 1.6;">
+                  Anh/Chị vui lòng kiểm tra và xác nhận tiếp nhận công việc theo đường dẫn bên dưới:
+                </p>
+
+                <p style="line-height: 1.6;">
+                  Mọi thắc mắc về công việc được phân công, vui lòng liên hệ trực tiếp với người giao việc hoặc qua email này.
+                </p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td style="padding: 20px; text-align: center; background-color: #f0f0f0; border-radius: 0 0 8px 8px; font-size: 12px; color: #666;">
+                <p style="margin: 0;">© 2023 TQT. Mọi quyền được bảo lưu.</p>
+                <p style="margin: 10px 0 0;">
+                  <a href="#" style="color: #4a6fa5; text-decoration: none; margin: 0 10px;">Trang chủ</a>
+                  <a href="#" style="color: #4a6fa5; text-decoration: none; margin: 0 10px;">Quy định</a>
+                  <a href="#" style="color: #4a6fa5; text-decoration: none; margin: 0 10px;">Liên hệ</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+                `,
+                send_at: null
             });
         },
     });
@@ -307,33 +443,7 @@ const TaskDepartment = () => {
         return taskData;
     }
 
-    // const setDataTask = (task, part) => {
-    //     const taskData = {
-    //         ...task,
-    //         project_part: part,
-    //         priority: task.priority === 0 ? "Thấp" : task.priority === 1 ? "Trung Bình" : "Cao",
-    //         key: "task" + task.id,
-    //         created_at: formatDate(task.created_at),
-    //         end_time: formatDate(task.end_time),
-    //         isCreateTask: employeeContext.position !== "NV" && task.responsible_person.id === auth.id,
-    //         isDoers: task.doers.some(doer => doer.id === auth.id)
-    //     };
 
-    //     // Nếu task có subtasks, xử lý đệ quy và lọc các subtasks hợp lệ
-    //     if (task.subtasks && task.subtasks.length > 0) {
-    //         const filteredSubtasks = task.subtasks
-    //             .map(sub => setDataTask(sub, part)) // Gọi đệ quy
-    //             .filter(sub => sub.isCreateTask || sub.isDoers || (sub.subtasks && sub.subtasks.length > 0)); // Lọc task hợp lệ hoặc có subtasks hợp lệ
-
-    //         if (filteredSubtasks.length > 0) {
-    //             taskData.subtasks = filteredSubtasks;
-    //         }
-    //     }else{
-    //         delete taskData.subtasks;
-    //     }
-
-    //     return taskData;
-    // };
 
 
     const priorityOrder = {
@@ -748,21 +858,23 @@ const TaskDepartment = () => {
                         )
                     }
                     {
-                        (record.isRes || employeeContext.position === "TP") && (
+                        (record.isDoers || employeeContext.position === "TP") && (
 
-                            <Button shape="circle" size="medium" color="gold" variant="solid" onClick={() => showDrawerCheckList(record)} ><File size={18} /></Button>
-
-                        )
-                    }
-
-                    {
-                        (record.isDoers) && (
                             <>
                                 <Button shape="circle" size="medium" color="cyan" variant="solid" onClick={() => showDrawer(record)}><MessageCircleMore size={18} /></Button>
                                 <Button shape="circle" size="medium" color="volcano" variant="solid" onClick={() => showHistoryModal(record)}><History size={18} /></Button>
                             </>
                         )
                     }
+
+                    {/* {
+                        (record.isDoers) && (
+                            <>
+                                <Button shape="circle" size="medium" color="cyan" variant="solid" onClick={() => showDrawer(record)}><MessageCircleMore size={18} /></Button>
+                                <Button shape="circle" size="medium" color="volcano" variant="solid" onClick={() => showHistoryModal(record)}><History size={18} /></Button>
+                            </>
+                        )
+                    } */}
 
                 </Space>
             ),
@@ -975,7 +1087,8 @@ const TaskDepartment = () => {
             locale={{
                 triggerDesc: "Sắp xếp giảm dần",
                 triggerAsc: "Sắp xếp tăng dần",
-                cancelSort: "Hủy sắp xếp"
+                cancelSort: "Hủy sắp xếp",
+
             }}
             loading={addLoading && addTaskAssLoading && addPatchtaskAssLoading}
 
@@ -1243,62 +1356,70 @@ const TaskDepartment = () => {
         }
     };
 
+    // hàm tìm file
+    function findFilesInDoers(task) {
+        // Nếu task không có subtasks, lấy file từ doers của task hiện tại
+        if (!task.subtasks || task.subtasks.length === 0) {
+            return task.doers?.flatMap(doer => doer.files || []) || [];
+        }
+
+        // Nếu có subtasks, lấy file từ doers của subtasks (đệ quy)
+        return task.subtasks.flatMap(subtask => findFilesInDoers(subtask));
+    }
+
+
     const showChildrenDrawer = (record) => {
-        let allFiles = [];
-        console.log("showChildrenDrawer record", record)
-        // console.log("showChildrenDrawer file",record.doers.flatMap(doer => doer.files || []))
-        if ('subtasks' in record && Array.isArray(record.subtasks) && record.subtasks.length > 0) {
-            console.log("Có subtasks và có phần tử");
-            record.subtasks.forEach(subtask => {
-                if ('doers' in subtask && Array.isArray(subtask.doers)) {
-                    subtask.doers.forEach(doer => {
-                        if ('files' in doer && Array.isArray(doer.files)) {
-                            allFiles.push(...doer.files);
-                        }
-                    });
-                }
-            });
-            console.log("allFiles", allFiles)
+
+        const allFiles = findFilesInDoers(record)
+        if (allFiles.length > 0) {
             setDoerSelected({
                 name: record.name,
                 files: allFiles
             });
+        } else {
+            setDoerSelected(record)
         }
+        console.log("showChildrenDrawer record", record)
+        console.log("  findFilesInDoers(record)", findFilesInDoers(record))
+
+        // let allFiles = [];
         // if ('subtasks' in record && Array.isArray(record.subtasks) && record.subtasks.length > 0) {
         //     console.log("Có subtasks và có phần tử");
-
         //     record.subtasks.forEach(subtask => {
-        //       if ('doers' in subtask && Array.isArray(subtask.doers)) {
-        //         const files = subtask.doers.flatMap(doer => doer.files || []);
+        //         if ('doers' in subtask && Array.isArray(subtask.doers)) {
+        //             subtask.doers.forEach(doer => {
+        //                 if ('files' in doer && Array.isArray(doer.files)) {
+        //                     allFiles.push(...doer.files);
+        //                 }
+        //             });
+        //         }
+        //     });
+        //     console.log("allFiles", allFiles)
+        //     setDoerSelected({
+        //         name: record.name,
+        //         files: allFiles
+        //     });
+        // }
+        // else if ('doers' in record && Array.isArray(record.doers) && record.doers.length > 0) {
+        //     console.log("Có doers và có phần tử");
+        //     // console.log("showChildrenDrawer file doers",record.doers.flatMap(doer => doer.files || []))
+        //     const files = record.doers.flatMap(doer => doer.files || []);
 
-        //         allFiles.push({
-        //           name: subtask.name,  // Lấy tên của subtask
-        //           files: files        // Lấy tất cả files của doers trong subtask này
-        //         });
-        //       }
+        //     allFiles.push({
+        //         name: record.name,
+        //         files: files
         //     });
 
-        //     console.log("Kết quả", allFiles);
-        //   }
-        else if ('doers' in record && Array.isArray(record.doers) && record.doers.length > 0) {
-            console.log("Có doers và có phần tử");
-            // console.log("showChildrenDrawer file doers",record.doers.flatMap(doer => doer.files || []))
-            const files = record.doers.flatMap(doer => doer.files || []);
+        //     console.log("allFiles", allFiles)
+        //     setDoerSelected({
+        //         name: record.name,
+        //         files: files
+        //     });
+        // } else {
+        //     console.log("Không có subtasks hoặc doers");
+        //     setDoerSelected(record);
+        // }
 
-            allFiles.push({
-                name: record.name,
-                files: files
-            });
-
-            console.log("allFiles", allFiles)
-            setDoerSelected({
-                name: record.name,
-                files: files
-            });
-        } else {
-            console.log("Không có subtasks hoặc doers");
-            setDoerSelected(record);
-        }
 
         setChildrenDrawer(true);
     };
@@ -1339,7 +1460,9 @@ const TaskDepartment = () => {
                     locale={{
                         triggerDesc: "Sắp xếp giảm dần",
                         triggerAsc: "Sắp xếp tăng dần",
-                        cancelSort: "Hủy sắp xếp"
+                        cancelSort: "Hủy sắp xếp",
+                        emptyText:
+                            <EmptyTemplate title={'Bạn không có phần dự án nào được giao !'} />
                     }}
 
                     loading={isLoading}
