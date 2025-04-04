@@ -15,6 +15,7 @@ import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/re
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 import { useRef } from "react";
+import useWebSocket from "../../Services/useWebSocket";
 const Employee = () => {
     const [current, setCurrent] = useState(1);
     const [total, setTotal] = useState(16);
@@ -32,11 +33,15 @@ const Employee = () => {
 
     const [roleEmployee, setRoleEmployee] = useState(null);
 
+    //test socket
     const previousManagerRef = useRef({});
 
     const navigate = useNavigate();
 
     const { features } = useAuth();
+
+    const employeeUpdate = useWebSocket("ws://127.0.0.1:8000/ws/employees/");
+
     useEffect(() => {
         if (features) {
             const featureEmployee = features.find((item) => item.feature.name === "Quản lý nhân viên");
@@ -93,6 +98,11 @@ const Employee = () => {
         queryKey: ["employees"],
         queryFn: employeeGetAPI,
     });
+    useEffect(() => {
+        if (employeeUpdate) {
+            queryClient.invalidateQueries(["employees"]);
+        }
+    }, [employeeUpdate, queryClient]);
     //lấy ds phòng ban
     const { data: departments } = useQuery({
         queryKey: ["departments"],
@@ -322,7 +332,7 @@ const Employee = () => {
                 <Search size={20} />
                 <Table
                     columns={columns}
-                    dataSource={data}
+                    dataSource={data || []}
                     pagination={{ total, defaultCurrent: current, pageSize: 10 }}
                 />
             </div>

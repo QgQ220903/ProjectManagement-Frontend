@@ -26,6 +26,7 @@ export const departmentGetAPI = async () => {
 
 export const departmentPostAPI = async (obj) => {
     try {
+        console.log("posy", obj);
         const response = await axios.post(api, obj);
         console.log(response.data);
         return response.data;
@@ -54,9 +55,10 @@ export const employeeGetAPI = async () => {
     }
 };
 
-export const departmentPutAPI = async (id, obj) => {
+export const departmentPutAPI = async (data) => {
     try {
-        const response = await axios.put(api + id + "/", obj);
+        // console.log("id,payload", id, obj);
+        const response = await axios.put(api + data.id + "/", data.obj);
         console.log("Updated Department:", response.data);
         return response.data;
     } catch (error) {
