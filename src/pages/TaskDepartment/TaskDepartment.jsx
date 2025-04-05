@@ -27,8 +27,6 @@ import { departmentTaskPost } from "@/Services/DepartmentTaskService";
 
 import { sendEmail } from "@/Services/EmailService."
 
-import { sendEmail } from "@/Services/EmailService."
-
 import { formatDate, getRandomColor } from "@/utils/cn";
 import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History, File, Pen, ArrowLeftRight, FileCheck2 } from "lucide-react";
 import ButtonIcon from "@/components/ButtonIcon";
@@ -133,6 +131,8 @@ const TaskDepartment = () => {
                 ...doer,
             })),
         );
+
+        console.log("show file check list", doersData);
         setOpenDrawerCheckList(true);
     };
 
@@ -992,7 +992,9 @@ const TaskDepartment = () => {
                         onChange={(checked) => onChangeCheckBox(checked, record)}
                         checkedChildren={<CheckOutlined />}
                         unCheckedChildren={<CloseOutlined />}
-                        defaultChecked={record.isDone}
+                        // checked={record.isDone}
+                        // checked={record.isDone}
+                        defaultValue={record.isDone}
                     />
                 </Space>
             ),
