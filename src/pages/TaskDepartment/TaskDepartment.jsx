@@ -138,10 +138,15 @@ const TaskDepartment = () => {
 
     const onClose = () => {
         setOpen(false);
+      
     };
 
     const onCloseDrawerCheckList = () => {
+        console.log("onCloseDrawerCheckList");
+        // set
         setOpenDrawerCheckList(false);
+        setDoersData([])
+     
     };
 
     const [isModalHistoryOpen, setIsModalHistoryOpen] = useState(false);
@@ -658,7 +663,7 @@ const TaskDepartment = () => {
             width: "20%",
             render: (text, record) => (
                 <>
-                    <a onClick={() => showDrawer(record)}>{text}</a>
+                    <a >{text}</a>
                     <Progress percent={record.completion_percentage} />
                 </>
             ),
@@ -888,8 +893,12 @@ const TaskDepartment = () => {
                         (record.isDoers || employeeContext.position === "TP") && (
 
                             <>
-                                <Button shape="circle" size="medium" color="cyan" variant="solid" onClick={() => showDrawer(record)}><MessageCircleMore size={18} /></Button>
-                                <Button shape="circle" size="medium" color="volcano" variant="solid" onClick={() => showHistoryModal(record)}><History size={18} /></Button>
+                                <Button shape="circle" size="medium" color="cyan" variant="solid" onClick={() => showDrawer(record)}>
+                                    <MessageCircleMore size={18} />
+                                </Button>
+                                <Button shape="circle" size="medium" color="volcano" variant="solid" onClick={() => showHistoryModal(record)}>
+                                    <History size={18} />
+                                </Button>
                             </>
                         )
                     }
