@@ -1,10 +1,29 @@
 import React, { Children, useEffect, useState } from "react";
-import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import { Table, Tooltip, Badge, Popconfirm, Space, Input, Form, Select, DatePicker, Tag, Progress, Button, Avatar, Drawer, Col, Row, Switch, Flex, message } from "antd";
-import Search from '@/components/Search';
-import PageHeader from '@/components/PageHeader';
-import { Link, useParams } from 'react-router-dom';
-
+import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import {
+    Table,
+    Tooltip,
+    Badge,
+    Popconfirm,
+    Space,
+    Input,
+    Form,
+    Select,
+    DatePicker,
+    Tag,
+    Progress,
+    Button,
+    Avatar,
+    Drawer,
+    Col,
+    Row,
+    Switch,
+    Flex,
+    message,
+} from "antd";
+import Search from "@/components/Search";
+import PageHeader from "@/components/PageHeader";
+import { Link, useParams } from "react-router-dom";
 
 import { CalendarSchedule } from "@/components/CalendarSchedule";
 
@@ -25,7 +44,7 @@ import { taskPost } from "@/Services/TaskService";
 import { taskAssignmentsPost, taskAssignmentsPatch } from "@/Services/TaskAssignmentsService";
 import { departmentTaskPost } from "@/Services/DepartmentTaskService";
 
-import { sendEmail } from "@/Services/EmailService."
+import { sendEmail } from "@/Services/EmailService.";
 
 import { formatDate, getRandomColor } from "@/utils/cn";
 import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History, File, Pen, ArrowLeftRight, FileCheck2 } from "lucide-react";
@@ -34,8 +53,8 @@ import ButtonIcon from "@/components/ButtonIcon";
 import ModalProjectPart from "@/components/modal/Modal";
 import ModalProjectTask from "@/components/modal/Modal";
 
-import FormProjectPart from '@/components/form/Form'
-import FormProjectTask from '@/components/form/Form'
+import FormProjectPart from "@/components/form/Form";
+import FormProjectTask from "@/components/form/Form";
 import { Chat, HeaderChat } from "@/components/chatRoom/Chat";
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -88,6 +107,7 @@ const { TextArea } = Input;
 const TaskDepartment = () => {
     const taskSocket = useWebSocket("ws://127.0.0.1:8000/ws/tasks/");
     const task_List = useWebSocket("ws://127.0.0.1:8000/ws/task_assignments/");
+    const file_list = useWebSocket("ws://127.0.0.1:8000/ws/file-detail/");
     // const { id } = useParams();
     const { auth, employeeContext } = useAuth();
 
@@ -138,15 +158,13 @@ const TaskDepartment = () => {
 
     const onClose = () => {
         setOpen(false);
-      
     };
 
     const onCloseDrawerCheckList = () => {
         console.log("onCloseDrawerCheckList");
         // set
         setOpenDrawerCheckList(false);
-        setDoersData([])
-     
+        setDoersData([]);
     };
 
     const [isModalHistoryOpen, setIsModalHistoryOpen] = useState(false);
@@ -192,15 +210,12 @@ const TaskDepartment = () => {
     });
 
     useEffect(() => {
-      
         console.log("test1");
         console.log("tsssss", task_List);
         console.log("tasksocket", taskSocket);
+        console.log("filesocket", file_list);
         queryClient.invalidateQueries(["taskDepartment"]);
-    
-    }, [task_List, taskSocket, queryClient]);
-
-  
+    }, [task_List, taskSocket, queryClient, file_list]);
 
     // Thêm 1 công việc vào dự án
     const { mutateAsync: mutateTask, isLoading: addLoading } = useMutation({
@@ -215,7 +230,6 @@ const TaskDepartment = () => {
                 updated_date: data.created_at,
                 content: "Tạo công việc mới",
             });
-
         },
     });
 
@@ -276,11 +290,11 @@ const TaskDepartment = () => {
             </tr>
             <tr>
               <td style={{ border: '1px solid #dee2e6', fontWeight: 'bold' }}>Ngày bắt đầu</td>
-              <td style={{ border: '1px solid #dee2e6' }}>${formatDate(data.task_details.start_time) }</td>
+              <td style={{ border: '1px solid #dee2e6' }}>${formatDate(data.task_details.start_time)}</td>
             </tr>
             <tr style={{ backgroundColor: '#ffeeba' }}>
               <td style={{ border: '1px solid #dee2e6', fontWeight: 'bold' }}>Hạn hoàn thành</td>
-              <td style={{ border: '1px solid #dee2e6', color: '#dc3545', fontWeight: 'bold' }}>${formatDate(data.task_details.end_time) }</td>
+              <td style={{ border: '1px solid #dee2e6', color: '#dc3545', fontWeight: 'bold' }}>${formatDate(data.task_details.end_time)}</td>
             </tr>
           </tbody>
         </table>
@@ -297,13 +311,12 @@ const TaskDepartment = () => {
                 
                 `,
                 send_at: new Date(new Date(data.task_details.end_time).getTime() - 24 * 60 * 60 * 1000).toISOString(),
-            })
+            });
             sendEmail({
                 recipient: data.employee_details.email,
                 subject: "Thông báo công việc mới",
                 // message: `Thêm ${data.employee_details.name} vào ${data.task_details.name} với vai trò ${data.role === "DOER" ? "thực hiện" : "chịu trách nghiệm"}`,
-                message:
-                    `
+                message: `
                      <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333;">
     <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4;">
       <tr>
@@ -339,11 +352,11 @@ const TaskDepartment = () => {
                   </tr>
                   <tr>
                     <td style="border: 1px solid #ddd; font-weight: bold;">Ngày bắt đầu</td>
-                    <td style="border: 1px solid #ddd;">${formatDate(data.task_details.start_time) }</td>
+                    <td style="border: 1px solid #ddd;">${formatDate(data.task_details.start_time)}</td>
                   </tr>
                   <tr style="background-color: #f0f0f0;">
                     <td style="border: 1px solid #ddd; font-weight: bold;">Hạn hoàn thành</td>
-                    <td style="border: 1px solid #ddd;">${formatDate(data.task_details.end_time) }</td>
+                    <td style="border: 1px solid #ddd;">${formatDate(data.task_details.end_time)}</td>
                   </tr>
                
                 </table>
@@ -375,7 +388,7 @@ const TaskDepartment = () => {
     </table>
   </body>
                 `,
-                send_at: null
+                send_at: null,
             });
         },
     });
@@ -446,9 +459,6 @@ const TaskDepartment = () => {
         return taskData;
     };
 
-
-
-
     const priorityOrder = {
         Thấp: 1,
         "Trung Bình": 2,
@@ -486,8 +496,6 @@ const TaskDepartment = () => {
             formTask.setFieldsValue(projectPartSelect);
         }
     }, [formTask, projectPartSelect]);
-
-  
 
     // Cấu hình cột PARTS
     const partColumns = [
@@ -663,7 +671,7 @@ const TaskDepartment = () => {
             width: "20%",
             render: (text, record) => (
                 <>
-                    <a >{text}</a>
+                    <a>{text}</a>
                     <Progress percent={record.completion_percentage} />
                 </>
             ),
@@ -885,23 +893,38 @@ const TaskDepartment = () => {
                                 <Pen size={18} />
                             </Button>
 
-                                <Button shape="circle" size="medium" color="lime" variant="solid" ><ArrowLeftRight size={18} /></Button>
-                            </>
-                        )
-                    }
-                    {
-                        (record.isDoers || employeeContext.position === "TP") && (
-
-                            <>
-                                <Button shape="circle" size="medium" color="cyan" variant="solid" onClick={() => showDrawer(record)}>
-                                    <MessageCircleMore size={18} />
-                                </Button>
-                                <Button shape="circle" size="medium" color="volcano" variant="solid" onClick={() => showHistoryModal(record)}>
-                                    <History size={18} />
-                                </Button>
-                            </>
-                        )
-                    }
+                            <Button
+                                shape="circle"
+                                size="medium"
+                                color="lime"
+                                variant="solid"
+                            >
+                                <ArrowLeftRight size={18} />
+                            </Button>
+                        </>
+                    )}
+                    {(record.isDoers || employeeContext.position === "TP") && (
+                        <>
+                            <Button
+                                shape="circle"
+                                size="medium"
+                                color="cyan"
+                                variant="solid"
+                                onClick={() => showDrawer(record)}
+                            >
+                                <MessageCircleMore size={18} />
+                            </Button>
+                            <Button
+                                shape="circle"
+                                size="medium"
+                                color="volcano"
+                                variant="solid"
+                                onClick={() => showHistoryModal(record)}
+                            >
+                                <History size={18} />
+                            </Button>
+                        </>
+                    )}
 
                     {/* {
                         (record.isDoers) && (
@@ -911,7 +934,6 @@ const TaskDepartment = () => {
                             </>
                         )
                     } */}
-
                 </Space>
             ),
         },
@@ -1110,7 +1132,22 @@ const TaskDepartment = () => {
             ),
         },
     ];
-
+    useEffect(() => {
+        if (file_list) {
+            console.log(1);
+            if (doerSelected?.id_assignment) {
+                console.log(2);
+                if (doerSelected.id_assignment === file_list.file_detail.task_assignment.id) {
+                    setDoerSelected((prev) => ({
+                        ...prev,
+                        files: [...(prev.files || []), file_list.file_detail.file],
+                    }));
+                    console.log(3);
+                    console.log("file push", doerSelected.files);
+                }
+            }
+        }
+    }, [file_list]);
     const expandedRowRender = (part) => (
         <Table
             columns={taskColumns}
@@ -1125,7 +1162,6 @@ const TaskDepartment = () => {
                 triggerDesc: "Sắp xếp giảm dần",
                 triggerAsc: "Sắp xếp tăng dần",
                 cancelSort: "Hủy sắp xếp",
-
             }}
             loading={addLoading && addTaskAssLoading && addPatchtaskAssLoading}
             pagination={false}
@@ -1374,7 +1410,6 @@ const TaskDepartment = () => {
                 );
             }
 
-
             setIsModalTaskOpen(false);
         } catch (error) {
             console.error("Validation Failed:", error);
@@ -1385,29 +1420,25 @@ const TaskDepartment = () => {
     function findFilesInDoers(task) {
         // Nếu task không có subtasks, lấy file từ doers của task hiện tại
         if (!task.subtasks || task.subtasks.length === 0) {
-            return task.doers?.flatMap(doer => doer.files || []) || [];
+            return task.doers?.flatMap((doer) => doer.files || []) || [];
         }
 
         // Nếu có subtasks, lấy file từ doers của subtasks (đệ quy)
-        return task.subtasks.flatMap(subtask => findFilesInDoers(subtask));
+        return task.subtasks.flatMap((subtask) => findFilesInDoers(subtask));
     }
 
-
     const showChildrenDrawer = (record) => {
-
-        const allFiles = findFilesInDoers(record)
+        const allFiles = findFilesInDoers(record);
         if (allFiles.length > 0) {
             setDoerSelected({
                 name: record.name,
                 files: allFiles,
             });
         } else {
-            setDoerSelected(record)
+            setDoerSelected(record);
         }
-        console.log("showChildrenDrawer record", record)
-        console.log("  findFilesInDoers(record)", findFilesInDoers(record))
-
-     
+        console.log("showChildrenDrawer record", record);
+        console.log("  findFilesInDoers(record)", findFilesInDoers(record));
 
         //     console.log("allFiles", allFiles)
         //     setDoerSelected({
@@ -1418,7 +1449,6 @@ const TaskDepartment = () => {
         //     console.log("Không có subtasks hoặc doers");
         //     setDoerSelected(record);
         // }
-
 
         setChildrenDrawer(true);
     };
@@ -1456,8 +1486,7 @@ const TaskDepartment = () => {
                         triggerDesc: "Sắp xếp giảm dần",
                         triggerAsc: "Sắp xếp tăng dần",
                         cancelSort: "Hủy sắp xếp",
-                        emptyText:
-                            <EmptyTemplate title={'Bạn không có phần dự án nào được giao !'} />
+                        emptyText: <EmptyTemplate title={"Bạn không có phần dự án nào được giao !"} />,
                     }}
                     loading={isLoading}
                 />
@@ -1529,7 +1558,10 @@ const TaskDepartment = () => {
                 >
                     {console.log("doerSelected", doerSelected)}
 
-                    <Flex gap={"middle"}>
+                    <Flex
+                        gap={"middle"}
+                        wrap
+                    >
                         {doerSelected.files &&
                             doerSelected.files.map((file, index) => (
                                 <div
