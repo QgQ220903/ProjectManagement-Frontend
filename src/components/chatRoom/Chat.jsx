@@ -37,26 +37,29 @@ export const Chat = ({ user, roomName, }) => {
     const [file, setFile] = useState(null);
 
     useEffect(() => {
-        const ws = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${roomName}/`);
-        setSocket(ws);
-
-        axios
-            .get(`http://127.0.0.1:8000/chat-history/${roomName}/`)
-            .then((response) => setChats(response.data))
-            .catch((error) => console.error("Error fetching chat history:", error));
-
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            console.log("onmessage", JSON.parse(event.data));
-            setChats((prev) => [
-                ...prev,
-                { sender: data.sender, chat: data.message, file: data.file, name: data.name },
-            ]);
-        };
-
-        return () => {
-            ws.close();
-        };
+        if(roomName){
+            const ws = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${roomName}/`);
+            setSocket(ws);
+    
+            axios
+                .get(`http://127.0.0.1:8000/chat-history/${roomName}/`)
+                .then((response) => setChats(response.data))
+                .catch((error) => console.error("Error fetching chat history:", error));
+    
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log("onmessage", JSON.parse(event.data));
+                setChats((prev) => [
+                    ...prev,
+                    { sender: data.sender, chat: data.message, file: data.file, name: data.name },
+                ]);
+            };
+    
+            return () => {
+                ws.close();
+            };
+        }
+      
     }, [roomName]);
 
     const sendChat = () => {
@@ -333,19 +336,19 @@ export const HeaderChat = ({ data, onClose }) => {
                     <>
                         <div className='ml-5'>
                             <div>
-                                <Title level={4}>{data.name}</Title>
+                                <Title level={4}>{data?.name}</Title>
 
                                 <Flex justify={"space-between"} >
                                     <span className='ml-3 font-light'>Người chịu trách nhiệm :
                                         {
                                             <Tag color="green" className='ml-2'>
-                                                <p className='font-medium'>{data.responsible_person.name}</p>
+                                                <p className='font-medium'>{data?.responsible_person?.name}</p>
                                             </Tag>
                                         }
 
                                     </span>
                                     <div>
-                                        <Tag color='red'>End Task: {data.end_time}</Tag>
+                                        <Tag color='red'>End Task: {data?.end_time}</Tag>
                                     </div>
                                 </Flex>
                             </div>
@@ -354,12 +357,12 @@ export const HeaderChat = ({ data, onClose }) => {
 
                         <div className='ml-5 mt-5'>
                             <Title level={5}>Mô tả:</Title>
-                            <TextArea rows={3} value={data.description} readOnly />
+                            <TextArea rows={3} value={data?.description} readOnly />
                         </div>
 
                         <div className='ml-5 mt-5'>
                             <Title level={5}>Thành viên:</Title>
-                            {data.doers.map((item, index) => (
+                            {data?.doers?.map((item, index) => (
                                 <Tag key={item.id} color={`${item.files.length !== 0 ? "green" : "red"}`} className=''>
                                     <p className='font-medium'>{item.name}</p>
                                 </Tag>))

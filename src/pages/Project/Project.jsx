@@ -206,12 +206,10 @@ const Project = () => {
             dataIndex: "name",
             key: "name",
             render: (text, record) => (
-                <a
-                    onClick={() => handleShowData(record)}
-                    className="text-blue-600"
-                >
+
+                <Link to={"/project/" + record.key} className="text-blue-600">
                     {text}
-                </a>
+                </Link>
             ),
             filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
                 <div style={{ padding: 8 }}>
@@ -482,10 +480,10 @@ const Project = () => {
                 ></FormProject>
             </ModalProject>
 
-      {/* <ToastContainer /> */}
+            {/* <ToastContainer /> */}
 
-    </>
-  )
+        </>
+    )
 }
 
 export default Project;
