@@ -109,7 +109,7 @@ const Task = () => {
     const { mutate: addFileAssignment, isLoading: isAdding } = useMutation({
         mutationFn: fileAssignmentPostAPI,
         onSuccess: () => {
-            //   queryClient.invalidateQueries(["projects"]); // Fetch lại danh sách mà không cần current
+            queryClient.invalidateQueries(["tasks"]); // Fetch lại danh sách mà không cần current
             showToastMessage('Lưu file thành công !', 'success', 'top-right')
             setFileList([]);
             setIsModalOpen(false);
