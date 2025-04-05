@@ -100,6 +100,7 @@ const Employee = () => {
     });
     useEffect(() => {
         if (employeeUpdate) {
+            console.log("test12");
             queryClient.invalidateQueries(["employees"]);
         }
     }, [employeeUpdate, queryClient]);

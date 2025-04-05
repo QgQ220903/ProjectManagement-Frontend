@@ -1017,10 +1017,10 @@ const ProjectDetail = () => {
                 <Chat></Chat>
             </Drawer>
 
-            <ShowHistory
+            {/* <ShowHistory
                 isModalOpen={isModalHistoryOpen}
                 setIsModalOpen={setIsModalHistoryOpen}
-            ></ShowHistory>
+            ></ShowHistory> */}
 
             <ToastContainer />
         </>

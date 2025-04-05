@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from "react";
 // import ModalAccount from "@/components/modal/Modal";
 import ModalUpload from "@/components/modal/Modal";
 import FormAccount from "@/components/form/Form";
@@ -6,78 +6,68 @@ import PageHeader from "@/components/PageHeader";
 import ButtonIcon from "@/components/ButtonIcon";
 import { Table, Tooltip, Badge, Popconfirm, Space, Input, Select, DatePicker, Tag, Progress, Avatar, Drawer, Col, Row, Switch } from "antd";
 
-import {Link} from 'react-router-dom'
-import { showToastMessage } from '@/utils/toast'
+import { Link } from "react-router-dom";
+import { showToastMessage } from "@/utils/toast";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import Search from "@/components/Search";
 
-import { CalendarSchedule } from "@/components/CalendarSchedule"
+import { CalendarSchedule } from "@/components/CalendarSchedule";
 
-import { UploadOutlined, SearchOutlined, InboxOutlined } from '@ant-design/icons';
+import { UploadOutlined, SearchOutlined, InboxOutlined } from "@ant-design/icons";
 
-import { Button, message, Upload } from 'antd';
-import { taskGetWithId } from '@/services/TaskService';
+import { Button, message, Upload } from "antd";
+import { taskGetWithId } from "@/services/TaskService";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
-import { formatDate, getRandomColor } from '@/utils/cn';
+import { formatDate, getRandomColor } from "@/utils/cn";
 import TitleTooltip from "@/components/tooltip/TitleTooltip";
-import FileUpload from './test';
-import {fileAssignmentPostAPI} from '@/services/FileService';
+import FileUpload from "./test";
+import { fileAssignmentPostAPI } from "@/services/FileService";
 
-
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast } from "react-toastify";
+import useWebSocket from "../../Services/useWebSocket";
 
 const { Dragger } = Upload;
 
 const getAccessToken = () => localStorage.getItem("access");
 
-const itemsBreadcrumb = [
-    { title: <Link to='/'>Home</Link> },
-    { title: 'Công việc' },
-];
-
+const itemsBreadcrumb = [{ title: <Link to="/">Home</Link> }, { title: "Công việc" }];
 
 const Task = () => {
-
+    const taskSocket = useWebSocket("ws://127.0.0.1:8000/ws/tasks/");
     const [fileList, setFileList] = useState([]);
 
-    
-const props = {
-    name: 'link',
-    action: 'http://localhost:8000/api/files/',
-    data: (file) => ({
-        name: file.name,  // Gửi tên file
-    }),
-    fileList: fileList,
-    multiple: true,
-    onChange(info) {
-        let newFileList = [...info.fileList];
-  
-      if (info.file.status === 'done') {
-        message.success(`${info.file.name} tải file lên thành công!.`);
-        // newFileList = newFileList.filter(file => file.status !== 'done'); // Xóa file đã upload xong
+    const props = {
+        name: "link",
+        action: "http://localhost:8000/api/files/",
+        data: (file) => ({
+            name: file.name, // Gửi tên file
+        }),
+        fileList: fileList,
+        multiple: true,
+        onChange(info) {
+            let newFileList = [...info.fileList];
 
-      } else if (info.file.status === 'error') {
-        message.error(`${info.file.name} file upload failed.`);
-      }
-  
-      setFileList(newFileList);
-    
-      },
-      onDrop(e) {
-        console.log('Dropped files', e.dataTransfer.files);
-      },
-   
-  
+            if (info.file.status === "done") {
+                message.success(`${info.file.name} tải file lên thành công!.`);
+                // newFileList = newFileList.filter(file => file.status !== 'done'); // Xóa file đã upload xong
+            } else if (info.file.status === "error") {
+                message.error(`${info.file.name} file upload failed.`);
+            }
 
-};
+            setFileList(newFileList);
+        },
+        onDrop(e) {
+            console.log("Dropped files", e.dataTransfer.files);
+        },
+    };
     const { auth, employeeContext } = useAuth();
 
     const queryClient = useQueryClient();
 
-    const [current, setCurrent] = useState(1)
+    const [current, setCurrent] = useState(1);
 
-    const [total, setTotal] = useState(0)
+    const [total, setTotal] = useState(0);
 
     const [taskData, setTaskData] = useState([]);
 
@@ -91,28 +81,30 @@ const props = {
         queryFn: () => taskGetWithId(employeeContext?.id), // Để React Query tự gọi API khi cần
         enabled: !!employeeContext?.id, // Chỉ chạy khi id có giá trị hợp lệ
     });
-
+    useEffect(() => {
+        if (taskSocket) {
+            console.log("test1");
+            queryClient.invalidateQueries(["tasks"]);
+        }
+    }, [taskSocket, queryClient]);
     const { mutate: addFileAssignment, isLoading: isAdding } = useMutation({
         mutationFn: fileAssignmentPostAPI,
         onSuccess: () => {
-        //   queryClient.invalidateQueries(["projects"]); // Fetch lại danh sách mà không cần current
-          showToastMessage('Lưu file thành công !', 'success', 'top-right')
-          setFileList([]);
-          setIsModalOpen(false);
+            //   queryClient.invalidateQueries(["projects"]); // Fetch lại danh sách mà không cần current
+            showToastMessage("Lưu file thành công !", "success", "top-right");
+            setFileList([]);
+            setIsModalOpen(false);
         },
         onError: (error) => {
-          showToastMessage('Lưu file thất bại !', 'error', 'top-right')
-          console.log(error)
+            showToastMessage("Lưu file thất bại !", "error", "top-right");
+            console.log(error);
         },
-      });
-
-
+    });
 
     useEffect(() => {
-        console.log('employeeContext', employeeContext)
-        console.log('Task', tasks)
+        console.log("employeeContext", employeeContext);
+        console.log("Task", tasks);
         if (tasks && tasks.data) {
-
             const results = tasks.data.map((item) => ({
                 ...item,
                 priority: item.priority === 0 ? "Thấp" : item.priority === 1 ? "Trung Bình" : "Cao",
@@ -122,15 +114,14 @@ const props = {
             }));
             setTaskData(results);
             setTotal(tasks.count);
-            console.log('taskData', taskData)
+            console.log("taskData", taskData);
         }
     }, [tasks]);
 
-
     const priorityOrder = {
-        "Thấp": 1,
+        Thấp: 1,
         "Trung Bình": 2,
-        "Cao": 3
+        Cao: 3,
     };
 
     // filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
@@ -178,7 +169,7 @@ const props = {
                         value={selectedKeys[0]}
                         onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
                         onPressEnter={() => confirm()}
-                        style={{ marginBottom: 8, display: 'block' }}
+                        style={{ marginBottom: 8, display: "block" }}
                     />
                     <Space>
                         <Button
@@ -224,7 +215,6 @@ const props = {
                 return dateA - dateB; // Sắp xếp theo số (timestamp)
             },
             // showSorterTooltip: { title: "Sắp xếp theo ngày" }, // Custom tooltip
-
         },
         // { title: "Mô tả", dataIndex: "description", key: "description" },
         {
@@ -232,38 +222,37 @@ const props = {
             dataIndex: "priority",
             key: "priority",
             width: "10%",
-            render: (text) => (
-                text === "Thấp" ? <Tag color="green">{text}</Tag> :
-                    text === "Trung Bình" ? <Tag color="yellow">{text}</Tag> :
-                        <Tag color="red">{text}</Tag>
-            ),
+            render: (text) =>
+                text === "Thấp" ? (
+                    <Tag color="green">{text}</Tag>
+                ) : text === "Trung Bình" ? (
+                    <Tag color="yellow">{text}</Tag>
+                ) : (
+                    <Tag color="red">{text}</Tag>
+                ),
             sorter: (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority], // Sắp xếp theo số
-
         },
         {
             title: "Chịu trách nhiệm",
             dataIndex: "responsible_person",
             key: "responsible_person",
-            render: (value) => (
-
-
-                value &&
-                (<Avatar.Group>
-
-                    <Tooltip placement="topRight"
-
-
-
-                        title={<TitleTooltip name={value.name} position={value.position} email={value.email}></TitleTooltip>}
-                    >
-                        <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
-                    </Tooltip>
-
-                </Avatar.Group>)
-
-
-            )
-
+            render: (value) =>
+                value && (
+                    <Avatar.Group>
+                        <Tooltip
+                            placement="topRight"
+                            title={
+                                <TitleTooltip
+                                    name={value.name}
+                                    position={value.position}
+                                    email={value.email}
+                                ></TitleTooltip>
+                            }
+                        >
+                            <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
+                        </Tooltip>
+                    </Avatar.Group>
+                ),
         },
         {
             title: "File",
@@ -271,15 +260,17 @@ const props = {
             key: "upload",
             width: "10%",
             render: (_, record) => (
+                <>
+                    <Button
+                        onClick={() => handleOpen(record)}
+                        icon={<UploadOutlined />}
+                    >
+                        Upload
+                    </Button>
 
-            <>
-                    <Button onClick={()=>handleOpen(record)} icon={<UploadOutlined />}>Upload</Button>
-    
                     {/* <FileUpload></FileUpload>  */}
-            </>
-
+                </>
             ),
-
         },
         {
             title: "Chức năng",
@@ -288,56 +279,53 @@ const props = {
             width: "17%",
             render: (_, record) => (
                 <Space size="middle">
-
-                    <ButtonIcon handleEvent={() => handleCreateSubTask(record)}><Plus size={18} /></ButtonIcon>
-
+                    <ButtonIcon handleEvent={() => handleCreateSubTask(record)}>
+                        <Plus size={18} />
+                    </ButtonIcon>
                 </Space>
             ),
-
         },
-
     ];
 
-  
-
-    const onChange = page => {
+    const onChange = (page) => {
         console.log(page);
         setCurrent(page);
     };
 
     const handleOpen = (record) => {
         setTaskSelectData(record);
-        console.log("record", record)
+        console.log("record", record);
         setIsModalOpen(true);
-    }
+    };
 
     const handleUpload = () => {
-        if(taskSelectData){
+        if (taskSelectData) {
             const task_assignment_id = taskSelectData.assignment_id;
 
-            if(fileList) {
-                fileList.map((file)=>{
+            if (fileList) {
+                fileList.map((file) => {
                     addFileAssignment({
                         task_assignment_id: task_assignment_id,
-                        file_id: file.response.id
-                    })
-                })
+                        file_id: file.response.id,
+                    });
+                });
             }
         }
-        console.log("upload",fileList)
-    }
+        console.log("upload", fileList);
+    };
 
     const handleCancel = () => {
         setIsModalOpen(false);
-    }
+    };
 
     return (
         <>
-            <PageHeader title={"Công Việc"} itemsBreadcrumb={itemsBreadcrumb}>
+            <PageHeader
+                title={"Công Việc"}
+                itemsBreadcrumb={itemsBreadcrumb}
+            ></PageHeader>
 
-            </PageHeader>
-
-            <CalendarSchedule ></CalendarSchedule>
+            <CalendarSchedule></CalendarSchedule>
 
             <div className="mt-5">
                 {/* <Space align="center" className='mb-5'>
@@ -365,13 +353,12 @@ const props = {
                         total: total,
                         defaultCurrent: current,
                         pageSize: 5, // Mặc định 10 dòng mỗi trang
-                        onChange: onChange
-
+                        onChange: onChange,
                     }}
                     locale={{
                         triggerDesc: "Sắp xếp giảm dần",
                         triggerAsc: "Sắp xếp tăng dần",
-                        cancelSort: "Hủy sắp xếp"
+                        cancelSort: "Hủy sắp xếp",
                     }}
                 />
             </div>
@@ -382,31 +369,22 @@ const props = {
                 handleOk={handleUpload}
                 handleCancel={handleCancel}
                 title={"Tải file"}
-
             >
-                <Dragger 
-                {...props}
-                
-                
-                >
+                <Dragger {...props}>
                     <p className="ant-upload-drag-icon">
                         <InboxOutlined />
                     </p>
                     <p className="ant-upload-text">Click or drag file to this area to upload</p>
                     <p className="ant-upload-hint">
-                        Support for a single or bulk upload. Strictly prohibited from uploading company data or other
-                        banned files.
+                        Support for a single or bulk upload. Strictly prohibited from uploading company data or other banned files.
                     </p>
                 </Dragger>
                 {/* <FileUpload></FileUpload> */}
-
             </ModalUpload>
 
             <ToastContainer />
-
-
         </>
-    )
-}
+    );
+};
 
-export default Task
+export default Task;
