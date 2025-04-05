@@ -15,21 +15,23 @@ import { Pencil, Trash2, Plus, File } from "lucide-react";
 
 
 
-import { CalendarSchedule } from "@/components/CalendarSchedule"
+import { CalendarSchedule } from "@/components/CalendarSchedule";
 
-import { UploadOutlined, SearchOutlined, InboxOutlined } from '@ant-design/icons';
+import { UploadOutlined, SearchOutlined, InboxOutlined } from "@ant-design/icons";
 
-import { Button, message, Upload } from 'antd';
-import { taskGetWithId } from '@/services/TaskService';
+import { Button, message, Upload } from "antd";
+import { taskGetWithId } from "@/services/TaskService";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
-import { formatDate, getRandomColor } from '@/utils/cn';
+import { formatDate, getRandomColor } from "@/utils/cn";
 import TitleTooltip from "@/components/tooltip/TitleTooltip";
 import FileUpload from './test';
 import { fileAssignmentPostAPI } from '@/services/FileService';
 
 import { FileCard } from "@/components/FileCard"
 
+import { ToastContainer, toast } from "react-toastify";
+import useWebSocket from "../../Services/useWebSocket";
 
 import { ToastContainer, toast } from 'react-toastify';
 
@@ -38,14 +40,10 @@ const { Dragger } = Upload;
 
 const getAccessToken = () => localStorage.getItem("access");
 
-const itemsBreadcrumb = [
-    { title: <Link to='/'>Home</Link> },
-    { title: 'Công việc' },
-];
-
+const itemsBreadcrumb = [{ title: <Link to="/">Home</Link> }, { title: "Công việc" }];
 
 const Task = () => {
-
+    const taskSocket = useWebSocket("ws://127.0.0.1:8000/ws/tasks/");
     const [fileList, setFileList] = useState([]);
 
     const calendarRef = useRef(null);
@@ -105,7 +103,13 @@ const Task = () => {
         queryFn: () => taskGetWithId(employeeContext?.id), // Để React Query tự gọi API khi cần
         enabled: !!employeeContext?.id, // Chỉ chạy khi id có giá trị hợp lệ
     });
-
+    useEffect(() => {
+        if (taskSocket) {
+            console.log("test1");
+            queryClient.invalidateQueries(["tasks"]);
+        }
+    }, [taskSocket, queryClient]);
+    
     const { mutate: addFileAssignment, isLoading: isAdding } = useMutation({
         mutationFn: fileAssignmentPostAPI,
         onSuccess: () => {
@@ -119,6 +123,7 @@ const Task = () => {
             console.log(error)
         },
     });
+   
 
 
 
@@ -133,10 +138,9 @@ const Task = () => {
 
 
     useEffect(() => {
-        console.log('employeeContext', employeeContext)
-        console.log('Task', tasks)
+        console.log("employeeContext", employeeContext);
+        console.log("Task", tasks);
         if (tasks && tasks.data) {
-
             const results = tasks.data.map((item) => ({
                 ...item,
                 priority: item.priority === 0 ? "Thấp" : item.priority === 1 ? "Trung Bình" : "Cao",
@@ -146,13 +150,12 @@ const Task = () => {
             }));
             setTaskData(results);
             setTotal(tasks.count);
-            console.log('taskData', taskData)
+            console.log("taskData", taskData);
         }
     }, [tasks]);
 
-
     const priorityOrder = {
-        "Thấp": 1,
+        Thấp: 1,
         "Trung Bình": 2,
         "Cao": 3
     };
@@ -193,7 +196,7 @@ const Task = () => {
                         value={selectedKeys[0]}
                         onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
                         onPressEnter={() => confirm()}
-                        style={{ marginBottom: 8, display: 'block' }}
+                        style={{ marginBottom: 8, display: "block" }}
                     />
                     <Space>
                         <Button
@@ -239,7 +242,6 @@ const Task = () => {
                 return dateA - dateB; // Sắp xếp theo số (timestamp)
             },
             // showSorterTooltip: { title: "Sắp xếp theo ngày" }, // Custom tooltip
-
         },
         // { title: "Mô tả", dataIndex: "description", key: "description" },
         {
@@ -247,38 +249,37 @@ const Task = () => {
             dataIndex: "priority",
             key: "priority",
             width: "10%",
-            render: (text) => (
-                text === "Thấp" ? <Tag color="green">{text}</Tag> :
-                    text === "Trung Bình" ? <Tag color="yellow">{text}</Tag> :
-                        <Tag color="red">{text}</Tag>
-            ),
+            render: (text) =>
+                text === "Thấp" ? (
+                    <Tag color="green">{text}</Tag>
+                ) : text === "Trung Bình" ? (
+                    <Tag color="yellow">{text}</Tag>
+                ) : (
+                    <Tag color="red">{text}</Tag>
+                ),
             sorter: (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority], // Sắp xếp theo số
-
         },
         {
             title: "Chịu trách nhiệm",
             dataIndex: "responsible_person",
             key: "responsible_person",
-            render: (value) => (
-
-
-                value &&
-                (<Avatar.Group>
-
-                    <Tooltip placement="topRight"
-
-
-
-                        title={<TitleTooltip name={value.name} position={value.position} email={value.email}></TitleTooltip>}
-                    >
-                        <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
-                    </Tooltip>
-
-                </Avatar.Group>)
-
-
-            )
-
+            render: (value) =>
+                value && (
+                    <Avatar.Group>
+                        <Tooltip
+                            placement="topRight"
+                            title={
+                                <TitleTooltip
+                                    name={value.name}
+                                    position={value.position}
+                                    email={value.email}
+                                ></TitleTooltip>
+                            }
+                        >
+                            <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
+                        </Tooltip>
+                    </Avatar.Group>
+                ),
         },
         {
             title: "File",
@@ -294,7 +295,6 @@ const Task = () => {
                 </>
 
             ),
-
         },
         {
             title: "Chức năng",
@@ -309,9 +309,7 @@ const Task = () => {
 
                 </Space>
             ),
-
         },
-
     ];
 
 
@@ -323,11 +321,12 @@ const Task = () => {
 
     const handleOpen = (record) => {
         setTaskSelectData(record);
-        console.log("record", record)
+        console.log("record", record);
         setIsModalOpen(true);
-    }
+    };
 
     const handleUpload = () => {
+        
         if (taskSelectData) {
             const task_assignment_id = taskSelectData.assignment_id;
 
@@ -335,9 +334,9 @@ const Task = () => {
                 fileList.map((file) => {
                     addFileAssignment({
                         task_assignment_id: task_assignment_id,
-                        file_id: file.response.id
-                    })
-                })
+                        file_id: file.response.id,
+                    });
+                });
             }
         }
         console.log("upload", fileList)
@@ -392,8 +391,7 @@ const Task = () => {
                         total: total,
                         defaultCurrent: current,
                         pageSize: 5, // Mặc định 10 dòng mỗi trang
-                        onChange: onChange
-
+                        onChange: onChange,
                     }}
                     locale={{
                         triggerDesc: "Sắp xếp giảm dần",
@@ -411,7 +409,6 @@ const Task = () => {
                 handleOk={handleUpload}
                 handleCancel={handleCancel}
                 title={"Tải file"}
-
             >
                 <Dragger
                     {...props}
@@ -423,12 +420,10 @@ const Task = () => {
                     </p>
                     <p className="ant-upload-text">Click or drag file to this area to upload</p>
                     <p className="ant-upload-hint">
-                        Support for a single or bulk upload. Strictly prohibited from uploading company data or other
-                        banned files.
+                        Support for a single or bulk upload. Strictly prohibited from uploading company data or other banned files.
                     </p>
                 </Dragger>
                 {/* <FileUpload></FileUpload> */}
-
             </ModalUpload>
 
             <Drawer
@@ -449,10 +444,8 @@ const Task = () => {
             </Drawer>
 
             <ToastContainer />
-
-
         </>
-    )
-}
+    );
+};
 
-export default Task
+export default Task;

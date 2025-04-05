@@ -6,7 +6,7 @@ import PageHeader from '@/components/PageHeader';
 import { Link, useParams } from 'react-router-dom';
 
 
-import { CalendarSchedule } from '@/components/CalendarSchedule'
+import { CalendarSchedule } from "@/components/CalendarSchedule";
 
 import { projectPartGetAPI } from "@/Services/ProjectService";
 import { projectPartPostAPI, projectPartGetAPIForIdUser, projectPartGetAPIWithIdDepartment } from "@/Services/ProjectPartService";
@@ -16,9 +16,9 @@ import { employeeGetAllAPI, employeeGetAllAPIWithDepartment } from "@/Services/E
 import EmptyTemplate from "@/components/emptyTemplate/EmptyTemplate";
 
 // Department API
-import { departmentGetAPI } from "@/Services/DepartmentService"
+import { departmentGetAPI } from "@/Services/DepartmentService";
 
-import { workHistoriesPostAPI, workHistoriesGetAPI } from "@/Services/WorkHistoryService"
+import { workHistoriesPostAPI, workHistoriesGetAPI } from "@/Services/WorkHistoryService";
 
 // Task API
 import { taskPost } from "@/Services/TaskService";
@@ -27,12 +27,14 @@ import { departmentTaskPost } from "@/Services/DepartmentTaskService";
 
 import { sendEmail } from "@/Services/EmailService."
 
-import { formatDate, getRandomColor } from '@/utils/cn';
-import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History, File, Pen, ArrowLeftRight, FileCheck2 } from 'lucide-react';
-import ButtonIcon from '@/components/ButtonIcon'
+import { sendEmail } from "@/Services/EmailService."
+
+import { formatDate, getRandomColor } from "@/utils/cn";
+import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History, File, Pen, ArrowLeftRight, FileCheck2 } from "lucide-react";
+import ButtonIcon from "@/components/ButtonIcon";
 // import { FaEye } from "react-icons/fa";
-import ModalProjectPart from '@/components/modal/Modal';
-import ModalProjectTask from '@/components/modal/Modal';
+import ModalProjectPart from "@/components/modal/Modal";
+import ModalProjectTask from "@/components/modal/Modal";
 
 import FormProjectPart from '@/components/form/Form'
 import FormProjectTask from '@/components/form/Form'
@@ -40,7 +42,7 @@ import { Chat, HeaderChat } from "@/components/chatRoom/Chat";
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { FileCard } from "@/components/FileCard"
+import { FileCard } from "@/components/FileCard";
 
 import ShowHistory from "@/components/ShowHistory";
 import { useNavigate } from "react-router-dom";
@@ -49,11 +51,9 @@ import { useAuth } from "@/hooks/use-auth";
 
 import TitleTooltip from "@/components/tooltip/TitleTooltip";
 import { FaRegFileCode } from "react-icons/fa6";
+import useWebSocket from "../../Services/useWebSocket";
 
-const itemsBreadcrumb = [
-    { title: <Link to='/'>Home</Link> },
-    { title: 'Công việc phòng ban' },
-];
+const itemsBreadcrumb = [{ title: <Link to="/">Home</Link> }, { title: "Công việc phòng ban" }];
 
 // tùy chỉnh form kích thước input
 const formItemLayout = {
@@ -65,20 +65,19 @@ const formItemLayout = {
     },
 };
 
-
 const props = {
-    name: 'file',
-    action: 'https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload',
+    name: "file",
+    action: "https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload",
     headers: {
-        authorization: 'authorization-text',
+        authorization: "authorization-text",
     },
     onChange(info) {
-        if (info.file.status !== 'uploading') {
+        if (info.file.status !== "uploading") {
             console.log(info.file, info.fileList);
         }
-        if (info.file.status === 'done') {
+        if (info.file.status === "done") {
             message.success(`${info.file.name} file uploaded successfully`);
-        } else if (info.file.status === 'error') {
+        } else if (info.file.status === "error") {
             message.error(`${info.file.name} file upload failed.`);
         }
     },
@@ -89,7 +88,8 @@ const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 
 const TaskDepartment = () => {
-
+    const taskSocket = useWebSocket("ws://127.0.0.1:8000/ws/tasks/");
+    const task_List = useWebSocket("ws://127.0.0.1:8000/ws/task_assignments/");
     // const { id } = useParams();
     const { auth, employeeContext } = useAuth();
 
@@ -99,7 +99,7 @@ const TaskDepartment = () => {
     // Drawer check task
     const [openDrawerCheckList, setOpenDrawerCheckList] = useState(false);
 
-    //task đc chọn để 
+    //task đc chọn để
     const [taskSelected, setTaskSelected] = useState([]);
 
     const [drawerData, setDrawerData] = useState([]);
@@ -113,7 +113,7 @@ const TaskDepartment = () => {
     const [childrenDrawer, setChildrenDrawer] = useState(false);
 
     const showDrawer = (record) => {
-        console.log(record)
+        console.log(record);
 
         setDrawerData(record);
 
@@ -121,17 +121,18 @@ const TaskDepartment = () => {
     };
 
     const showDrawerCheckList = (record) => {
-        console.log("record.subtasks", record)
+        console.log("record.subtasks", record);
 
-        console.log("record.subtasks", record.subtasks)
+        console.log("record.subtasks", record.subtasks);
         setDrawerData(record);
-        setTaskSelectData(record)
-        setDoersData(record.doers.map((doer) => ({
-            key: doer.id,
-            isDone: doer.status === 'DONE',
-            ...doer,
-
-        })));
+        setTaskSelectData(record);
+        setDoersData(
+            record.doers.map((doer) => ({
+                key: doer.id,
+                isDone: doer.status === "DONE",
+                ...doer,
+            })),
+        );
         setOpenDrawerCheckList(true);
     };
 
@@ -156,7 +157,6 @@ const TaskDepartment = () => {
     // Chứa danh sách nhân viên
     const [employeesData, setEmployeesdata] = useState(null);
 
-
     const [projectPartSelect, setProjectPartSelect] = useState(null);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -164,7 +164,6 @@ const TaskDepartment = () => {
     const [title, setTitle] = useState("");
 
     const [isModalTaskOpen, setIsModalTaskOpen] = useState(false);
-
 
     const [formTask] = Form.useForm();
 
@@ -187,15 +186,16 @@ const TaskDepartment = () => {
         enabled: !!employeeContext.department, // Chỉ chạy khi id có giá trị hợp lệ
     });
 
-    // Thêm 1 phần dự án
-    // const { data: newProjectPart, mutate: mutateProjectPart } = useMutation({
-    //     mutationFn: projectPartPostAPI,
-    //     onSuccess: () => {
-    //         queryClient.invalidateQueries({
-    //             queryKey: ["taskDepartment", id], // Chỉ refetch đúng project có id đó
-    //         });
-    //     },
-    // });
+    useEffect(() => {
+      
+        console.log("test1");
+        console.log("tsssss", task_List);
+        console.log("tasksocket", taskSocket);
+        queryClient.invalidateQueries(["taskDepartment"]);
+    
+    }, [task_List, taskSocket, queryClient]);
+
+  
 
     // Thêm 1 công việc vào dự án
     const { mutateAsync: mutateTask, isLoading: addLoading } = useMutation({
@@ -204,7 +204,7 @@ const TaskDepartment = () => {
             queryClient.invalidateQueries({
                 queryKey: ["taskDepartment"],
             });
-            console.log("mutateTask", data)
+            console.log("mutateTask", data);
             mutateHistory({
                 task: data.id,
                 updated_date: data.created_at,
@@ -218,7 +218,7 @@ const TaskDepartment = () => {
     const { mutateAsync: mutateHistory, isLoading: historyPostLoading } = useMutation({
         mutationFn: workHistoriesPostAPI,
         onSuccess: () => {
-            console.log("mutateHistory thành công")
+            console.log("mutateHistory thành công");
             // queryClient.invalidateQueries({
             //     queryKey: ["taskDepartment"],
             // });
@@ -226,13 +226,17 @@ const TaskDepartment = () => {
     });
 
     // Thêm 1 nhân viên vào công việc
-    const { data: newTaskAssignments, mutate: mutateTaskAssignment, isLoading: addTaskAssLoading } = useMutation({
+    const {
+        data: newTaskAssignments,
+        mutate: mutateTaskAssignment,
+        isLoading: addTaskAssLoading,
+    } = useMutation({
         mutationFn: taskAssignmentsPost,
         onSuccess: (data) => {
             queryClient.invalidateQueries({
                 queryKey: ["taskDepartment"], // Chỉ refetch đúng project có id đó
             });
-            console.log("newTaskAssignments", data)
+            console.log("newTaskAssignments", data);
             mutateHistory({
                 task: data.task_details.id,
                 updated_date: data.task_details.created_at,
@@ -377,14 +381,12 @@ const TaskDepartment = () => {
             queryClient.invalidateQueries({
                 queryKey: ["taskDepartment"], // Chỉ refetch đúng project có id đó
             });
-            console.log("mutatePatchTaskAssignment thành công")
+            console.log("mutatePatchTaskAssignment thành công");
         },
         onError: (error) => {
-            console.log("mutatePatchTaskAssignment thất bại", error)
+            console.log("mutatePatchTaskAssignment thất bại", error);
         },
     });
-
-
 
     //lấy ds nv
     const { data: employees } = useQuery({
@@ -399,7 +401,6 @@ const TaskDepartment = () => {
     //     queryFn: departmentGetAPI,
     // });
 
-
     const setDataProjectPart = (data) => {
         const dataNew = data.map((part) => ({
             key: part.id,
@@ -412,10 +413,9 @@ const TaskDepartment = () => {
             // isCreateProjectPart: employeeContext.position === "TP"
         }));
 
-        return dataNew
-    }
+        return dataNew;
+    };
     const setDataTask = (task) => {
-
         const taskData = {
             ...task,
 
@@ -424,15 +424,13 @@ const TaskDepartment = () => {
             created_at: formatDate(task.created_at),
             end_time: formatDate(task.end_time),
             isCreateTask: task?.responsible_person ? employeeContext.position !== "NV" && task.responsible_person.id === auth.id : false,
-            isDoers: task?.responsible_person ? task.doers.some(doer => doer.id === auth.id) || task.responsible_person.id === auth.id : false,
+            isDoers: task?.responsible_person ? task.doers.some((doer) => doer.id === auth.id) || task.responsible_person.id === auth.id : false,
             isRes: task?.responsible_person ? task.responsible_person.id === auth.id : false,
-
-
         };
 
         // Nếu task có subtasks, gọi đệ quy để xử lý tất cả các cấp
         if (task.subtasks && task.subtasks.length > 0) {
-            taskData.subtasks = task.subtasks.map(sub => ({
+            taskData.subtasks = task.subtasks.map((sub) => ({
                 ...setDataTask(sub), // Gọi đệ quy
 
                 key: "sub" + sub.id,
@@ -441,17 +439,16 @@ const TaskDepartment = () => {
             delete taskData.subtasks; // Xóa thuộc tính `subtasks` nếu không có dữ liệu
         }
         return taskData;
-    }
+    };
 
 
 
 
     const priorityOrder = {
-        "Thấp": 1,
+        Thấp: 1,
         "Trung Bình": 2,
-        "Cao": 3
+        Cao: 3,
     };
-
 
     useEffect(() => {
         console.log("chạy 1 lần");
@@ -464,32 +461,28 @@ const TaskDepartment = () => {
             console.log("dataFillterv ", dataFillter);
             setProjectPartData(dataFillter);
         }
-
     }, [project_part]);
 
     useEffect(() => {
         if (employees) {
-            setEmployeesdata(employees)
+            setEmployeesdata(employees);
         }
-    }, [employees])
+    }, [employees]);
 
     useEffect(() => {
         if (workHistories) {
-            setHistoriesData(workHistories)
+            setHistoriesData(workHistories);
         }
-    }, [workHistories])
+    }, [workHistories]);
 
     useEffect(() => {
         if (projectPartSelect) {
-            console.log(projectPartSelect)
-            formTask.setFieldsValue(projectPartSelect)
+            console.log(projectPartSelect);
+            formTask.setFieldsValue(projectPartSelect);
         }
     }, [formTask, projectPartSelect]);
 
-    // const getRandomColor = () => {
-    //     return "#" + Math.floor(Math.random() * 16777215).toString(16);
-    // };
-
+  
 
     // Cấu hình cột PARTS
     const partColumns = [
@@ -508,7 +501,7 @@ const TaskDepartment = () => {
                         value={selectedKeys[0]}
                         onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
                         onPressEnter={() => confirm()}
-                        style={{ marginBottom: 8, display: 'block' }}
+                        style={{ marginBottom: 8, display: "block" }}
                     />
                     <Space>
                         <Button
@@ -545,7 +538,7 @@ const TaskDepartment = () => {
                         value={selectedKeys[0]}
                         onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
                         onPressEnter={() => confirm()}
-                        style={{ marginBottom: 8, display: 'block' }}
+                        style={{ marginBottom: 8, display: "block" }}
                     />
                     <Space>
                         <Button
@@ -573,23 +566,24 @@ const TaskDepartment = () => {
             title: "Chịu trách nhiệm",
             dataIndex: "department_manager",
             key: "department_manager",
-            render: (value) => (
-
-
-                value &&
-                (<Avatar.Group>
-
-                    <Tooltip key={value.id} placement="topRight"
-
-                        title={<TitleTooltip name={value.name} position={value.position} email={value.email}></TitleTooltip>}
-                    >
-                        <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
-                    </Tooltip>
-
-                </Avatar.Group>)
-
-
-            )
+            render: (value) =>
+                value && (
+                    <Avatar.Group>
+                        <Tooltip
+                            key={value.id}
+                            placement="topRight"
+                            title={
+                                <TitleTooltip
+                                    name={value.name}
+                                    position={value.position}
+                                    email={value.email}
+                                ></TitleTooltip>
+                            }
+                        >
+                            <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
+                        </Tooltip>
+                    </Avatar.Group>
+                ),
         },
         {
             title: "Ngày tạo",
@@ -603,14 +597,14 @@ const TaskDepartment = () => {
         },
         // { title: "Cập nhật gần nhất", dataIndex: "updated_at", key: "updated_at" },
         {
-            title: 'Chức Năng',
-            key: 'action',
-            width: '15%',
+            title: "Chức Năng",
+            key: "action",
+            width: "15%",
             render: (_, record) => (
                 <Space size="middle">
-                    <ButtonIcon handleEvent={() => handleCreateProjectTask(record)}><Plus></Plus> Công việc</ButtonIcon>
-
-
+                    <ButtonIcon handleEvent={() => handleCreateProjectTask(record)}>
+                        <Plus></Plus> Công việc
+                    </ButtonIcon>
                 </Space>
             ),
             hidden: employeeContext.position !== "TP",
@@ -618,13 +612,13 @@ const TaskDepartment = () => {
     ];
 
     const showHistoryModal = (record) => {
-        console.log("showHistoryModal", record)
-        setTaskSelected(record)
-        setIsModalHistoryOpen(true)
-    }
+        console.log("showHistoryModal", record);
+        setTaskSelected(record);
+        setIsModalHistoryOpen(true);
+    };
 
     const searchSubtasks = (subtasks, value, key) => {
-        return subtasks.some(subtask => {
+        return subtasks.some((subtask) => {
             // Kiểm tra trường key có trong subtask và có chứa giá trị tìm kiếm
             if (subtask[key] && subtask[key].toLowerCase().includes(value.toLowerCase())) {
                 return true;
@@ -640,7 +634,7 @@ const TaskDepartment = () => {
     };
 
     const searchSubtasksResponsible_person = (subtasks, value) => {
-        return subtasks.some(subtask => {
+        return subtasks.some((subtask) => {
             // Kiểm tra trường key có trong subtask và có chứa giá trị tìm kiếm
             if (subtask.responsible_person && subtask.responsible_person.name.toLowerCase().includes(value.toLowerCase())) {
                 return true;
@@ -677,7 +671,7 @@ const TaskDepartment = () => {
                         value={selectedKeys[0]}
                         onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
                         onPressEnter={() => confirm()}
-                        style={{ marginBottom: 8, display: 'block' }}
+                        style={{ marginBottom: 8, display: "block" }}
                     />
                     <Space>
                         <Button
@@ -698,11 +692,9 @@ const TaskDepartment = () => {
                 </div>
             ),
 
-
             onFilter: (value, record) => {
                 // Tìm kiếm theo name và các thuộc tính khác trong subtasks (ví dụ: created_at, description)
-                return record.name.toLowerCase().includes(value.toLowerCase()) ||
-                    (record.subtasks && searchSubtasks(record.subtasks, value, 'name'))
+                return record.name.toLowerCase().includes(value.toLowerCase()) || (record.subtasks && searchSubtasks(record.subtasks, value, "name"));
             },
             filterSearch: true,
         },
@@ -734,37 +726,37 @@ const TaskDepartment = () => {
             dataIndex: "priority",
             key: "priority",
             width: "10%",
-            render: (text) => (
-                text === "Thấp" ? <Tag color="green">{text}</Tag> :
-                    text === "Trung Bình" ? <Tag color="yellow">{text}</Tag> :
-                        <Tag color="red">{text}</Tag>
-            ),
+            render: (text) =>
+                text === "Thấp" ? (
+                    <Tag color="green">{text}</Tag>
+                ) : text === "Trung Bình" ? (
+                    <Tag color="yellow">{text}</Tag>
+                ) : (
+                    <Tag color="red">{text}</Tag>
+                ),
             sorter: (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority], // Sắp xếp theo số
-
         },
         {
             title: "Chịu trách nhiệm",
             dataIndex: "responsible_person",
             key: "responsible_person",
-            render: (value) => (
-
-
-                value &&
-                (<Avatar.Group>
-
-                    <Tooltip placement="topRight"
-
-
-
-                        title={<TitleTooltip name={value.name} position={value.position} email={value.email}></TitleTooltip>}
-                    >
-                        <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
-                    </Tooltip>
-
-                </Avatar.Group>)
-
-
-            ),
+            render: (value) =>
+                value && (
+                    <Avatar.Group>
+                        <Tooltip
+                            placement="topRight"
+                            title={
+                                <TitleTooltip
+                                    name={value.name}
+                                    position={value.position}
+                                    email={value.email}
+                                ></TitleTooltip>
+                            }
+                        >
+                            <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
+                        </Tooltip>
+                    </Avatar.Group>
+                ),
             filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
                 <div style={{ padding: 8 }}>
                     {/* Tùy chỉnh dropdown filter */}
@@ -774,7 +766,7 @@ const TaskDepartment = () => {
                         value={selectedKeys[0]}
                         onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
                         onPressEnter={() => confirm()}
-                        style={{ marginBottom: 8, display: 'block' }}
+                        style={{ marginBottom: 8, display: "block" }}
                     />
                     <Space>
                         <Button
@@ -799,11 +791,12 @@ const TaskDepartment = () => {
             onFilter: (value, record) => {
                 // Kiểm tra nếu responsible_person tồn tại và tìm kiếm trong các thuộc tính (name, position, email)
                 const responsiblePerson = record.responsible_person;
-                return (responsiblePerson && responsiblePerson.name.toLowerCase().includes(value.toLowerCase())) ||
-                    (record.subtasks && searchSubtasksResponsible_person(record.subtasks, value, 'responsible_person')); // Tìm kiếm trong subtasks nếu có
+                return (
+                    (responsiblePerson && responsiblePerson.name.toLowerCase().includes(value.toLowerCase())) ||
+                    (record.subtasks && searchSubtasksResponsible_person(record.subtasks, value, "responsible_person"))
+                ); // Tìm kiếm trong subtasks nếu có
             },
             filterSearch: true,
-
         },
         {
             title: "Nhóm thực hiện",
@@ -811,20 +804,27 @@ const TaskDepartment = () => {
             key: "doers",
             width: "18%",
             render: (value) => (
-                <> <Avatar.Group>
-                    {value.map((item) => (
-                        <Tooltip key={item.id} placement="topRight"
-
-
-
-                            title={<TitleTooltip name={item.name} position={item.position} email={item.email}></TitleTooltip>}
-                        >
-                            <Avatar style={{ backgroundColor: getRandomColor() }}> {item.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
-                        </Tooltip>
-                    ))}
-                </Avatar.Group>
+                <>
+                    {" "}
+                    <Avatar.Group>
+                        {value.map((item) => (
+                            <Tooltip
+                                key={item.id}
+                                placement="topRight"
+                                title={
+                                    <TitleTooltip
+                                        name={item.name}
+                                        position={item.position}
+                                        email={item.email}
+                                    ></TitleTooltip>
+                                }
+                            >
+                                <Avatar style={{ backgroundColor: getRandomColor() }}> {item.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
+                            </Tooltip>
+                        ))}
+                    </Avatar.Group>
                 </>
-            )
+            ),
         },
         {
             title: "Chức năng",
@@ -832,26 +832,53 @@ const TaskDepartment = () => {
             key: "action",
             width: "17%",
             render: (_, record) => (
-                <Space size={[8, 16]} wrap >
-
+                <Space
+                    size={[8, 16]}
+                    wrap
+                >
                     {record.isCreateTask && (
                         <>
-                            <Button shape="circle" size="medium" type="primary" onClick={() => handleCreateSubTask(record)}><Plus size={18} /></Button>
-
-
+                            <Button
+                                shape="circle"
+                                size="medium"
+                                type="primary"
+                                onClick={() => handleCreateSubTask(record)}
+                            >
+                                <Plus size={18} />
+                            </Button>
                         </>
                     )}
 
-                    {
-                        record.isRes && (
+                    {record.isRes && (
+                        <>
+                            <Button
+                                shape="circle"
+                                size="medium"
+                                color="pink"
+                                variant="solid"
+                                onClick={() => console.log("bekk")}
+                            >
+                                <Bell size={18} />
+                            </Button>
 
-                            <>
-                                <Button shape="circle" size="medium" color="pink" variant="solid" onClick={() => console.log("bekk")}><Bell size={18} /></Button>
+                            <Button
+                                shape="circle"
+                                size="medium"
+                                color="gold"
+                                variant="solid"
+                                onClick={() => showDrawerCheckList(record)}
+                            >
+                                <File size={18} />
+                            </Button>
 
-
-                                <Button shape="circle" size="medium" color="gold" variant="solid" onClick={() => showDrawerCheckList(record)} ><File size={18} /></Button>
-
-                                <Button shape="circle" size="medium" color="purple" variant="solid" ><Pen size={18} /></Button>
+                            <Button
+                                shape="circle"
+                                size="medium"
+                                color="purple"
+                                variant="solid"
+                            >
+                                <Pen size={18} />
+                            </Button>
 
                                 <Button shape="circle" size="medium" color="lime" variant="solid" ><ArrowLeftRight size={18} /></Button>
                             </>
@@ -878,9 +905,7 @@ const TaskDepartment = () => {
 
                 </Space>
             ),
-
         },
-
     ];
 
     const onChangeCheckBox = (checked, record) => {
@@ -890,22 +915,17 @@ const TaskDepartment = () => {
             const data = {
                 employee: record.id,
                 task: drawerData.id,
-            }
-            console.log("data", data)
+            };
+            console.log("data", data);
             if (checked) {
-
                 mutatePatchTaskAssignment({ id: record.id_assignment, obj: data, status: "DONE" });
-
             } else {
                 // mutatePatchTaskAssignment(record.id_assignment, data, "IN_PROGRESS")
                 mutatePatchTaskAssignment({ id: record.id_assignment, obj: data, status: "IN_PROGRESS" });
             }
-
-
         } catch (error) {
             console.log("onChangeCheckBox error", error);
         }
-
     };
 
     const checkListFileColumns = [
@@ -918,7 +938,7 @@ const TaskDepartment = () => {
                 <>
                     <p>{text}</p>
                 </>
-            )
+            ),
         },
         {
             title: "Số điện thoại",
@@ -935,17 +955,13 @@ const TaskDepartment = () => {
                 <>
                     <p>{text}</p>
                 </>
-            )
+            ),
         },
         {
             title: "Chức vụ",
             dataIndex: "position",
             key: "position",
-            render: (text) => (
-                text === "TP" ? 'Trưởng Phòng' :
-                    text === "TN" ? 'Trưởng nhóm' :
-                        'Nhân viên'
-            ),
+            render: (text) => (text === "TP" ? "Trưởng Phòng" : text === "TN" ? "Trưởng nhóm" : "Nhân viên"),
             width: "12%",
         },
         {
@@ -954,9 +970,16 @@ const TaskDepartment = () => {
             key: "upload",
             width: "15%",
             render: (_, record) => (
-                <Button shape="circle" size="medium" color="gold" variant="solid" onClick={() => showChildrenDrawer(record)}><FileCheck2 size={18} /></Button>
-            )
-
+                <Button
+                    shape="circle"
+                    size="medium"
+                    color="gold"
+                    variant="solid"
+                    onClick={() => showChildrenDrawer(record)}
+                >
+                    <FileCheck2 size={18} />
+                </Button>
+            ),
         },
         {
             title: "Chức năng",
@@ -971,14 +994,10 @@ const TaskDepartment = () => {
                         unCheckedChildren={<CloseOutlined />}
                         defaultChecked={record.isDone}
                     />
-
-
                 </Space>
             ),
-
         },
-
-    ]
+    ];
 
     const checkListTaskColumns = [
         {
@@ -989,7 +1008,6 @@ const TaskDepartment = () => {
             render: (text, record) => (
                 <>
                     <a onClick={() => showDrawer(record)}>{text}</a>
-
                 </>
             ),
             filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
@@ -1001,7 +1019,7 @@ const TaskDepartment = () => {
                         value={selectedKeys[0]}
                         onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
                         onPressEnter={() => confirm()}
-                        style={{ marginBottom: 8, display: 'block' }}
+                        style={{ marginBottom: 8, display: "block" }}
                     />
                     <Space>
                         <Button
@@ -1053,13 +1071,15 @@ const TaskDepartment = () => {
             dataIndex: "priority",
             key: "priority",
             width: "10%",
-            render: (text) => (
-                text === "Thấp" ? <Tag color="green">{text}</Tag> :
-                    text === "Trung Bình" ? <Tag color="yellow">{text}</Tag> :
-                        <Tag color="red">{text}</Tag>
-            ),
+            render: (text) =>
+                text === "Thấp" ? (
+                    <Tag color="green">{text}</Tag>
+                ) : text === "Trung Bình" ? (
+                    <Tag color="yellow">{text}</Tag>
+                ) : (
+                    <Tag color="red">{text}</Tag>
+                ),
             sorter: (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority], // Sắp xếp theo số
-
         },
         {
             title: "File",
@@ -1067,16 +1087,22 @@ const TaskDepartment = () => {
             key: "upload",
             width: "15%",
             render: (_, record) => (
-                <Button shape="circle" size="medium" color="gold" variant="solid" onClick={() => showChildrenDrawer(record)}><FileCheck2 size={18} /></Button>
-            )
-
+                <Button
+                    shape="circle"
+                    size="medium"
+                    color="gold"
+                    variant="solid"
+                    onClick={() => showChildrenDrawer(record)}
+                >
+                    <FileCheck2 size={18} />
+                </Button>
+            ),
         },
-
-
-    ]
+    ];
 
     const expandedRowRender = (part) => (
-        <Table columns={taskColumns}
+        <Table
+            columns={taskColumns}
             dataSource={part.tasks}
             // dataSource={part.tasks.filter(task => task.isCreateTask === true || task.isDoers === true)}
             // dataSource={part.tasks
@@ -1091,16 +1117,15 @@ const TaskDepartment = () => {
 
             }}
             loading={addLoading && addTaskAssLoading && addPatchtaskAssLoading}
-
-            pagination={false} indentSize={20} childrenColumnName={'subtasks'} />
+            pagination={false}
+            indentSize={20}
+            childrenColumnName={"subtasks"}
+        />
     );
 
-
     const onSearch = (value) => {
-        console.log('search:', value);
+        console.log("search:", value);
     };
-
-
 
     // Form items task
     const formItemsTask = [
@@ -1109,14 +1134,14 @@ const TaskDepartment = () => {
             label: "Mã phần dự án:",
             component: <Input />,
             props: { readOnly: true },
-            hidden: false
+            hidden: false,
         },
         {
             name: "task",
             label: "Mã công việc cha:",
             component: <Input />,
             props: { readOnly: true },
-            hidden: !isSubTaskForm
+            hidden: !isSubTaskForm,
         },
         {
             name: "nameTask",
@@ -1126,9 +1151,9 @@ const TaskDepartment = () => {
             rules: [
                 {
                     required: true,
-                    message: 'Làm ơn nhập tên phần dự án',
+                    message: "Làm ơn nhập tên phần dự án",
                 },
-            ]
+            ],
         },
         {
             name: "desTask",
@@ -1138,14 +1163,14 @@ const TaskDepartment = () => {
             rules: [
                 {
                     required: true,
-                    message: 'Làm ơn nhập tên phần dự án',
+                    message: "Làm ơn nhập tên phần dự án",
                 },
-            ]
+            ],
         },
         {
             name: "resEmployee",
             label: "Người chịu tránh nhiệm:",
-            component:
+            component: (
                 <Select
                     showSearch
                     placeholder="Select a employee"
@@ -1156,20 +1181,21 @@ const TaskDepartment = () => {
                         value: item.id,
                         label: `${item.name} - ${item.position === "TP" ? "Trưởng phòng" : item.position === "TN" ? "Trưởng nhóm" : "Nhân viên"}`,
                     }))}
-                />,
+                />
+            ),
             // props: { disabled: !isEmployeeTask },
             rules: [
                 {
                     required: true,
-                    message: 'Làm ơn chọn người chịu trách nhiệm',
+                    message: "Làm ơn chọn người chịu trách nhiệm",
                 },
-            ]
+            ],
         },
 
         {
             name: "WorksEmployee",
             label: "Người thực hiện:",
-            component:
+            component: (
                 <Select
                     mode="multiple"
                     allowClear
@@ -1177,45 +1203,46 @@ const TaskDepartment = () => {
                     // onChange={onChangeEmployee}
                     // options={options}
                     options={employeesData
-                        ?.filter(item => item.position !== "TP") // Lọc bỏ Trưởng phòng
-                        .map(item => ({
+                        ?.filter((item) => item.position !== "TP") // Lọc bỏ Trưởng phòng
+                        .map((item) => ({
                             value: item.id,
-                            label: `${item.name} - ${item.position === "TN" ? "Trưởng nhóm" : "Nhân viên"}`
+                            label: `${item.name} - ${item.position === "TN" ? "Trưởng nhóm" : "Nhân viên"}`,
                         }))}
-                />,
+                />
+            ),
             // props: { disabled: !isEmployeeTask },
             rules: [
                 {
                     required: true,
-                    message: 'Làm ơn chọn người chịu trách nhiệm',
+                    message: "Làm ơn chọn người chịu trách nhiệm",
                 },
             ],
-
         },
 
         {
             name: "date",
             label: "Chọn thời gian:",
             // getValueFromEvent: (_, dateString) => dateString,
-            component:
-                < RangePicker
+            component: (
+                <RangePicker
                     showTime
                     format={"DD/MM/YY : HH:mm"}
                     onChange={(date, dateString) => console.log("onChange", date, dateString)}
-                ></RangePicker>,
+                ></RangePicker>
+            ),
             rules: [
                 {
                     required: true,
-                    message: 'Làm ơn chọn ngày thực hiện và kết thức',
+                    message: "Làm ơn chọn ngày thực hiện và kết thức",
                 },
-            ]
+            ],
         },
 
         {
             name: "Priority",
             label: "Mức độ ưu tiên:",
             // getValueFromEvent: (_, dateString) => dateString,
-            component:
+            component: (
                 <Select
                     showSearch
                     placeholder="Select a priority"
@@ -1223,34 +1250,32 @@ const TaskDepartment = () => {
                     // onChange={onChange}
                     options={[
                         {
-                            value: '0',
-                            label: 'Thấp',
+                            value: "0",
+                            label: "Thấp",
                         },
                         {
-                            value: '1',
-                            label: 'Trung Bình',
+                            value: "1",
+                            label: "Trung Bình",
                         },
                         {
-                            value: '2',
-                            label: 'Cao',
+                            value: "2",
+                            label: "Cao",
                         },
                     ]}
-                />,
+                />
+            ),
             rules: [
                 {
                     required: true,
-                    message: 'Làm ơn chọn ngày thực hiện và kết thức',
+                    message: "Làm ơn chọn ngày thực hiện và kết thức",
                 },
-            ]
-        }
-
+            ],
+        },
     ];
 
-
-
     const handleCancelTask = () => {
-        setIsModalTaskOpen(false)
-    }
+        setIsModalTaskOpen(false);
+    };
 
     // const handleCreateProjectPart = () => {
     //     setTitle((projectdata && projectdata.name));
@@ -1260,31 +1285,33 @@ const TaskDepartment = () => {
     // }
 
     const handleCreateProjectTask = (value) => {
-        setIsSubTaskForm(false)
-        setEmployeesdata(employees)
-        formTask.resetFields()
-        console.log("handleCreateProjectTask", value)
-        value && setProjectPartSelect({
-            projectPart: value.key,
-        });
-        console.log("projectPartSelect", projectPartSelect)
+        setIsSubTaskForm(false);
+        setEmployeesdata(employees);
+        formTask.resetFields();
+        console.log("handleCreateProjectTask", value);
+        value &&
+            setProjectPartSelect({
+                projectPart: value.key,
+            });
+        console.log("projectPartSelect", projectPartSelect);
         setMode("Add");
-        showModalTask()
-    }
+        showModalTask();
+    };
 
     const handleCreateSubTask = (value) => {
-        setIsSubTaskForm(true)
-        setEmployeesdata(value.doers)
-        formTask.resetFields()
-        console.log("handleCreateSubTask", value)
-        value && setProjectPartSelect({
-            projectPart: value.project_part,
-            task: value.id
-        });
-        console.log("projectPartSelect", projectPartSelect)
+        setIsSubTaskForm(true);
+        setEmployeesdata(value.doers);
+        formTask.resetFields();
+        console.log("handleCreateSubTask", value);
+        value &&
+            setProjectPartSelect({
+                projectPart: value.project_part,
+                task: value.id,
+            });
+        console.log("projectPartSelect", projectPartSelect);
         setMode("Add");
-        showModalTask()
-    }
+        showModalTask();
+    };
 
     // const showModal = () => {
     //     setIsModalOpen(true);
@@ -1294,13 +1321,12 @@ const TaskDepartment = () => {
         setIsModalTaskOpen(true);
     };
 
-
-    // Thêm Công việc mới 
+    // Thêm Công việc mới
     const handleOkTask = async () => {
         try {
             const values = await formTask.validateFields();
-            values.date = values.date?.map(d => d.format("YYYY-MM-DDThh:mm"));
-            console.log('Validated Values:', values);
+            values.date = values.date?.map((d) => d.format("YYYY-MM-DDThh:mm"));
+            console.log("Validated Values:", values);
 
             const valueNew = {
                 name: values.nameTask,
@@ -1308,11 +1334,11 @@ const TaskDepartment = () => {
                 priority: values.Priority,
                 start_time: values.date?.[0] || null,
                 end_time: values.date?.[1] || null,
-                task_status: 'IN_PROGRESS',
+                task_status: "IN_PROGRESS",
                 completion_percentage: "0",
                 is_deleted: false,
                 project_part: values.projectPart,
-                parent_task: isSubTaskForm ? values.task : null
+                parent_task: isSubTaskForm ? values.task : null,
             };
 
             // await createTask(values, valueNew, isSubTaskForm);
@@ -1321,38 +1347,26 @@ const TaskDepartment = () => {
             if (values.resEmployee) {
                 mutateTaskAssignment({
                     employee: values.resEmployee,
-                    role: 'RESPONSIBLE',
-                    task: dataTask.id
-                })
+                    role: "RESPONSIBLE",
+                    task: dataTask.id,
+                });
             }
             if (values.WorksEmployee?.length > 0) {
                 await Promise.all(
-                    values.WorksEmployee.map(employee => mutateTaskAssignment(
-                        {
+                    values.WorksEmployee.map((employee) =>
+                        mutateTaskAssignment({
                             employee: employee,
-                            role: 'DOER',
-                            task: dataTask.id
-                        }
-                    ))
+                            role: "DOER",
+                            task: dataTask.id,
+                        }),
+                    ),
                 );
             }
-            // Gửi API tạo DepartmentTask
-            // else if (values.DepartmentTask?.length > 0) {
-            //     await Promise.all(
-            //         values.DepartmentTask.map(department => 
-            //             mutateDepartmentTask(
-            //                 { department: department, 
-            //                     task: dataTask.id 
-            //                 },
-            //             )
-            //         )
-            //     );
-            // }
 
 
             setIsModalTaskOpen(false);
         } catch (error) {
-            console.error('Validation Failed:', error);
+            console.error("Validation Failed:", error);
         }
     };
 
@@ -1374,7 +1388,7 @@ const TaskDepartment = () => {
         if (allFiles.length > 0) {
             setDoerSelected({
                 name: record.name,
-                files: allFiles
+                files: allFiles,
             });
         } else {
             setDoerSelected(record)
@@ -1382,33 +1396,7 @@ const TaskDepartment = () => {
         console.log("showChildrenDrawer record", record)
         console.log("  findFilesInDoers(record)", findFilesInDoers(record))
 
-        // let allFiles = [];
-        // if ('subtasks' in record && Array.isArray(record.subtasks) && record.subtasks.length > 0) {
-        //     console.log("Có subtasks và có phần tử");
-        //     record.subtasks.forEach(subtask => {
-        //         if ('doers' in subtask && Array.isArray(subtask.doers)) {
-        //             subtask.doers.forEach(doer => {
-        //                 if ('files' in doer && Array.isArray(doer.files)) {
-        //                     allFiles.push(...doer.files);
-        //                 }
-        //             });
-        //         }
-        //     });
-        //     console.log("allFiles", allFiles)
-        //     setDoerSelected({
-        //         name: record.name,
-        //         files: allFiles
-        //     });
-        // }
-        // else if ('doers' in record && Array.isArray(record.doers) && record.doers.length > 0) {
-        //     console.log("Có doers và có phần tử");
-        //     // console.log("showChildrenDrawer file doers",record.doers.flatMap(doer => doer.files || []))
-        //     const files = record.doers.flatMap(doer => doer.files || []);
-
-        //     allFiles.push({
-        //         name: record.name,
-        //         files: files
-        //     });
+     
 
         //     console.log("allFiles", allFiles)
         //     setDoerSelected({
@@ -1429,23 +1417,19 @@ const TaskDepartment = () => {
     };
 
     const handleCancelSelctTask = () => {
-        setIsModalHistoryOpen(false)
-        setTaskSelected([])
-    }
-
-
+        setIsModalHistoryOpen(false);
+        setTaskSelected([]);
+    };
 
     return (
         <>
             {/* <div>{projectPartData && JSON.stringify(projectPartData)}</div> */}
-            <PageHeader title={"Công việc Phòng Ban"} itemsBreadcrumb={itemsBreadcrumb}>
-
-
-
-            </PageHeader>
+            <PageHeader
+                title={"Công việc Phòng Ban"}
+                itemsBreadcrumb={itemsBreadcrumb}
+            ></PageHeader>
 
             {/* <CalendarSchedule></CalendarSchedule> */}
-
 
             <div className="mt-5">
                 <Table
@@ -1464,10 +1448,7 @@ const TaskDepartment = () => {
                         emptyText:
                             <EmptyTemplate title={'Bạn không có phần dự án nào được giao !'} />
                     }}
-
                     loading={isLoading}
-
-
                 />
             </div>
 
@@ -1478,38 +1459,47 @@ const TaskDepartment = () => {
                 handleCancel={handleCancelTask}
                 title={"Thêm Công Việc Mới"}
                 form={formTask}
-
             >
                 <FormProjectTask
-                    formName={'formTask' + mode}
+                    formName={"formTask" + mode}
                     form={formTask}
                     formItemLayout={formItemLayout}
                     formItems={formItemsTask}
-
-                >
-
-                </FormProjectTask>
+                ></FormProjectTask>
             </ModalProjectTask>
 
             <Drawer
-                title={<HeaderChat data={drawerData} onClose={onClose}></HeaderChat>}
+                title={
+                    <HeaderChat
+                        data={drawerData}
+                        onClose={onClose}
+                    ></HeaderChat>
+                }
                 onClose={onClose}
                 open={open}
-                width={'40%'}
+                width={"40%"}
                 maskClosable={false}
                 loading={false}
                 closable={false}
             >
-                <Chat roomName={drawerData.id} user={employeeContext}></Chat>
+                <Chat
+                    roomName={drawerData.id}
+                    user={employeeContext}
+                ></Chat>
             </Drawer>
 
             {/* Drawr check list File */}
             <Drawer
                 // title={''}
-                title={<HeaderChat data={drawerData} onClose={onCloseDrawerCheckList}></HeaderChat>}
+                title={
+                    <HeaderChat
+                        data={drawerData}
+                        onClose={onCloseDrawerCheckList}
+                    ></HeaderChat>
+                }
                 onClose={onCloseDrawerCheckList}
                 open={openDrawerCheckList}
-                width={'50%'}
+                width={"50%"}
                 maskClosable={false}
                 loading={false}
                 closable={false}
@@ -1520,28 +1510,36 @@ const TaskDepartment = () => {
                 ></Table>
 
                 <Drawer
-                    title={`File của ${doerSelected ? doerSelected.name : ''}`}
-                    width={'30%'}
+                    title={`File của ${doerSelected ? doerSelected.name : ""}`}
+                    width={"30%"}
                     // closable={false}
                     onClose={onChildrenDrawerClose}
                     open={childrenDrawer}
                 >
                     {console.log("doerSelected", doerSelected)}
 
-                    <Flex gap={'middle'}>
-                        {doerSelected.files && doerSelected.files.map((file, index) => (
-                            <div key={index} className={'w-32'}><FileCard file={file} /></div>
-                        ))}
+                    <Flex gap={"middle"}>
+                        {doerSelected.files &&
+                            doerSelected.files.map((file, index) => (
+                                <div
+                                    key={index}
+                                    className={"w-32"}
+                                >
+                                    <FileCard file={file} />
+                                </div>
+                            ))}
                     </Flex>
-
                 </Drawer>
-
             </Drawer>
 
-            <ShowHistory handleCancel={handleCancelSelctTask} isModalOpen={isModalHistoryOpen} setIsModalOpen={setIsModalHistoryOpen} items={historiesData.filter((item) => item.task.id === taskSelected.id)}></ShowHistory>
-
+            <ShowHistory
+                handleCancel={handleCancelSelctTask}
+                isModalOpen={isModalHistoryOpen}
+                setIsModalOpen={setIsModalHistoryOpen}
+                items={historiesData.filter((item) => item.task.id === taskSelected.id)}
+            ></ShowHistory>
         </>
-    )
-}
+    );
+};
 
-export default TaskDepartment
+export default TaskDepartment;
