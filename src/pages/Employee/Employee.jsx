@@ -18,7 +18,7 @@ import { useRef } from "react";
 import useWebSocket from "../../Services/useWebSocket";
 const Employee = () => {
     const [current, setCurrent] = useState(1);
-    const [total, setTotal] = useState(16);
+    const [total, setTotal] = useState(0);
     const [useData, setUseData] = useState(null);
 
     const [departmentData, setDepartmentData] = useState(null);
@@ -95,7 +95,7 @@ const Employee = () => {
     const queryClient = useQueryClient();
     //lấy ds nv
     const { data: employees } = useQuery({
-        queryKey: ["employees"],
+        queryKey: ["employeeEm"],
         queryFn: employeeGetAPI,
     });
     useEffect(() => {
@@ -104,6 +104,8 @@ const Employee = () => {
             queryClient.invalidateQueries(["employees"]);
         }
     }, [employeeUpdate, queryClient]);
+
+    console.log("fix employee", employees);
     //lấy ds phòng ban
     const { data: departments } = useQuery({
         queryKey: ["departments"],
@@ -114,7 +116,7 @@ const Employee = () => {
         mutationFn: employeePutAPI,
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: ["employees"],
+                queryKey: ["employeeEm"],
             });
         },
     });
@@ -123,7 +125,7 @@ const Employee = () => {
         mutationFn: employeePostAPI,
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: ["employees"],
+                queryKey: ["employeeEm"],
             });
         },
     });
@@ -139,7 +141,7 @@ const Employee = () => {
     // Cập nhật state chỉ khi `employees` thay đổi
     useEffect(() => {
         if (employees) {
-            const employeData = employees.filter((item) => {
+            const employeData = employees.results.filter((item) => {
                 return item.is_deleted !== true;
             });
             console.log("employ", employeData);
@@ -311,6 +313,10 @@ const Employee = () => {
             console.log(error);
         }
     };
+    const onChange = (page) => {
+        // console.log(page);
+        // setCurrent(page);
+    };
     return (
         <>
             {/* {roleEmployee && JSON.stringify(roleEmployee)} */}
@@ -334,7 +340,12 @@ const Employee = () => {
                 <Table
                     columns={columns}
                     dataSource={data || []}
-                    pagination={{ total, defaultCurrent: current, pageSize: 10 }}
+                    pagination={{
+                        total: total,
+                        defaultCurrent: current,
+                        pageSize: 5, // Mặc định 10 dòng mỗi trang
+                        onChange: onChange,
+                    }}
                 />
             </div>
 

@@ -217,6 +217,7 @@ const TaskDepartment = () => {
         queryClient.invalidateQueries(["taskDepartment"]);
     }, [task_List, taskSocket, queryClient, file_list]);
 
+    console.log("project part soc ket", project_part);
     // Thêm 1 công việc vào dự án
     const { mutateAsync: mutateTask, isLoading: addLoading } = useMutation({
         mutationFn: taskPost,

@@ -16,9 +16,9 @@ export const departmentGetAllAPI = async () => {
 
 export const departmentGetAPI = async () => {
     try {
-        const response = await axios.get(api);
+        const response = await axios.get(api + "get_all_departments/");
         console.log(response);
-        return response.data.results;
+        return response.data;
     } catch (error) {
         console.log(error);
     }

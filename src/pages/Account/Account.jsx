@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from "react";
 import ModalAccount from "@/components/modal/Modal";
 import FormAccount from "@/components/form/Form";
 import PageHeader from "@/components/PageHeader";
@@ -6,19 +6,18 @@ import ButtonIcon from "@/components/ButtonIcon";
 import { Table, Drawer, Form, Input, Select, Space } from "antd";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import Search from "@/components/Search";
-import { useForm } from 'antd/es/form/Form';
+import { useForm } from "antd/es/form/Form";
 import { accountGetAPI, accountPostAPI, accountPutAPI } from "@/services/AccountService";
 import { rolesGetAPI } from "@/services/RoleService";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { employeeGetAllAPI } from "@/Services/EmployeeService";
-
-
+import { employeeGetAllAPI } from "@/Services/employeeService";
 
 const Account = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [title, setTitle] = useState("");
-
+    const [current, setCurrent] = useState(1);
+    const [total, setTotal] = useState(0);
     const [form] = Form.useForm();
 
     const [mode, setMode] = useState("");
@@ -33,8 +32,8 @@ const Account = () => {
 
     const queryClient = useQueryClient();
     //lấy ds nv
-    const { data: employees } = useQuery({
-        queryKey: ["employees"],
+    const { data: employeeAccount } = useQuery({
+        queryKey: ["employeeAccount"],
         queryFn: employeeGetAllAPI,
     });
 
@@ -57,7 +56,7 @@ const Account = () => {
             queryClient.invalidateQueries({
                 queryKey: ["accounts"],
             });
-            setIsModalOpen(false)
+            setIsModalOpen(false);
         },
         onError: (err) => {
             // console.error("API Error:", err);
@@ -83,7 +82,7 @@ const Account = () => {
                 //     ]);
                 // }
             }
-        }
+        },
     });
 
     //sửa tk
@@ -93,7 +92,7 @@ const Account = () => {
             queryClient.invalidateQueries({
                 queryKey: ["accounts"],
             });
-            setIsModalOpen(false)
+            setIsModalOpen(false);
         },
     });
 
@@ -102,55 +101,58 @@ const Account = () => {
             ...item,
             key: item.id,
             nameUser: item?.employee && item.employee.name,
-            nameRole: item?.role && item.role.name
+            nameRole: item?.role && item.role.name,
         }));
     }
-
 
     useEffect(() => {
         console.log("accounts", accounts);
         if (accounts) {
-            const accountFilter = setDataAccounts(accounts);
+            const accountFilter = setDataAccounts(accounts.results);
             setAccountData(accountFilter);
         }
 
-        if (employees) {
-            setEmployeeData(employees);
+        if (employeeAccount) {
+            setEmployeeData(employeeAccount);
         }
 
         console.log("roles", roles);
         if (roles) {
             setRoleData(roles);
         }
-    }, [accounts, employees, roles]); // Lắng nghe sự thay đổi của dữ liệu
+    }, [accounts, employeeAccount, roles]); // Lắng nghe sự thay đổi của dữ liệu
 
     useEffect(() => {
         if (selectedRecord) {
-
             form.setFieldsValue({
                 role: selectedRecord.role?.id,
-                id: selectedRecord.id
-            })
+                id: selectedRecord.id,
+            });
         }
     }, [form, selectedRecord]);
 
     const columns = [
-
         { title: "ID", dataIndex: "id", key: "id" },
         { title: "Người dùng", dataIndex: "nameUser", key: "nameUser" },
         { title: "Nhóm quyền", dataIndex: "nameRole", key: "nameRole" },
         { title: "Tên đăng nhập", dataIndex: "email", key: "email" },
         {
-            title: "Chức năng", dataIndex: "action", key: "action", render: (_, record) => (
+            title: "Chức năng",
+            dataIndex: "action",
+            key: "action",
+            render: (_, record) => (
                 <>
                     <Space size="middle">
-                        <a onClick={() => handleUpdate(record)}><Pencil size={20} /></a>
-                        <a href=""><Trash2 size={20}></Trash2></a>
+                        <a onClick={() => handleUpdate(record)}>
+                            <Pencil size={20} />
+                        </a>
+                        <a href="">
+                            <Trash2 size={20}></Trash2>
+                        </a>
                     </Space>
                 </>
-            )
+            ),
         },
-
     ];
     // const data = [
     //     {
@@ -197,15 +199,14 @@ const Account = () => {
         {
             name: "id",
             label: "Mã tài khoản",
-            component:
-            <Input />,
+            component: <Input />,
             hidden: mode === "Edit" ? false : true,
             props: { readOnly: true },
         },
         {
             name: "name",
             label: "Tên đăng nhập",
-            component:
+            component: (
                 <Select
                     showSearch
                     placeholder="Chọn nhân viên"
@@ -214,14 +215,15 @@ const Account = () => {
                         value: item.id,
                         label: item.name,
                     }))}
-                ></Select>,
+                ></Select>
+            ),
             rules: [{ required: true, message: "Vui lòng nhập tên đăng nhập" }],
             hidden: mode === "Edit" ? true : false,
         },
         {
             name: "role",
             label: "Quyền",
-            component:
+            component: (
                 <Select
                     showSearch
                     placeholder="Chọn quyền"
@@ -230,8 +232,9 @@ const Account = () => {
                         value: item.id,
                         label: item.name,
                     }))}
-                // value={selectedRecord?.role?.id} // Set giá trị mặc định
-                />,
+                    // value={selectedRecord?.role?.id} // Set giá trị mặc định
+                />
+            ),
             rules: [{ required: true, message: "Vui lòng nhập tên đăng nhập" }],
         },
         {
@@ -240,9 +243,7 @@ const Account = () => {
             component: <Input placeholder="Nhập Mật khẩu" />,
             rules: mode === "Add" ? [{ required: true, message: "Vui lòng nhập Mật khẩu" }] : [],
         },
-
     ];
-
 
     const showModal = () => {
         setIsModalOpen(true);
@@ -250,13 +251,13 @@ const Account = () => {
 
     const createAccount = async (values) => {
         // Tìm employee_id và email từ employeeData dựa trên name (đã chọn từ Select)
-        const selectedEmployee = employeeData.find(emp => emp.id === values.name);
+        const selectedEmployee = employeeData.find((emp) => emp.id === values.name);
 
         // Format lại dữ liệu theo yêu cầu
         const submitData = {
-            email: selectedEmployee?.email || "",  // Lấy email của nhân viên hoặc rỗng nếu không có
+            email: selectedEmployee?.email || "", // Lấy email của nhân viên hoặc rỗng nếu không có
             password: values.password,
-            role_id: values.role || null,          // role đã chọn từ form
+            role_id: values.role || null, // role đã chọn từ form
             employee_id: values.name || null, // employee_id từ dữ liệu nhân viên
         };
 
@@ -265,73 +266,69 @@ const Account = () => {
         // Gửi API hoặc xử lý dữ liệu tiếp theo
         // Xử lý lỗi từ API
         mutatePost(submitData);
-    }
+    };
 
     const updateAccount = async (values) => {
-        //    cấp lại mk 
+        //    cấp lại mk
         const submitData = {
-            role_id: values.role
+            role_id: values.role,
         };
 
         if (values.password) {
             submitData.password = values.password;
         }
 
-
         console.log("updateAccount", submitData);
 
         mutatePut({ obj: submitData, id: values.id });
-
-
-    }
+    };
 
     const handleOk = async () => {
         try {
             const values = await form.validateFields(); // Lấy dữ liệu từ form
             console.log("Form values:", values);
             if (mode === "Add") {
-                createAccount(values)
-            }
-            else {
-                updateAccount(values)
+                createAccount(values);
+            } else {
+                updateAccount(values);
             }
 
             // setIsModalOpen(false)
-
         } catch (error) {
             console.error("Validation failed:", error);
         }
-    }
+    };
 
     const handleCreate = () => {
         setSelectedRecord(null);
         setMode("Add");
         form.resetFields();
         showModal();
-
-    }
+    };
 
     const handleUpdate = (record) => {
         setMode("Edit");
-        console.log("record", record.role.id)
+        console.log("record", record.role.id);
         setSelectedRecord(record);
         // Cập nhật giá trị form trước khi mở modal
-        showModal()
-    }
+        showModal();
+    };
 
     const handleCancel = () => {
         form.resetFields();
         setSelectedRecord(null);
         setIsModalOpen(false);
-    }
-
-
+    };
+    const onChange = (page) => {
+        // console.log(page);
+        // setCurrent(page);
+    };
     return (
         <>
             <PageHeader title={"Quản Lý Tài Khoản"}>
                 <ButtonIcon
                     handleEvent={() => {
-                        handleCreate()
+                        handleCreate();
                     }}
                 >
                     <Plus /> Thêm Tài Khoản
@@ -343,10 +340,14 @@ const Account = () => {
                 <Table
                     columns={columns}
                     dataSource={accountData}
-                // pagination={{ total, defaultCurrent: current, pageSize: 10 }}
+                    pagination={{
+                        total: total,
+                        defaultCurrent: current,
+                        pageSize: 5, // Mặc định 10 dòng mỗi trang
+                        onChange: onChange,
+                    }}
                 />
             </div>
-
 
             <ModalAccount
                 isModalOpen={isModalOpen}
@@ -359,16 +360,15 @@ const Account = () => {
                     form={form}
                     formItems={formItems}
                     formItemLayout={formItemLayout}
-                // initialValues={{
+                    // initialValues={{
 
-                //     role: selectedRecord && selectedRecord?.role?.id, // ID của quyền đã chọn
+                    //     role: selectedRecord && selectedRecord?.role?.id, // ID của quyền đã chọn
 
-                // }}
-
+                    // }}
                 />
             </ModalAccount>
         </>
-    )
-}
+    );
+};
 
-export default Account
+export default Account;

@@ -11,38 +11,40 @@ import useWebSocket from "../../Services/useWebSocket";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 const Department = () => {
     const [data, setData] = useState([]);
-    const [employees, setEmployees] = useState([]);
+    const [employeess, setemployeess] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [current, setCurrent] = useState(1);
+    const [total, setTotal] = useState(0);
     const [form] = Form.useForm();
     const [title, setTitle] = useState("");
     const [mode, setMode] = useState("");
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     const departmentUpdate = useWebSocket("ws://127.0.0.1:8000/ws/departments/");
 
-    const { data: dataEmployees } = useQuery({
-        queryKey: ["employees"],
+    const { data: dataemployeess } = useQuery({
+        queryKey: ["employeess"],
         queryFn: employeeGetAPI,
     });
 
     useEffect(() => {
-        setEmployees(dataEmployees || []);
-    }, [dataEmployees]);
+        setemployeess(dataemployeess || []);
+    }, [dataemployeess]);
 
     const queryClient = useQueryClient();
     const { data: dataDepartment } = useQuery({
-        queryKey: ["departments"],
+        queryKey: ["departmentDe"],
         queryFn: departmentGetAPI,
     });
     useEffect(() => {
         if (departmentUpdate) {
-            queryClient.invalidateQueries(["departments"]);
+            queryClient.invalidateQueries(["departmentDe"]);
         }
     }, [departmentUpdate, queryClient]);
     const { data: dataDepartmentPut, mutate: mutatePut } = useMutation({
         mutationFn: departmentPutAPI,
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: ["departments"],
+                queryKey: ["departmentDe"],
             });
         },
     });
@@ -51,7 +53,7 @@ const Department = () => {
         mutationFn: departmentPostAPI,
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: ["departments"],
+                queryKey: ["departmentDe"],
             });
         },
     });
@@ -64,8 +66,9 @@ const Department = () => {
         }));
     }
     useEffect(() => {
+        //console.log("fix de", dataDepartment);
         if (dataDepartment) {
-            setData(setDataDepartments(dataDepartment));
+            setData(setDataDepartments(dataDepartment.results));
         }
     }, [dataDepartment]);
     useEffect(() => {
@@ -106,6 +109,10 @@ const Department = () => {
         setIsModalOpen(false);
     };
 
+    const onChange = (page) => {
+        // console.log(page);
+        // setCurrent(page);
+    };
     const formItems = [
         {
             name: "name",
@@ -121,7 +128,7 @@ const Department = () => {
                     placeholder="Chọn trưởng phòng"
                     allowClear
                 >
-                    {employees.map((emp) => (
+                    {employeess.map((emp) => (
                         <Select.Option
                             key={emp.id}
                             value={emp.id}
@@ -131,6 +138,7 @@ const Department = () => {
                     ))}
                 </Select>
             ),
+            hidden: mode === "Add" ? true : false,
         },
         {
             name: "description",
@@ -187,7 +195,12 @@ const Department = () => {
             <Table
                 columns={columns}
                 dataSource={data}
-                pagination={{ showSizeChanger: true, pageSizeOptions: ["10", "20", "50", "100"] }}
+                pagination={{
+                    total: total,
+                    defaultCurrent: current,
+                    pageSize: 5, // Mặc định 10 dòng mỗi trang
+                    onChange: onChange,
+                }}
             />
             <ModalDepartment
                 isModalOpen={isModalOpen}

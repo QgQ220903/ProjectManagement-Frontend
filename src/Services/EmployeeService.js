@@ -1,13 +1,13 @@
 import axios from "axios";
-import axiosInstance  from "@/Services/AxiosInstance";
+import axiosInstance from "@/Services/AxiosInstance";
 
 const api = "http://127.0.0.1:8000/api/employees/";
 
 export const employeeGetAPI = async () => {
     try {
-        const response = await axios.get(api);
+        const response = await axios.get(api + "get_all_employees/");
         console.log("employeeGetAPI", response);
-        return response.data.results;
+        return response.data;
     } catch (error) {
         console.log(error);
     }
@@ -15,9 +15,9 @@ export const employeeGetAPI = async () => {
 
 export const employeeGetAllAPI = async () => {
     try {
-        const response = await axiosInstance.get('/employees/get_all_employees/');
+        const response = await axiosInstance.get("/employees/get_all_employees/");
         console.log("employeeGetAllAPI", response);
-        return response.data;
+        return response.data.results;
     } catch (error) {
         console.log(error);
     }
