@@ -33,6 +33,7 @@ const ModalCreateDepartment = (props) => {
       onOk={handleOk}
       onCancel={handleCancel}
       // destroyOnClose={true}
+      addText="Lưu và thêm"
       okText="Lưu"
       cancelText="Thoát"
       maskClosable={false}
