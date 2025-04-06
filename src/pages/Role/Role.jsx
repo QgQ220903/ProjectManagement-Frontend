@@ -215,14 +215,14 @@ const Role = () => {
                 title={title}
                 form={form}
             >
-                {isEditRole ? (<Table pagination={false}  columns={columns2} dataSource={data2} />) :(  <FormAccount
+                <FormAccount
                     form={form}
                     formItems={formItems}
                     formItemLayout={formItemLayout}
                 // initialValues={{
                 //     positionName: "NV",
-                // }}
-                />)}
+                // }
+                />
                
             </ModalAccount>
         </>

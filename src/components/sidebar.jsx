@@ -33,7 +33,8 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
             "Quản lý nhóm quyền": "Nhóm Quyền",
             "Quản lý công việc phòng ban": "Công Việc Phòng Ban",
             "Quản lý công việc": "Công Việc",
-            "Công việc lưu trữ": "Công Việc Lưu Trữ"
+            "Công việc lưu trữ": "Công Việc Lưu Trữ",
+            "Thống kê" : "Thống kê"
         };
 
         // Lọc navbarLinks theo featuresWithIsShow

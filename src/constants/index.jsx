@@ -7,8 +7,8 @@ import ProductImage from "@/assets/product-image.jpg";
 export const navbarLinks = [
       
         {
-            label: "Dashboard",
-            icon: Home,
+            label: "Thống kê",
+            icon: ChartLine,
             path: "/",
         },  
         {
