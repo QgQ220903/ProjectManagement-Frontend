@@ -1,4 +1,4 @@
-import { ChartLine, Briefcase,ChartColumn,User ,UserCog, CircleUserRound, Home, NotepadText, Package, PackagePlus, Settings, ShoppingBag, UserCheck, UserPlus, Users, ClipboardList, FolderOpen } from "lucide-react";
+import {ArchiveRestore , ChartLine, Briefcase,ChartColumn,User ,UserCog, CircleUserRound, Home, NotepadText, Package, PackagePlus, Settings, ShoppingBag, UserCheck, UserPlus, Users, ClipboardList, FolderOpen } from "lucide-react";
 
 import ProfileImage from "@/assets/profile-image.jpg";
 import ProductImage from "@/assets/product-image.jpg";
@@ -47,6 +47,11 @@ export const navbarLinks = [
             icon: Briefcase,
             path: "/task-department",
         },
+        {
+            label: "Công Việc Lưu Trữ",
+            icon: ArchiveRestore,
+            path:"/task-archive"
+        }
 
       
 ];

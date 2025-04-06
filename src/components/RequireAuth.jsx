@@ -1,25 +1,31 @@
-import { useLocation, Navigate, Outlet } from "react-router-dom";
-import {useAuth} from "@/hooks/use-auth";
-import { Infinity } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useLocation, Navigate } from "react-router-dom";
+import { checkAndRefreshToken } from "@/utils/token";
 
-const RequireAuth = ({ allowedRoles, children  }) => {
-    const { auth, features } = useAuth();
-    const authStorage = JSON.parse(localStorage.getItem("auth"));
+const RequireAuth = ({ children }) => {
     const location = useLocation();
+    const [isChecking, setIsChecking] = useState(true);
+    const [isValid, setIsValid] = useState(false);
 
-    // console.log("RequireAuth",auth)
-    if (Object.keys(auth).length === 0) {
-        console.log("authStorage",authStorage)
-        if(!authStorage){
+    useEffect(() => {
+        const verifyToken = async () => {
+            const valid = await checkAndRefreshToken();
+            setIsValid(valid);
+            setIsChecking(false);
+        };
 
-            return <Navigate to="/login" state={{ from: location }} replace />;
-        }
+        verifyToken();
+    }, []);
+
+    if (isChecking) {
+        return <div>Checking authentication...</div>; // hoặc spinner
     }
 
-    
-
+    if (!isValid) {
+        return <Navigate to="/login" state={{ from: location }} replace />;
+    }
 
     return children;
-}
+};
 
 export default RequireAuth;

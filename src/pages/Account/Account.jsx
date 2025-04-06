@@ -3,14 +3,27 @@ import ModalAccount from "@/components/modal/Modal";
 import FormAccount from "@/components/form/Form";
 import PageHeader from "@/components/PageHeader";
 import ButtonIcon from "@/components/ButtonIcon";
-import { Table, Drawer, Form, Input, Select, Space } from "antd";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Table, Drawer, Form, Input, Select, Space, Button, Popconfirm, Tag, Switch } from "antd";
+import { Pencil, Trash2, Plus, Ban, LockKeyholeOpen, LockKeyhole } from "lucide-react";
 import Search from "@/components/Search";
 import { useForm } from "antd/es/form/Form";
-import { accountGetAPI, accountPostAPI, accountPutAPI } from "@/services/AccountService";
+import { accountGetAPI, accountPostAPI, accountPutAPI, accountDeleteAPI } from "@/services/AccountService";
 import { rolesGetAPI } from "@/services/RoleService";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { employeeGetAllAPI } from "@/Services/employeeService";
+import { Link } from "react-router-dom"
+import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
+
+// Đường dẫn
+const itemsBreadcrumb = [
+    {
+        title: <Link to="/">Home</Link>,
+    },
+
+    {
+        title: "Tài khoản",
+    },
+];
 
 const Account = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -96,6 +109,16 @@ const Account = () => {
         },
     });
 
+    const { data: deleteData, mutate: mutateDelete } = useMutation({
+        mutationFn: ({ isDelete, id }) => accountDeleteAPI(isDelete, id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["accounts"],
+            });
+            setIsModalOpen(false);
+        },
+    });
+
     function setDataAccounts(accounts) {
         return accounts?.map((item) => ({
             ...item,
@@ -131,29 +154,166 @@ const Account = () => {
         }
     }, [form, selectedRecord]);
 
+
+
+    const handleIsLock = (record, isDelete) => {
+        console.log("handleIsLock", record.id)
+        mutateDelete({ isDelete: isDelete, id: record.id })
+    }
     const columns = [
         { title: "ID", dataIndex: "id", key: "id" },
-        { title: "Người dùng", dataIndex: "nameUser", key: "nameUser" },
-        { title: "Nhóm quyền", dataIndex: "nameRole", key: "nameRole" },
-        { title: "Tên đăng nhập", dataIndex: "email", key: "email" },
+        {
+            title: "Người dùng",
+            dataIndex: "nameUser",
+            key: "nameUser",
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    {/* Tùy chỉnh dropdown filter */}
+                    <Input
+                        autoFocus
+                        placeholder="Tìm kiếm theo tên người dùng"
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: "block" }}
+                    />
+                    <Space>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => clearFilters && clearFilters()}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => confirm()}
+                        >
+                            Tìm
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            onFilter: (value, record) => record.nameUser.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            filterSearch: true,
+        },
+        {
+            title: "Nhóm quyền",
+            dataIndex: "nameRole",
+            key: "nameRole"
+        },
+        {
+            title: "Tên đăng nhập",
+            dataIndex: "email",
+            key: "email",
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    {/* Tùy chỉnh dropdown filter */}
+                    <Input
+                        autoFocus
+                        placeholder="Tìm kiếm theo tên đăng nhập"
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: "block" }}
+                    />
+                    <Space>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => clearFilters && clearFilters()}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => confirm()}
+                        >
+                            Tìm
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            onFilter: (value, record) => record.email.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            filterSearch: true,
+        },
+        {
+            title: "Trạng thái",
+            dataIndex: "is_deleted",
+            key: "is_deleted",
+            render: (isDelete) => (
+                <>
+                    {isDelete ? <Tag color="volcano">Không hoạt động</Tag> : <Tag color="green"> Hoạt Động</Tag>}
+                </>
+            )
+        },
         {
             title: "Chức năng",
             dataIndex: "action",
             key: "action",
             render: (_, record) => (
                 <>
-                    <Space size="middle">
-                        <a onClick={() => handleUpdate(record)}>
+                    <Space >
+                        {/* <a onClick={() => handleUpdate(record)}>
                             <Pencil size={20} />
-                        </a>
-                        <a href="">
-                            <Trash2 size={20}></Trash2>
-                        </a>
+                        </a> */}
+                        <Button
+                            shape="circle"
+                            size="medium"
+                            color="gold"
+                            variant="solid"
+                            onClick={() => handleUpdate(record)}
+
+                        >
+                            <Pencil size={18} />
+                        </Button>
+                        {record.is_deleted ? (     <Popconfirm
+                            title="Mở khóa tài khoản?"
+                            onConfirm={() => handleIsLock(record, false)}
+                            okText="Có"
+                            cancelText="Không"
+                            description="Bạn đã chắc chắn muốn mở khóa ?"
+                        >
+                            <Button
+                                shape="circle"
+                                size="medium"
+                                color="green"
+                                variant="solid"
+
+                            >
+                                <LockKeyholeOpen size={20} />
+                            </Button>
+                        </Popconfirm>) 
+                        : 
+                        (  <Popconfirm
+                            title="Khóa tài khoản?"
+                            onConfirm={() => handleIsLock(record, true)}
+                            okText="Có"
+                            cancelText="Không"
+                            description="Bạn đã chắc chắn muốn khóa ?"
+                        >
+                            <Button
+                                shape="circle"
+                                size="medium"
+                                color="red"
+                                variant="solid"
+
+                            >
+                                <LockKeyhole size={20} />
+                            </Button>
+                        </Popconfirm>)}
+                      
+
+                   
                     </Space>
                 </>
             ),
         },
     ];
+
+
     // const data = [
     //     {
     //         key: '1',
@@ -232,7 +392,7 @@ const Account = () => {
                         value: item.id,
                         label: item.name,
                     }))}
-                    // value={selectedRecord?.role?.id} // Set giá trị mặc định
+                // value={selectedRecord?.role?.id} // Set giá trị mặc định
                 />
             ),
             rules: [{ required: true, message: "Vui lòng nhập tên đăng nhập" }],
@@ -325,7 +485,7 @@ const Account = () => {
     };
     return (
         <>
-            <PageHeader title={"Quản Lý Tài Khoản"}>
+            <PageHeader title={"Quản Lý Tài Khoản"} itemsBreadcrumb={itemsBreadcrumb}>
                 <ButtonIcon
                     handleEvent={() => {
                         handleCreate();
@@ -336,7 +496,6 @@ const Account = () => {
             </PageHeader>
 
             <div className="mt-5">
-                <Search size={20} />
                 <Table
                     columns={columns}
                     dataSource={accountData}
@@ -360,11 +519,11 @@ const Account = () => {
                     form={form}
                     formItems={formItems}
                     formItemLayout={formItemLayout}
-                    // initialValues={{
+                // initialValues={{
 
-                    //     role: selectedRecord && selectedRecord?.role?.id, // ID của quyền đã chọn
+                //     role: selectedRecord && selectedRecord?.role?.id, // ID của quyền đã chọn
 
-                    // }}
+                // }}
                 />
             </ModalAccount>
         </>

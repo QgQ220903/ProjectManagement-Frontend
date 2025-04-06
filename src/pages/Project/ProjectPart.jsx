@@ -217,8 +217,8 @@ const ProjectDetail = () => {
 
     useEffect(() => {
         if (employees) {
-            setEmployeesdata(employees);
-            setDepartmentsData(departments);
+            setEmployeesdata(employees.results);
+            setDepartmentsData(departments.results);
         }
     }, [employees, departments]);
 
@@ -1026,7 +1026,7 @@ const ProjectDetail = () => {
                 setIsModalOpen={setIsModalHistoryOpen}
             ></ShowHistory> */}
 
-            <ToastContainer />
+     
         </>
     );
 };

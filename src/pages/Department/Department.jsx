@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Space, Tag, Popconfirm, Form, Input, Select, Table, Drawer } from "antd";
+import { Space, Tag, Popconfirm, Form, Input, Select, Table, Drawer, Button } from "antd";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import Search from "@/components/Search";
 import ModalDepartment from "@/components/modal/Modal";
@@ -9,6 +9,21 @@ import ButtonIcon from "@/components/ButtonIcon";
 import { departmentGetAPI, departmentPostAPI, departmentPutAPI, departmentDeleteAPI, employeeGetAPI } from "@/Services/DepartmentService";
 import useWebSocket from "../../Services/useWebSocket";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
+
+// Đường dẫn
+const itemsBreadcrumb = [
+    {
+        title: <Link to="/">Home</Link>,
+    },
+
+    {
+        title: "Phòng ban",
+    },
+];
+
+
+
 const Department = () => {
     const [data, setData] = useState([]);
     const [employeess, setemployeess] = useState([]);
@@ -31,7 +46,7 @@ const Department = () => {
     }, [dataemployeess]);
 
     const queryClient = useQueryClient();
-    const { data: dataDepartment } = useQuery({
+    const { data: dataDepartment, isLoading } = useQuery({
         queryKey: ["departmentDe"],
         queryFn: departmentGetAPI,
     });
@@ -113,6 +128,17 @@ const Department = () => {
         // console.log(page);
         // setCurrent(page);
     };
+
+    // tùy chỉnh form kích thước input
+    const formItemLayout = {
+        labelCol: {
+            span: 8,
+        },
+        wrapperCol: {
+            span: 16,
+        },
+    };
+
     const formItems = [
         {
             name: "name",
@@ -149,9 +175,86 @@ const Department = () => {
     ];
 
     const columns = [
-        { title: "ID", dataIndex: "key", key: "key" },
-        { title: "Tên Phòng Ban", dataIndex: "name", key: "name", render: (text) => <span>{text}</span> },
-        { title: "Trưởng Phòng", dataIndex: "manager", key: "manager" },
+        {
+            title: "ID",
+            dataIndex: "key",
+            key: "key",
+
+        },
+        {
+            title: "Tên Phòng Ban",
+            dataIndex: "name",
+            key: "name",
+            render: (text) => <span>{text}</span>,
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    {/* Tùy chỉnh dropdown filter */}
+                    <Input
+                        autoFocus
+                        placeholder="Tìm kiếm theo tên phòng ban"
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: "block" }}
+                    />
+                    <Space>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => clearFilters && clearFilters()}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => confirm()}
+                        >
+                            Tìm
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            onFilter: (value, record) => record.name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            filterSearch: true,
+        },
+        { 
+            title: "Trưởng Phòng", 
+            dataIndex: "manager", 
+            key: "manager" ,
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    {/* Tùy chỉnh dropdown filter */}
+                    <Input
+                        autoFocus
+                        placeholder="Tìm kiếm theo tên"
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: "block" }}
+                    />
+                    <Space>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => clearFilters && clearFilters()}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => confirm()}
+                        >
+                            Tìm
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            onFilter: (value, record) => record.manager.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            filterSearch: true,
+            
+        },
         { title: "Mô tả", dataIndex: "description", key: "description" },
         // { title: 'Trạng Thái', dataIndex: 'is_deleted', key: 'is_deleted', render: (text) => <Tag color={text === "Ngừng hoạt động" ? "volcano" : "green"}>{text}</Tag> },
         {
@@ -159,18 +262,35 @@ const Department = () => {
             key: "action",
             render: (_, record) => (
                 <Space>
-                    <a onClick={() => handleEditDepartment(record)}>
+                    {/* <a onClick={() => handleEditDepartment(record)}>
                         <Pencil size={20} />
-                    </a>
+                    </a> */}
+                    <Button
+                        shape="circle"
+                        size="medium"
+                        color="gold"
+                        variant="solid"
+                        onClick={() => handleEditDepartment(record)}
+
+                    >
+                        <Pencil size={18} />
+                    </Button>
                     <Popconfirm
                         title="Xóa phòng ban?"
                         onConfirm={() => handleDeleteDepartment(record.key)}
                         okText="Có"
                         cancelText="Không"
+                        description="Bạn đã chắc chắn muốn xóa ?"
                     >
-                        <a>
-                            <Trash2 size={20} />
-                        </a>
+                        <Button
+                            shape="circle"
+                            size="medium"
+                            color="red"
+                            variant="solid"
+
+                        >
+                            <Trash2 size={18} />
+                        </Button>
                     </Popconfirm>
                 </Space>
             ),
@@ -179,7 +299,7 @@ const Department = () => {
 
     return (
         <>
-            <PageHeader title={"Phòng Ban"}>
+            <PageHeader title={"Quản lý Phòng Ban"} itemsBreadcrumb={itemsBreadcrumb}>
                 <ButtonIcon
                     handleEvent={() => {
                         form.resetFields();
@@ -191,17 +311,20 @@ const Department = () => {
                     <Plus /> Thêm Phòng Ban Mới
                 </ButtonIcon>
             </PageHeader>
-            <Search size={20} />
-            <Table
-                columns={columns}
-                dataSource={data}
-                pagination={{
-                    total: total,
-                    defaultCurrent: current,
-                    pageSize: 5, // Mặc định 10 dòng mỗi trang
-                    onChange: onChange,
-                }}
-            />
+
+            <div className="mt-5">
+                <Table
+                    columns={columns}
+                    dataSource={data}
+                    pagination={{
+                        total: total,
+                        defaultCurrent: current,
+                        pageSize: 5, // Mặc định 10 dòng mỗi trang
+                        onChange: onChange,
+                    }}
+                    isLoading={isLoading}
+                />
+            </div>
             <ModalDepartment
                 isModalOpen={isModalOpen}
                 handleOk={handleOk}
@@ -212,6 +335,7 @@ const Department = () => {
                 <FormDepartment
                     form={form}
                     formItems={formItems}
+                    formItemLayout={formItemLayout}
                 />
             </ModalDepartment>
         </>

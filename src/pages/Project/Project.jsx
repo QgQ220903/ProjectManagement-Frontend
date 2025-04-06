@@ -29,7 +29,7 @@ import { showToastMessage } from "@/utils/toast";
 import { ToastContainer, toast } from "react-toastify";
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import useWebSocket from "../../Services/useWebSocket";
+import useWebSocket from "@/Services/useWebSocket";
 // import "react-toastify/dist/ReactToastify.css";
 
 const Project = () => {
@@ -169,11 +169,10 @@ const Project = () => {
     // Đường dẫn
     const itemsBreadcrumb = [
         {
-            title: <a href="">Home</a>,
+            title: <Link to="/">Home</Link>,
         },
-
         {
-            title: "Công việc",
+            title: "Dự án",
         },
     ];
 
@@ -267,15 +266,26 @@ const Project = () => {
             title: "Chức năng",
             key: "action",
             render: (_, record) => (
-                <Space size="middle">
-                    <a
+                <Space >
+                    {/* <a
                         className="font-medium"
                         onClick={() => handleEditProject(record)}
                     >
                         <Pencil size={20} />
-                    </a>
+                    </a> */}
 
-                    <Popconfirm
+                    <Button
+                            shape="circle"
+                            size="medium"
+                            color="gold"
+                            variant="solid"
+                            onClick={() => handleEditProject(record)}
+
+                        >
+                            <Pencil size={18} />
+                        </Button>
+
+                    {/* <Popconfirm
                         placement="bottomRight"
                         title="Xóa một dự án"
                         description="Bạn đã chắc chắn muốn xóa ?"
@@ -283,13 +293,27 @@ const Project = () => {
                         cancelText="Không"
                         onConfirm={() => handleDeleteProject(record)} // Sửa lại chỗ này
                     >
-                        <a className="font-medium">
+                     
+                        <Button
+                            shape="circle"
+                            size="medium"
+                            color="red"
+                            variant="solid"
+                        >
                             <Trash2 size={20} />
-                        </a>
-                    </Popconfirm>
+                        </Button>
+                    </Popconfirm> */}
 
                     <Link to={"/project/" + record.key}>
-                        <FaEye className="text-lg" />
+                        <Button
+                            shape="circle"
+                            size="medium"
+                            color="blue"
+                            variant="solid"
+                        >
+                            <FaEye className="text-lg" />
+                        </Button>
+                       
                     </Link>
                 </Space>
             ),

@@ -1,6 +1,8 @@
 import { useTheme } from "@/hooks/use-theme";
 
-import { Bell, ChevronsLeft, Moon, Search, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
+
+import { Bell, ChevronsLeft, Moon, Search, Sun  } from "lucide-react";
 
 import profileImg from "@/assets/profile-image.jpg";
 
@@ -8,9 +10,9 @@ import PropTypes from "prop-types";
 
 import { Link } from "react-router-dom";
 
-import { Dropdown, Space } from 'antd';
+import { Dropdown, Space, Avatar, Typography } from 'antd';
 
-import {logOutAPI} from "@/services/AccountService";
+import { logOutAPI } from "@/services/AccountService";
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -18,14 +20,33 @@ import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/hooks/use-auth";
 
-import { removeLocalStorageWhenLogout } from "../utils/cn";
+import { getInitials } from "@/utils/cn"
+
+import { removeLocalStorageWhenLogout } from "@/utils/cn";
+
+import { checkAndRefreshToken } from "@/utils/token";
 
 export const Header = ({ collapsed, setCollapsed }) => {
 
     const { theme, setTheme } = useTheme();
 
-    const { features,setFeatures,setAuth } = useAuth(); 
-    
+    const { features, setFeatures, setAuth, auth, employeeContext } = useAuth();
+
+    console.log("employeeContext", employeeContext)
+
+    const [isChecking, setIsChecking] = useState(true);
+    const [isValid, setIsValid] = useState(false);
+
+    useEffect(() => {
+        const verifyToken = async () => {
+            const valid = await checkAndRefreshToken();
+            setIsValid(valid);
+            setIsChecking(false);
+        };
+        console.log("isValid", isValid)
+        verifyToken();
+    }, []);
+
 
     const navigate = useNavigate();
     const getRefreshToken = () => localStorage.getItem("refresh");
@@ -34,10 +55,10 @@ export const Header = ({ collapsed, setCollapsed }) => {
     const { data: newData, mutate: mutatePost } = useMutation({
         mutationFn: logOutAPI,
         onSuccess: () => {
-            
+
             removeLocalStorageWhenLogout()
-            setFeatures([]) 
-            setAuth({})  
+            setFeatures([])
+            setAuth({})
             navigate('/login');
         },
         onError: (error) => {
@@ -53,31 +74,39 @@ export const Header = ({ collapsed, setCollapsed }) => {
 
     const items = [
         {
-          key: '1',
-          label: (
-            <Link to="login" rel="noopener noreferrer">
-              Login
-            </Link>
-          ),
-        },
-        {
-          key: '2',
-          label: (
-            <Link rel="noopener noreferrer" onClick={handleLogout}>
-                Logout
-            </Link>
-          ),
-        },
-        {
-            key: '3',
+            key: '0',
             label: (
-              <Link rel="noopener noreferrer" >
-                  Setting
-              </Link>
+                <Typography.Title  level={5} >
+                    {employeeContext?.name}
+                </Typography.Title >
             ),
+            disabled: true,
+     
+        },
+        {
+            type: 'divider',
           },
-       
-      ];
+        {
+            key: '1',
+            label: (
+                !isValid ?  <Link to="login" rel="noopener noreferrer">
+                    Login 
+                </Link> :  <Link rel="noopener noreferrer" onClick={handleLogout}>
+                    Logout
+                </Link>
+            ),
+        },
+        // {
+        //     key: '2',
+        //     label: (
+        //         <Link rel="noopener noreferrer" onClick={handleLogout}>
+        //             Logout
+        //         </Link>
+        //     ),
+        // },
+      
+
+    ];
 
     return (
         <header className="relative z-10 flex h-[60px] items-center justify-between bg-white px-4 shadow-md transition-colors dark:bg-slate-900">
@@ -125,14 +154,17 @@ export const Header = ({ collapsed, setCollapsed }) => {
                     }}
                     trigger={['click']}
                     arrow
-                    overlayStyle = {{marginTop:'15px', width:'10%'}}
+                    overlayStyle={{ marginTop: '15px', width: '10%' }}
                 >
                     <button className="size-10 overflow-hidden rounded-full">
-                        <img
+                        {/* <img
                             src={profileImg}
                             alt="profile image"
                             className="size-full object-cover"
-                        />
+                        /> */}
+                        <Avatar className="bg-blue-500" size="large" >
+                            {getInitials(employeeContext?.name)}
+                        </Avatar>
                     </button>
                 </Dropdown>
             </div>

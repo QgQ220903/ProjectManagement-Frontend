@@ -43,3 +43,16 @@ export const projectPartGetAPIWithIdDepartment = async (idDepartment) => {
         console.log(error);
     }
 }
+
+export const projectPartArchivedGetAPIWithIdDepartment = async (idDepartment) => {
+    try {
+        const response = await axiosInstance.get(`/project-parts/with-archived-tasks/${idDepartment}/`);
+        console.log("projectPartArchivedGetAPIWithIdDepartment", response);
+        return response.data.results;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
+

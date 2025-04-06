@@ -27,6 +27,18 @@ export const accountPutAPI = async (obj, id) => {
     }
 };
 
+export const accountDeleteAPI = async (is_deleted, id) => {
+    try {
+        const res = await axiosInstance.patch(`/account/${id}/`, {
+            "is_deleted": is_deleted
+        });
+        return res.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+
 export const logInAPI = async (obj) => {
     // return axiosInstance.post("/account/login/",obj);
     try {

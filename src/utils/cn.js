@@ -28,3 +28,13 @@ export const getRandomColor = () => {
     return "#" + Math.floor(Math.random() * 16777215).toString(16);
 };
 
+export const getInitials = (fullName) => {
+    if (!fullName) return "";
+  
+    return fullName
+      .trim()
+      .split(/\s+/) // tách theo khoảng trắng
+      .map(word => word[0].toUpperCase())
+      .join("");
+  }
+  

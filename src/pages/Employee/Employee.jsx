@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Space, Popconfirm, Form, Input, Select, Descriptions } from "antd";
+import { Space, Popconfirm, Form, Input, Select, Descriptions, Button } from "antd";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FaEye } from "react-icons/fa";
@@ -16,6 +16,20 @@ import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 import { useRef } from "react";
 import useWebSocket from "../../Services/useWebSocket";
+
+
+ // Đường dẫn
+ const itemsBreadcrumb = [
+    {
+        title: <Link to="/">Home</Link>,
+    },
+
+    {
+        title: "Nhân viên",
+    },
+];
+
+
 const Employee = () => {
     const [current, setCurrent] = useState(1);
     const [total, setTotal] = useState(0);
@@ -28,7 +42,9 @@ const Employee = () => {
     const [open, setOpen] = useState(false);
     const [title, setTitle] = useState("");
     const [mode, setMode] = useState("");
+
     const [form] = Form.useForm();
+
     const [data, setData] = useState(null);
 
     const [roleEmployee, setRoleEmployee] = useState(null);
@@ -48,9 +64,6 @@ const Employee = () => {
             setRoleEmployee(featureEmployee);
             console.log("roleEmployee", roleEmployee);
 
-            // if(!featureEmployee) {
-            //     navigate("/")
-            // }
         }
     }, [features]);
 
@@ -94,7 +107,7 @@ const Employee = () => {
     }
     const queryClient = useQueryClient();
     //lấy ds nv
-    const { data: employees } = useQuery({
+    const { data: employees, isLoading } = useQuery({
         queryKey: ["employeeEm"],
         queryFn: employeeGetAPI,
     });
@@ -148,7 +161,7 @@ const Employee = () => {
             setData(setDataEmployees(employeData));
         }
         console.log("dataDepartment", departments);
-        departments ? setDepartmentData(departments) : "";
+        departments ? setDepartmentData(departments.results) : "";
     }, [employees, departments]);
 
     useEffect(() => {
@@ -235,38 +248,183 @@ const Employee = () => {
 
     const columns = [
         { title: "ID", dataIndex: "key", key: "key" },
-        { title: "Tên Nhân Viên", dataIndex: "name", key: "name" },
-        { title: "Chức Vụ", dataIndex: "position", key: "position" },
-        { title: "Số Điện Thoại", dataIndex: "phone_number", key: "phone" },
-        { title: "Email", dataIndex: "email", key: "email" },
+        {
+            title: "Tên Nhân Viên",
+            dataIndex: "name",
+            key: "name",
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    {/* Tùy chỉnh dropdown filter */}
+                    <Input
+                        autoFocus
+                        placeholder="Tìm kiếm theo tên nhân viên"
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: "block" }}
+                    />
+                    <Space>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => clearFilters && clearFilters()}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => confirm()}
+                        >
+                            Tìm
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            onFilter: (value, record) => record.name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            filterSearch: true,
+
+        },
+        {
+            title: "Chức Vụ",
+            dataIndex: "position",
+            key: "position"
+        },
+        {
+            title: "Số Điện Thoại",
+            dataIndex: "phone_number",
+            key: "phone",
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    {/* Tùy chỉnh dropdown filter */}
+                    <Input
+                        autoFocus
+                        placeholder="Tìm kiếm theo số điện thoại"
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: "block" }}
+                    />
+                    <Space>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => clearFilters && clearFilters()}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => confirm()}
+                        >
+                            Tìm
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            onFilter: (value, record) => record.phone.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            filterSearch: true,
+        },
+        {
+            title: "Email",
+            dataIndex: "email",
+            key: "email",
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    {/* Tùy chỉnh dropdown filter */}
+                    <Input
+                        autoFocus
+                        placeholder="Tìm kiếm theo email"
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: "block" }}
+                    />
+                    <Space>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => clearFilters && clearFilters()}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => confirm()}
+                        >
+                            Tìm
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            onFilter: (value, record) => record.email.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            filterSearch: true,
+        },
 
         {
             title: "Hành động",
             key: "action",
             render: (_, record) => (
-                <Space size="middle">
+                <Space >
                     {roleEmployee?.can_update && (
-                        <a
+                        // <a
+                        //     onClick={() =>
+                        //         handleEditEmployee(record.position === "Trưởng Phòng" ? { ...record, position: "TP" } : { ...record, position: "NV" })
+                        //     }
+                        // >
+                        //     <Pencil size={20} />
+                        // </a>
+                        <Button
+                            shape="circle"
+                            size="medium"
+                            color="gold"
+                            variant="solid"
                             onClick={() =>
                                 handleEditEmployee(record.position === "Trưởng Phòng" ? { ...record, position: "TP" } : { ...record, position: "NV" })
                             }
+
                         >
-                            <Pencil size={20} />
-                        </a>
+                            <Pencil size={18} />
+                        </Button>
                     )}
 
                     {roleEmployee?.can_delete && (
+                        // <Popconfirm
+                        //     title="Xóa nhân viên?"
+                        //     onConfirm={() => handleDeleteEmployee(record.key)}
+                        //     okText="Có"
+                        //     cancelText="Không"
+                        // >
+                        //     <a>
+                        //         <Trash2 size={20} />
+                        //     </a>
+                        // </Popconfirm>
                         <Popconfirm
                             title="Xóa nhân viên?"
                             onConfirm={() => handleDeleteEmployee(record.key)}
                             okText="Có"
                             cancelText="Không"
+                             description="Bạn đã chắc chắn muốn xóa ?"
                         >
-                            <a>
-                                <Trash2 size={20} />
-                            </a>
+                            <Button
+                                shape="circle"
+                                size="medium"
+                                color="red"
+                                variant="solid"
+
+                            >
+                                <Trash2 size={18} />
+                            </Button>
                         </Popconfirm>
                     )}
+
+
+
+
+
+
                 </Space>
             ),
         },
@@ -320,7 +478,7 @@ const Employee = () => {
     return (
         <>
             {/* {roleEmployee && JSON.stringify(roleEmployee)} */}
-            <PageHeader title={"Nhân Viên"}>
+            <PageHeader title={"Quản Lý Nhân Viên"} itemsBreadcrumb={itemsBreadcrumb}>
                 {roleEmployee?.can_create && (
                     <ButtonIcon
                         handleEvent={() => {
@@ -336,7 +494,7 @@ const Employee = () => {
             </PageHeader>
 
             <div className="mt-5">
-                <Search size={20} />
+
                 <Table
                     columns={columns}
                     dataSource={data || []}
@@ -346,6 +504,7 @@ const Employee = () => {
                         pageSize: 5, // Mặc định 10 dòng mỗi trang
                         onChange: onChange,
                     }}
+                    isLoading={isLoading}
                 />
             </div>
 

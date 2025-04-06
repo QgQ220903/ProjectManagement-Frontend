@@ -5,6 +5,7 @@ import { navbarLinks } from "@/constants";
 
 import logoLight from "@/assets/logo-light.svg";
 import logoDark from "@/assets/logo-dark.svg";
+import logoSgu from "@/assets/logoSgu.png";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/utils/cn";
 
@@ -32,6 +33,7 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
             "Quản lý nhóm quyền": "Nhóm Quyền",
             "Quản lý công việc phòng ban": "Công Việc Phòng Ban",
             "Quản lý công việc": "Công Việc",
+            "Công việc lưu trữ": "Công Việc Lưu Trữ"
         };
 
         // Lọc navbarLinks theo featuresWithIsShow
@@ -58,18 +60,22 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
                 collapsed ? "max-md:-left-full" : "max-md:left-0",
             )}
         >
-            <div className="flex gap-x-3 p-3">
+            <div className="flex gap-x-3 p-3 flex-col items-center">
                 <img
-                    src={logoLight}
-                    alt="Logoipsum"
-                    className="dark:hidden"
+              
+                    src={logoSgu}
+                    alt="SGU"
+                    className="dark:hidden w-24 object-cover"
                 />
                 <img
-                    src={logoDark}
-                    alt="Logoipsum"
-                    className="hidden dark:block"
+                    src={logoSgu}
+                    alt="SGU"
+                    className="hidden dark:block  w-24 object-cover"
                 />
-                {!collapsed && <p className="text-lg font-medium text-slate-900 transition-colors dark:text-slate-50">Logoipsum</p>}
+                {!collapsed && 
+                <p className="mt-2 text-lg font-medium text-slate-900 transition-colors dark:text-slate-50">
+                    <span className="text-blue-500 font-extrabold">SGU</span> <span className="font-normal ">Task Manager</span>
+                </p>}
             </div>
             <div className="flex w-full flex-col gap-y-4 overflow-y-auto overflow-x-hidden p-3 [scrollbar-width:_thin]">
 

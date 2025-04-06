@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import FormLogin from "@/components/form/Form";
 import { useAuth } from "@/hooks/use-auth";
 import { showToastMessage } from '@/utils/toast'
+import logoSgu from "@/assets/logoSgu.png";
 
 import { ToastContainer, toast } from 'react-toastify';
 
@@ -66,13 +67,19 @@ const Login = () => {
             <section className="bg-gray-50 dark:bg-gray-900">
                 <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
                     <a href="#" className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
-                        <img className="w-8 h-8 mr-2" src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/logo.svg" alt="logo" />
-                        Quản dự án
+                        <img
+                             className=" w-24 object-cover"
+                            src={logoSgu}
+                            alt="Logoipsum"
+                           
+                        />
+                     
                     </a>
                     <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
                         <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
+                
                             <h1 className="text-xl text-center font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-                                Đăng nhập bằng tài khoản của bạn
+                                Đăng nhập vào hệ thống
                             </h1>
                             <form className="space-y-4 md:space-y-6" action="Post" onSubmit={handleSubmit}>
                                 <div>
@@ -85,14 +92,14 @@ const Login = () => {
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-start">
-                                        <div className="flex items-center h-5">
+                                        {/* <div className="flex items-center h-5">
                                             <input id="remember" aria-describedby="remember" type="checkbox" className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800" required="" />
-                                        </div>
-                                        <div className="ml-3 text-sm">
+                                        </div> */}
+                                        {/* <div className="ml-3 text-sm">
                                             <label htmlFor="remember" className="text-gray-500 dark:text-gray-300">Remember me</label>
-                                        </div>
+                                        </div> */}
                                     </div>
-                                    <a href="#" className="text-sm font-medium text-primary-600 hover:underline dark:text-blue-600">Quên mật khẩu ?</a>
+                                    {/* <a href="#" className="text-sm font-medium text-primary-600 hover:underline dark:text-blue-600">Quên mật khẩu ?</a> */}
                                 </div>
                                 <button type="submit" className="w-full btn-primary ">Đăng nhập</button>
                                 {/* <p className="text-sm font-light text-gray-500 dark:text-gray-400">

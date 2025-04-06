@@ -13,6 +13,8 @@ import Role from "@/pages/Role/Role";
 import Task from "@/pages/Task/Task";
 import TaskDepartment from "@/pages/TaskDepartment/TaskDepartment";
 
+import TaskArchive from "@/pages/TaskArchive/TaskArchive";
+
 import RequireAuth from "@/components/RequireAuth";
 
 import { theme as antdTheme } from "antd";
@@ -36,19 +38,22 @@ function App() {
     const router = createBrowserRouter([
         {
             path: "/",
-            element: <MainLayout />,
+            element: <RequireAuth>
+                <MainLayout />
+            </RequireAuth>,
             children: [
                 {
-                    index: true,
+                    path: "/",
                     element: <Dashboard />,
+                    
                 },
                 {
                     path: "employees",
-                    element: <RequireAuth><Employee /></RequireAuth>,
+                    element: <Employee />
                 },
                 {
                     path: "department",
-                    element: <RequireAuth><Department /></RequireAuth>,
+                    element: <Department />
                 },
                 {
                     path: "verified-customers",
@@ -84,8 +89,8 @@ function App() {
                     element: <h1 className="title">Settings</h1>,
                 },
                 {
-                    path: "test",
-                    element: <Test />,
+                    path: "task-archive",
+                    element: <TaskArchive />,
                 },
             ],
         },

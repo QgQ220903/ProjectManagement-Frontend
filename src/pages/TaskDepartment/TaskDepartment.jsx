@@ -34,7 +34,7 @@ import EmptyTemplate from "@/components/emptyTemplate/EmptyTemplate";
 import { workHistoriesPostAPI, workHistoriesGetAPI } from "@/Services/WorkHistoryService";
 
 // Task API
-import { taskPost } from "@/Services/TaskService";
+import { taskPost, taskDelete } from "@/Services/TaskService";
 
 import { taskAssignmentsPost, taskAssignmentsPatch } from "@/Services/TaskAssignmentsService";
 
@@ -42,8 +42,9 @@ import { departmentTaskPost } from "@/Services/DepartmentTaskService";
 
 import { sendEmail } from "@/Services/EmailService.";
 
-import { formatDate, getRandomColor } from "@/utils/cn";
-import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History, File, Pen, ArrowLeftRight, FileCheck2 } from "lucide-react";
+import { formatDate, getRandomColor, getInitials } from "@/utils/cn";
+
+import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History, File, Pen, ArrowLeftRight, FileCheck2, ArchiveRestore } from "lucide-react";
 import ButtonIcon from "@/components/ButtonIcon";
 
 import ModalProjectTask from "@/components/modal/Modal";
@@ -53,7 +54,6 @@ import FormProjectTask from "@/components/form/Form";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import ShowHistory from "@/components/ShowHistory";
-
 
 import { useAuth } from "@/hooks/use-auth";
 
@@ -216,6 +216,19 @@ const TaskDepartment = () => {
         }, onError: (error) => {
             console.log("mutateTask", error);
             showToastMessage('Thêm công việc vào dự án thất bại !', 'error', 'top-right')
+        },
+    });
+
+    const { mutateAsync: mutateDeleteTask, isLoading: deleteLoading } = useMutation({
+        mutationFn: ({ isDelete, id }) => taskDelete(isDelete, id),
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({
+                queryKey: ["taskDepartment"],
+            });
+            showToastMessage('Lưu trữ công việc thành công !', 'success', 'top-right')
+        }, onError: (error) => {
+            console.log("mutateTask", error);
+            showToastMessage('Lưu trữ công việc thất bại !', 'error', 'top-right')
         },
     });
 
@@ -584,7 +597,12 @@ const TaskDepartment = () => {
                                 ></TitleTooltip>
                             }
                         >
-                            <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
+                            <Avatar 
+                            // style={{ backgroundColor: getRandomColor() }}
+                               className="bg-blue-500"
+                            > 
+                            {getInitials(value.name)}
+                            </Avatar>
                         </Tooltip>
                     </Avatar.Group>
                 ),
@@ -656,6 +674,10 @@ const TaskDepartment = () => {
     //     });
     // };
 
+    const handleArchiveTask = (record) => {
+        console.log("handleArchiveTask", record)
+        mutateDeleteTask({isDelete:true,id:record.id})
+    }
     // Cấu hình cột TASKS
     const taskColumns = [
         {
@@ -760,7 +782,12 @@ const TaskDepartment = () => {
                                 ></TitleTooltip>
                             }
                         >
-                            <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
+                            <Avatar 
+                            // style={{ backgroundColor: getRandomColor() }} 
+                            className="bg-blue-500"
+                            > 
+                                {getInitials(value.name)}
+                            </Avatar>
                         </Tooltip>
                     </Avatar.Group>
                 ),
@@ -829,6 +856,9 @@ const TaskDepartment = () => {
                                 <Avatar style={{ backgroundColor: getRandomColor() }}> {item.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
                             </Tooltip>
                         ))}
+                         <Link>
+                         <Avatar icon={<Plus></Plus>} ></Avatar>
+                         </Link>
                     </Avatar.Group>
                 </>
             ),
@@ -878,25 +908,26 @@ const TaskDepartment = () => {
                                 <File size={18} />
                             </Button>
 
-                            <Button
+                            {/* <Button
                                 shape="circle"
                                 size="medium"
                                 color="purple"
                                 variant="solid"
                             >
                                 <Pen size={18} />
-                            </Button>
+                            </Button> */}
 
-                            <Button
+                            {/* <Button
                                 shape="circle"
                                 size="medium"
                                 color="lime"
                                 variant="solid"
                             >
                                 <ArrowLeftRight size={18} />
-                            </Button>
+                            </Button> */}
                         </>
                     )}
+
                     {(record.isDoers || employeeContext.position === "TP") && (
                         <>
                             <Button
@@ -920,14 +951,32 @@ const TaskDepartment = () => {
                         </>
                     )}
 
-                    {/* {
-                        (record.isDoers) && (
-                            <>
-                                <Button shape="circle" size="medium" color="cyan" variant="solid" onClick={() => showDrawer(record)}><MessageCircleMore size={18} /></Button>
-                                <Button shape="circle" size="medium" color="volcano" variant="solid" onClick={() => showHistoryModal(record)}><History size={18} /></Button>
-                            </>
-                        )
-                    } */}
+                   { record.completion_percentage === 100 && (
+                        <>
+                             <Popconfirm
+                            title="Lưu trữ dự án?"
+                            onConfirm={()=>handleArchiveTask(record)}
+                            okText="Có"
+                            cancelText="Không"
+                            description="Bạn đã chắc chắn lưu trữ dự án này ?"
+                        >
+                             <Button 
+                                shape="circle"
+                                size="medium"
+                                color="green"
+                                variant="solid"
+                                // onClick={()=>handleArchiveTask(record)}
+                                
+                            
+                            >
+                              <ArchiveRestore size={18} />
+                            </Button>
+                        </Popconfirm>
+
+                           
+                        </>)
+
+                   }
                 </Space>
             ),
         },
@@ -1214,7 +1263,7 @@ const TaskDepartment = () => {
         <>
             {/* <div>{projectPartData && JSON.stringify(projectPartData)}</div> */}
             <PageHeader
-                title={"Công việc Phòng Ban"}
+                title={"Công Việc Phòng Ban"}
                 itemsBreadcrumb={itemsBreadcrumb}
             ></PageHeader>
 
