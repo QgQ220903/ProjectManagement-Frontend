@@ -41,7 +41,7 @@ import { showToastMessage } from "@/utils/toast";
 import { ToastContainer, toast } from "react-toastify";
 import useWebSocket from "../../Services/useWebSocket";
 
-const itemsBreadcrumb = [{ title: <Link to="/">Home</Link> }, { title: <Link to="/project">Dự án</Link> }, { title: "Phần dự án" }];
+const itemsBreadcrumb = [{ title: <Link to="/">Trang chủ</Link> }, { title: <Link to="/project">Dự án</Link> }, { title: "Phần dự án" }];
 
 // tùy chỉnh form kích thước input
 const formItemLayout = {

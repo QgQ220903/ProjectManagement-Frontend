@@ -38,7 +38,7 @@ const { Dragger } = Upload;
 
 const getAccessToken = () => localStorage.getItem("access");
 
-const itemsBreadcrumb = [{ title: <Link to="/">Home</Link> }, { title: "Công việc" }];
+const itemsBreadcrumb = [{ title: <Link to="/">Trang chủ</Link> }, { title: "Công việc" }];
 
 const Task = () => {
     const taskSocket = useWebSocket("ws://127.0.0.1:8000/ws/tasks/");

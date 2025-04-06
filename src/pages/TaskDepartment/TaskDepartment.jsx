@@ -67,7 +67,7 @@ import DrawerChatRom from "./components/DrawerChatRom";
 
 import { searchSubtasks, searchSubtasksResponsible_person } from "@/utils/tasks"
 
-const itemsBreadcrumb = [{ title: <Link to="/">Home</Link> }, { title: "Công việc phòng ban" }];
+const itemsBreadcrumb = [{ title: <Link to="/">Trang chủ</Link> }, { title: "Công việc phòng ban" }];
 
 // tùy chỉnh form kích thước input
 const formItemLayout = {

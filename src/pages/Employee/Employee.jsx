@@ -21,7 +21,7 @@ import useWebSocket from "../../Services/useWebSocket";
  // Đường dẫn
  const itemsBreadcrumb = [
     {
-        title: <Link to="/">Home</Link>,
+        title: <Link to="/">Trang chủ</Link>,
     },
 
     {
