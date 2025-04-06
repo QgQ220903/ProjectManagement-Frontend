@@ -17,7 +17,7 @@ import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 // Đường dẫn
 const itemsBreadcrumb = [
     {
-        title: <Link to="/">Home</Link>,
+        title: <Link to="/">Trang chủ</Link>,
     },
 
     {
