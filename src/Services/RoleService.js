@@ -9,3 +9,4 @@ export const rolesGetAPI = async() => {
     const res = await axiosInstance.get(`/roles/`);
     return res.data;    
 }
+
