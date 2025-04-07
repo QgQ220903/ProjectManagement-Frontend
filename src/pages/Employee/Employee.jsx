@@ -455,6 +455,7 @@ const Employee = () => {
         setTitle("Sửa Nhân Viên");
         //setUseData(record.position === "Trưởng phòng" ? { ...record, position: "TP" } : { ...record, position: "NV" });
         setUseData(record);
+        setDepartmentDataFilter(departmentData)
         form.setFieldsValue(record); // Đổ dữ liệu vào form
         setMode("Edit");
         setIsModalOpen(true);

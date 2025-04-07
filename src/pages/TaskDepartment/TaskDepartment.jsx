@@ -48,8 +48,10 @@ import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History, File, Pen, Arro
 import ButtonIcon from "@/components/ButtonIcon";
 
 import ModalProjectTask from "@/components/modal/Modal";
+import ModalSendEmail from "@/components/modal/Modal";
 
 import FormProjectTask from "@/components/form/Form";
+import FormSendEmail from "@/components/form/Form";
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -79,11 +81,14 @@ const formItemLayout = {
     },
 };
 
+
+
 const priorityOrder = {
     "Thấp": 1,
     "Trung Bình": 2,
     "Cao": 3,
 };
+
 
 
 const { RangePicker } = DatePicker;
@@ -121,6 +126,10 @@ const TaskDepartment = () => {
     const [isModalTaskOpen, setIsModalTaskOpen] = useState(false);
 
     const [formTask] = Form.useForm();
+
+    const [formSendEmail] = Form.useForm();
+
+
 
     const [mode, setMode] = useState("");
 
@@ -673,6 +682,15 @@ const TaskDepartment = () => {
     //         return false;
     //     });
     // };
+    const [isModalSendEmailOpen, setIsModalSendEmailOpen] = useState(false);
+
+    const handleShowSendEmail = (record) => {
+        setIsModalSendEmailOpen(true);
+    }
+
+    const handleCancelSendEmail = () => {
+        setIsModalSendEmailOpen(false);
+    }
 
     const handleArchiveTask = (record) => {
         console.log("handleArchiveTask", record)
@@ -893,7 +911,7 @@ const TaskDepartment = () => {
                                 size="medium"
                                 color="pink"
                                 variant="solid"
-                                onClick={() => console.log("bekk")}
+                                onClick={() => handleShowSendEmail(record)}
                             >
                                 <Bell size={18} />
                             </Button>
@@ -1126,6 +1144,17 @@ const TaskDepartment = () => {
         },
     ];
 
+    const formItemsSendEmail = [
+        {
+            name: "content",
+            label: "",
+            component:  <TextArea rows={10} placeholder="nhập tin nhắn!"/>,
+            // props: { readOnly: true },
+           
+        },
+      
+    ]
+
     const expandedRowRender = (part) => (
         <Table
             columns={taskColumns}
@@ -1304,6 +1333,23 @@ const TaskDepartment = () => {
                     formItems={formItemsTask}
                 ></FormProjectTask>
             </ModalProjectTask>
+
+            {/* Modal show send email */}
+            <ModalSendEmail
+                isModalOpen={isModalSendEmailOpen}
+                setIsModalOpen={setIsModalSendEmailOpen}
+                // handleOk={handleOkTask}
+                handleCancel={handleCancelSendEmail}
+                title={"Gửi Email"}
+                form={formSendEmail}
+            >
+                <FormSendEmail
+                    formName={"formSendEmail" + mode}
+                    form={formSendEmail}
+                  
+                    formItems={formItemsSendEmail}
+                ></FormSendEmail>
+            </ModalSendEmail>
 
             {/* Drawer chatroom */}
             <DrawerChatRom
