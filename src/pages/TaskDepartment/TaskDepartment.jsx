@@ -442,8 +442,8 @@ const TaskDepartment = () => {
             created_at: formatDate(task.created_at),
             end_time: formatDate(task.end_time),
             isCreateTask: task?.responsible_person ? employeeContext.position !== "NV" && task.responsible_person.id === auth.id : false,
-            isDoers: task?.responsible_person ? task.doers.some((doer) => doer.id === auth.id) || task.responsible_person.id === auth.id : false,
-            isRes: task?.responsible_person ? task.responsible_person.id === auth.id : false,
+            isDoers: task.doers.some((doer) => doer.id === employeeContext.id) || task.responsible_person.id === employeeContext.id,
+            isRes: task?.responsible_person ? task.responsible_person.id === employeeContext.id : false,
         };
 
         // Nếu task có subtasks, gọi đệ quy để xử lý tất cả các cấp
