@@ -441,7 +441,7 @@ const TaskDepartment = () => {
             key: "task" + task.id,
             created_at: formatDate(task.created_at),
             end_time: formatDate(task.end_time),
-            isCreateTask: task?.responsible_person ? employeeContext.position !== "NV" && task.responsible_person.id === auth.id : false,
+            isCreateTask: task?.responsible_person ? employeeContext.position !== "NV" && task.responsible_person.id === employeeContext.id : false,
             isDoers: task.doers.some((doer) => doer.id === employeeContext.id) || task.responsible_person.id === employeeContext.id,
             isRes: task?.responsible_person ? task.responsible_person.id === employeeContext.id : false,
         };
