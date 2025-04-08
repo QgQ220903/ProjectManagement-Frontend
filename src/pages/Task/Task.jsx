@@ -25,7 +25,7 @@ import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/re
 import { useAuth } from "@/hooks/use-auth";
 import { formatDate, getRandomColor } from "@/utils/cn";
 import TitleTooltip from "@/components/tooltip/TitleTooltip";
-import FileUpload from './test';
+
 import { fileAssignmentPostAPI } from '@/services/FileService';
 
 import { FileCard } from "@/components/FileCard"

@@ -63,9 +63,9 @@ import TitleTooltip from "@/components/tooltip/TitleTooltip";
 
 import useWebSocket from "@/services/useWebSocket";
 
-import DrawerFile from "./components/DrawerFile";
+import DrawerFile from "@/pages/TaskDepartment/components/DrawerFile";
 
-import DrawerChatRom from "./components/DrawerChatRom";
+import DrawerChatRom from "@/pages/TaskDepartment/components/DrawerChatRom";
 
 import { searchSubtasks, searchSubtasksResponsible_person } from "@/utils/tasks"
 
