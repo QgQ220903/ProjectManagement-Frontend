@@ -5,7 +5,7 @@ import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { HeaderChat } from '@/components/chatRoom/Chat'
 import { FileCheck2 } from 'lucide-react'
 import { FileCard } from "@/components/FileCard";
-import { taskAssignmentsPost, taskAssignmentsPatch } from "@/Services/TaskAssignmentsService";
+import { taskAssignmentsPost, taskAssignmentsPatch } from "@/services/TaskAssignmentsService";
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 

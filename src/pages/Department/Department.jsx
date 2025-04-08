@@ -6,8 +6,8 @@ import ModalDepartment from "@/components/modal/Modal";
 import FormDepartment from "@/components/form/Form";
 import PageHeader from "@/components/PageHeader";
 import ButtonIcon from "@/components/ButtonIcon";
-import { departmentGetAPI, departmentPostAPI, departmentPutAPI, departmentDeleteAPI, employeeGetAPI } from "@/Services/DepartmentService";
-import useWebSocket from "@/Services/useWebSocket";
+import { departmentGetAPI, departmentPostAPI, departmentPutAPI, departmentDeleteAPI, employeeGetAPI } from "@/services/DepartmentService";
+import useWebSocket from "@/services/useWebSocket";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 

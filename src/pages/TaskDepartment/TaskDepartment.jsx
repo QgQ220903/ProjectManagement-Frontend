@@ -22,25 +22,25 @@ import PageHeader from "@/components/PageHeader";
 
 import { Link } from "react-router-dom";
 
-import { projectPartGetAPI } from "@/Services/ProjectService";
+import { projectPartGetAPI } from "@/services/ProjectService";
 
-import { projectPartPostAPI, projectPartGetAPIForIdUser, projectPartGetAPIWithIdDepartment } from "@/Services/ProjectPartService";
+import { projectPartPostAPI, projectPartGetAPIForIdUser, projectPartGetAPIWithIdDepartment } from "@/services/ProjectPartService";
 
 // Employee API
-import { employeeGetAllAPI, employeeGetAllAPIWithDepartment } from "@/Services/EmployeeService";
+import { employeeGetAllAPI, employeeGetAllAPIWithDepartment } from "@/services/EmployeeService";
 
 import EmptyTemplate from "@/components/emptyTemplate/EmptyTemplate";
 
-import { workHistoriesPostAPI, workHistoriesGetAPI } from "@/Services/WorkHistoryService";
+import { workHistoriesPostAPI, workHistoriesGetAPI } from "@/services/WorkHistoryService";
 
 // Task API
-import { taskPost, taskDelete } from "@/Services/TaskService";
+import { taskPost, taskDelete } from "@/services/TaskService";
 
-import { taskAssignmentsPost, taskAssignmentsPatch } from "@/Services/TaskAssignmentsService";
+import { taskAssignmentsPost, taskAssignmentsPatch } from "@/services/TaskAssignmentsService";
 
-import { departmentTaskPost } from "@/Services/DepartmentTaskService";
+import { departmentTaskPost } from "@/services/DepartmentTaskService";
 
-import { sendEmail } from "@/Services/EmailService.";
+import { sendEmail } from "@/services/EmailService.";
 
 import { formatDate, getRandomColor, getInitials } from "@/utils/cn";
 
@@ -61,7 +61,7 @@ import { useAuth } from "@/hooks/use-auth";
 
 import TitleTooltip from "@/components/tooltip/TitleTooltip";
 
-import useWebSocket from "@/Services/useWebSocket";
+import useWebSocket from "@/services/useWebSocket";
 
 import DrawerFile from "./components/DrawerFile";
 

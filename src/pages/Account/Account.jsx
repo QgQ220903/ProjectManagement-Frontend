@@ -7,10 +7,10 @@ import { Table, Drawer, Form, Input, Select, Space, Button, Popconfirm, Tag, Swi
 import { Pencil, Trash2, Plus, Ban, LockKeyholeOpen, LockKeyhole } from "lucide-react";
 import Search from "@/components/Search";
 import { useForm } from "antd/es/form/Form";
-import { accountGetAPI, accountPostAPI, accountPutAPI, accountDeleteAPI } from "@/Services/AccountService";
-import { rolesGetAPI } from "@/Services/RoleService";
+import { accountGetAPI, accountPostAPI, accountPutAPI, accountDeleteAPI } from "@/services/AccountService";
+import { rolesGetAPI } from "@/services/RoleService";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { employeeGetAllAPI } from "@/Services/employeeService";
+import { employeeGetAllAPI } from "@/services/employeeService";
 import { Link } from "react-router-dom"
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 

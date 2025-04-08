@@ -6,9 +6,9 @@ import ButtonIcon from "@/components/ButtonIcon";
 import { Table, Form, Input, Space, Checkbox, Button, Popconfirm } from "antd";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import Search from "@/components/Search";
-import { getRolesDetailById, rolePutAPI, rolesDeleteAPI, rolesGetAPI, rolesPostAPI } from "@/Services/RolesService";
-import { featuresGetAPI } from "@/Services/FeaturesService";
-import { rolesDetailPostAPI } from "@/Services/RolesdetailService";
+import { getRolesDetailById, rolePutAPI, rolesDeleteAPI, rolesGetAPI, rolesPostAPI } from "@/services/RolesService";
+import { featuresGetAPI } from "@/services/FeaturesService";
+import { rolesDetailPostAPI } from "@/services/RolesdetailService";
 import { check } from "prettier";
 
 const Role = () => {

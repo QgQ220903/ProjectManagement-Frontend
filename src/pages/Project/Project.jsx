@@ -20,7 +20,7 @@ import PageHeader from "@/components/PageHeader";
 
 import ButtonIcon from "@/components/ButtonIcon";
 
-import { projectGetAPI, projectPostAPI, projectDeleteAPI, projectUpdateAPI } from "@/Services/ProjectService";
+import { projectGetAPI, projectPostAPI, projectDeleteAPI, projectUpdateAPI } from "@/services/ProjectService";
 
 import { formatDate } from "@/utils/cn";
 
@@ -29,7 +29,7 @@ import { showToastMessage } from "@/utils/toast";
 import { ToastContainer, toast } from "react-toastify";
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import useWebSocket from "@/Services/useWebSocket";
+import useWebSocket from "@/services/useWebSocket";
 // import "react-toastify/dist/ReactToastify.css";
 
 const Project = () => {

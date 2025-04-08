@@ -1,5 +1,5 @@
 import axios from "axios";
-import axiosInstance from "@/Services/AxiosInstance";
+import axiosInstance from "@/services/AxiosInstance";
 
 const api = "http://127.0.0.1:8000/api/project-parts/";
 

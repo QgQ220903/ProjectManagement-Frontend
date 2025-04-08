@@ -9,13 +9,13 @@ import ModalProject from "@/components/modal/Modal";
 import FormProject from "@/components/form/Form";
 import PageHeader from "@/components/PageHeader";
 import ButtonIcon from "@/components/ButtonIcon";
-import { employeeGetAPI, employeePostAPI, employeePutAPI, employeeDeleteAPI } from "@/Services/EmployeeService";
-import { departmentGetAPI, departmentPostAPI, updateManagerForDepartmentAPI } from "@/Services/DepartmentService";
+import { employeeGetAPI, employeePostAPI, employeePutAPI, employeeDeleteAPI } from "@/services/EmployeeService";
+import { departmentGetAPI, departmentPostAPI, updateManagerForDepartmentAPI } from "@/services/DepartmentService";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 import { useRef } from "react";
-import useWebSocket from "@/Services/useWebSocket";
+import useWebSocket from "@/services/useWebSocket";
 
 
 // Đường dẫn

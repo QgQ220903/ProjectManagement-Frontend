@@ -1,8 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { logInAPI } from "@/Services/AccountService";
-import { getRolesAPI } from "@/Services/RoleService";
+import { logInAPI } from "@/services/AccountService";
+import { getRolesAPI } from "@/services/RoleService";
 import { useNavigate } from "react-router-dom";
 import FormLogin from "@/components/form/Form";
 import { useAuth } from "@/hooks/use-auth";

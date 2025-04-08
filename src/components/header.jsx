@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 
 import { Dropdown, Space, Avatar, Typography } from 'antd';
 
-import { logOutAPI } from "@/Services/AccountService";
+import { logOutAPI } from "@/services/AccountService";
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 

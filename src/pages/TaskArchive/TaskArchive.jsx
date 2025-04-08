@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import EmptyTemplate from "@/components/emptyTemplate/EmptyTemplate";
 
-import { projectPartArchivedGetAPIWithIdDepartment } from "@/Services/ProjectPartService"
+import { projectPartArchivedGetAPIWithIdDepartment } from "@/services/ProjectPartService"
 import { useAuth } from "@/hooks/use-auth";
 import ButtonIcon from "@/components/ButtonIcon";
 import { formatDate, getInitials, getRandomColor } from "@/utils/cn"

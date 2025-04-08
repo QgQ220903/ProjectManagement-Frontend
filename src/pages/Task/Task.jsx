@@ -20,17 +20,17 @@ import { CalendarSchedule } from "@/components/CalendarSchedule";
 import { UploadOutlined, SearchOutlined, InboxOutlined } from "@ant-design/icons";
 
 import { Button, message, Upload } from "antd";
-import { taskGetWithId } from "@/Services/TaskService";
+import { taskGetWithId } from "@/services/TaskService";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { formatDate, getRandomColor } from "@/utils/cn";
 import TitleTooltip from "@/components/tooltip/TitleTooltip";
 import FileUpload from './test';
-import { fileAssignmentPostAPI } from '@/Services/FileService';
+import { fileAssignmentPostAPI } from '@/services/FileService';
 
 import { FileCard } from "@/components/FileCard"
 
-import useWebSocket from "@/Services/useWebSocket";
+import useWebSocket from "@/services/useWebSocket";
 
 
 
