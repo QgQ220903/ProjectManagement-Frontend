@@ -105,9 +105,7 @@ const Login = () => {
                                     {/* <a href="#" className="text-sm font-medium text-primary-600 hover:underline dark:text-blue-600">Quên mật khẩu ?</a> */}
                                 </div>
                                 <button type="submit" className="w-full btn-primary ">Đăng nhập</button>
-                                {/* <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                                    Bạn chưa có tài khoản ? <Link to='/register' className="font-medium text-primary-600 hover:underline dark:text-primary-500">Đăng ký</Link>
-                                </p> */}
+                                
                             </form>
                         </div>
                     </div>

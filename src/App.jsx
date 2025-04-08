@@ -21,11 +21,9 @@ import { theme as antdTheme } from "antd";
 import { useTheme } from "@/hooks/use-theme";
 import { AuthProvider } from "@/contexts/authContext";
 
-import Login from "./pages/Authenticate/Login";
+import Login from "@/pages/Authenticate/Login";
 
-// import Register from "./pages/Register";
-import Test from "./pages/Test";
-import ProjectPart from "./pages/Project/ProjectPart";
+import ProjectPart from "@/pages/Project/ProjectPart";
 
 const queryClient = new QueryClient({
     defaultOptions: {
