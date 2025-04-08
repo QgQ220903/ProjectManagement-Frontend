@@ -17,7 +17,7 @@ import { taskPost } from "@/Services/TaskService";
 import { taskAssignmentsPost } from "@/Services/TaskAssignmentsService";
 import { departmentTaskPost } from "@/Services/DepartmentTaskService";
 
-import { formatDate } from "@/utils/cn";
+import { formatDate, getInitials } from "@/utils/cn";
 import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History } from "lucide-react";
 import ButtonIcon from "@/components/ButtonIcon";
 // import { FaEye } from "react-icons/fa";
@@ -152,7 +152,7 @@ const ProjectDetail = () => {
 
     //lấy ds nv
     const { data: employees } = useQuery({
-        queryKey: ["employees"],
+        queryKey: ["employeesProjectPart"],
         queryFn: employeeGetAPI,
     });
 
@@ -217,8 +217,8 @@ const ProjectDetail = () => {
 
     useEffect(() => {
         if (employees) {
-            setEmployeesdata(employees.results);
-            setDepartmentsData(departments.results);
+            setEmployeesdata(employees?.results);
+            setDepartmentsData(departments?.results);
         }
     }, [employees, departments]);
 
@@ -331,7 +331,7 @@ const ProjectDetail = () => {
                                 ></TitleTooltip>
                             }
                         >
-                            <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
+                            <Avatar className="bg-blue-500"> {getInitials(value.name)}</Avatar>
                         </Tooltip>
                     </Avatar.Group>
                 ),

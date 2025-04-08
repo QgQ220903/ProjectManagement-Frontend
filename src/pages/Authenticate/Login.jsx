@@ -6,7 +6,7 @@ import { getRolesAPI } from "@/services/RoleService";
 import { useNavigate } from "react-router-dom";
 import FormLogin from "@/components/form/Form";
 import { useAuth } from "@/hooks/use-auth";
-import { showToastMessage } from '@/utils/toast'
+import { showToastMessage, showToastMessagePlus, showToastMessagePlus2 } from '@/utils/toast'
 import logoSgu from "@/assets/logoSgu.png";
 
 import { ToastContainer, toast } from 'react-toastify';
@@ -39,12 +39,15 @@ const Login = () => {
 
             }
 
-
-
         },
         onError: (error) => {
-            showToastMessage('Đăng nhập thất bại !', 'error', 'top-right')
-            console.log(error);
+            showToastMessage(error.response.data.error, 'error', 'top-right')
+        //     showToastMessagePlus2({
+        //         title: 'Đăng nhập thất bại!',
+        //         description: 'Dữ liệu đã được lưu.',
+        //         type: 'error',
+            //   });
+            console.log("error.data.error",error.response.data.error);
         },
     });
 
