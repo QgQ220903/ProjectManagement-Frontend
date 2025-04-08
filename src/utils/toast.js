@@ -29,30 +29,3 @@ export const showToastMessagePlus = (
   });
 };
 
-export const showToastMessagePlus2 = ({
-  title = '',
-  description = '',
-  type = 'default',
-  position = 'top-right',
-  autoClose = 2000,
-  theme = 'light',
-  pauseOnHover = true,
-  hideProgressBar = false,
-  closeOnClick = true,
-}) => {
-  toast(
-    <div>
-      <strong>{title}</strong>
-      <div>{description}</div>
-    </div>,
-    {
-      type,
-      position,
-      autoClose,
-      theme,
-      pauseOnHover,
-      hideProgressBar,
-      closeOnClick,
-    }
-  );
-};
