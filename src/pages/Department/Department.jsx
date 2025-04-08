@@ -7,7 +7,7 @@ import FormDepartment from "@/components/form/Form";
 import PageHeader from "@/components/PageHeader";
 import ButtonIcon from "@/components/ButtonIcon";
 import { departmentGetAPI, departmentPostAPI, departmentPutAPI, departmentDeleteAPI, employeeGetAPI } from "@/Services/DepartmentService";
-import useWebSocket from "../../Services/useWebSocket";
+import useWebSocket from "@/Services/useWebSocket";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 
@@ -218,10 +218,10 @@ const Department = () => {
             onFilter: (value, record) => record.name.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
             filterSearch: true,
         },
-        { 
-            title: "Trưởng Phòng", 
-            dataIndex: "manager", 
-            key: "manager" ,
+        {
+            title: "Trưởng Phòng",
+            dataIndex: "manager",
+            key: "manager",
             filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
                 <div style={{ padding: 8 }}>
                     {/* Tùy chỉnh dropdown filter */}
@@ -253,7 +253,7 @@ const Department = () => {
             ),
             onFilter: (value, record) => record.manager.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
             filterSearch: true,
-            
+
         },
         { title: "Mô tả", dataIndex: "description", key: "description" },
         // { title: 'Trạng Thái', dataIndex: 'is_deleted', key: 'is_deleted', render: (text) => <Tag color={text === "Ngừng hoạt động" ? "volcano" : "green"}>{text}</Tag> },

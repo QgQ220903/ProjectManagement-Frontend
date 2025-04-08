@@ -1,8 +1,8 @@
 import React,  {useState} from 'react'
 import FormDepartment from '@/components/form/Form'
 import { Form, Input, Table, Button, Modal  } from 'antd';
-import PageHeader from '../components/PageHeader';
-import ModalTest from '../components/modal/ModalTest';
+import PageHeader from '@/components/PageHeader';
+import ModalTest from '@/components/modal/ModalTest';
 const Test = () => {
   
   const dataSource = [

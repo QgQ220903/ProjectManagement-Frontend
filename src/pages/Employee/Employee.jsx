@@ -15,11 +15,11 @@ import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/re
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 import { useRef } from "react";
-import useWebSocket from "../../Services/useWebSocket";
+import useWebSocket from "@/Services/useWebSocket";
 
 
- // Đường dẫn
- const itemsBreadcrumb = [
+// Đường dẫn
+const itemsBreadcrumb = [
     {
         title: <Link to="/">Trang chủ</Link>,
     },
@@ -406,7 +406,7 @@ const Employee = () => {
                             onConfirm={() => handleDeleteEmployee(record.key)}
                             okText="Có"
                             cancelText="Không"
-                             description="Bạn đã chắc chắn muốn xóa ?"
+                            description="Bạn đã chắc chắn muốn xóa ?"
                         >
                             <Button
                                 shape="circle"
