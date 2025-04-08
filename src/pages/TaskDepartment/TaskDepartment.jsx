@@ -164,11 +164,11 @@ const TaskDepartment = () => {
         setOpen(true);
     };
 
-    useEffect(()=>{
-        if(file_list){
-        //    sửa lý sau
+    useEffect(() => {
+        if (file_list) {
+            //    sửa lý sau
         }
-    },[file_list])
+    }, [file_list])
 
     //  open modal file
     const showDrawerCheckList = (record) => {
@@ -449,6 +449,7 @@ const TaskDepartment = () => {
             priority: task.priority === 0 ? "Thấp" : task.priority === 1 ? "Trung Bình" : "Cao",
             key: "task" + task.id,
             created_at: formatDate(task.created_at),
+            start_time: formatDate(task.start_time),
             end_time: formatDate(task.end_time),
             isCreateTask: task?.responsible_person ? employeeContext.position !== "NV" && task.responsible_person.id === employeeContext.id : false,
             isDoers: task.doers.some((doer) => doer.id === employeeContext.id) || task.responsible_person.id === employeeContext.id,
@@ -476,7 +477,7 @@ const TaskDepartment = () => {
         if (project_part) {
             console.log("TaskDepartment", project_part);
             // setProjectdata(project_part)
-            const dataFillter = setDataProjectPart(project_part);
+            const dataFillter = setDataProjectPart(project_part?.results);
             console.log("dataFillterv ", dataFillter);
             setProjectPartData(dataFillter);
         }
@@ -508,7 +509,7 @@ const TaskDepartment = () => {
         // console.log("project_part socket", project_part)
     }, [task_List, taskSocket, queryClient]);
 
-    
+
 
     // Cấu hình cột PARTS
     const partColumns = [
@@ -606,11 +607,11 @@ const TaskDepartment = () => {
                                 ></TitleTooltip>
                             }
                         >
-                            <Avatar 
-                            // style={{ backgroundColor: getRandomColor() }}
-                               className="bg-blue-500"
-                            > 
-                            {getInitials(value.name)}
+                            <Avatar
+                                // style={{ backgroundColor: getRandomColor() }}
+                                className="bg-blue-500"
+                            >
+                                {getInitials(value.name)}
                             </Avatar>
                         </Tooltip>
                     </Avatar.Group>
@@ -694,7 +695,7 @@ const TaskDepartment = () => {
 
     const handleArchiveTask = (record) => {
         console.log("handleArchiveTask", record)
-        mutateDeleteTask({isDelete:true,id:record.id})
+        mutateDeleteTask({ isDelete: true, id: record.id })
     }
     // Cấu hình cột TASKS
     const taskColumns = [
@@ -747,12 +748,12 @@ const TaskDepartment = () => {
         },
         {
             title: "Ngày bắt đầu",
-            dataIndex: "created_at",
-            key: "created_at",
+            dataIndex: "start_time",
+            key: "start_time",
             width: "11%",
             sorter: (a, b) => {
-                const dateA = new Date(a.created_at.split("-").reverse().join("-"));
-                const dateB = new Date(b.created_at.split("-").reverse().join("-"));
+                const dateA = new Date(a.start_time.split("-").reverse().join("-"));
+                const dateB = new Date(b.start_time.split("-").reverse().join("-"));
                 return dateA - dateB; // Sắp xếp theo số (timestamp)
             },
         },
@@ -800,10 +801,10 @@ const TaskDepartment = () => {
                                 ></TitleTooltip>
                             }
                         >
-                            <Avatar 
-                            // style={{ backgroundColor: getRandomColor() }} 
-                            className="bg-blue-500"
-                            > 
+                            <Avatar
+                                // style={{ backgroundColor: getRandomColor() }} 
+                                className="bg-blue-500"
+                            >
                                 {getInitials(value.name)}
                             </Avatar>
                         </Tooltip>
@@ -874,9 +875,9 @@ const TaskDepartment = () => {
                                 <Avatar style={{ backgroundColor: getRandomColor() }}> {item.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
                             </Tooltip>
                         ))}
-                         <Link>
-                         <Avatar icon={<Plus></Plus>} ></Avatar>
-                         </Link>
+                        <Link>
+                            <Avatar icon={<Plus></Plus>} ></Avatar>
+                        </Link>
                     </Avatar.Group>
                 </>
             ),
@@ -969,32 +970,32 @@ const TaskDepartment = () => {
                         </>
                     )}
 
-                   { record.completion_percentage === 100 && (
+                    {record.completion_percentage === 100 && (
                         <>
-                             <Popconfirm
-                            title="Lưu trữ dự án?"
-                            onConfirm={()=>handleArchiveTask(record)}
-                            okText="Có"
-                            cancelText="Không"
-                            description="Bạn đã chắc chắn lưu trữ dự án này ?"
-                        >
-                             <Button 
-                                shape="circle"
-                                size="medium"
-                                color="green"
-                                variant="solid"
-                                // onClick={()=>handleArchiveTask(record)}
-                                
-                            
+                            <Popconfirm
+                                title="Lưu trữ dự án?"
+                                onConfirm={() => handleArchiveTask(record)}
+                                okText="Có"
+                                cancelText="Không"
+                                description="Bạn đã chắc chắn lưu trữ dự án này ?"
                             >
-                              <ArchiveRestore size={18} />
-                            </Button>
-                        </Popconfirm>
+                                <Button
+                                    shape="circle"
+                                    size="medium"
+                                    color="green"
+                                    variant="solid"
+                                // onClick={()=>handleArchiveTask(record)}
 
-                           
+
+                                >
+                                    <ArchiveRestore size={18} />
+                                </Button>
+                            </Popconfirm>
+
+
                         </>)
 
-                   }
+                    }
                 </Space>
             ),
         },
@@ -1148,28 +1149,13 @@ const TaskDepartment = () => {
         {
             name: "content",
             label: "",
-            component:  <TextArea rows={10} placeholder="nhập tin nhắn!"/>,
+            component: <TextArea rows={10} placeholder="nhập tin nhắn!" />,
             // props: { readOnly: true },
-           
+
         },
-      
+
     ]
 
-    const expandedRowRender = (part) => (
-        <Table
-            columns={taskColumns}
-            dataSource={part.tasks}
-            locale={{
-                triggerDesc: "Sắp xếp giảm dần",
-                triggerAsc: "Sắp xếp tăng dần",
-                cancelSort: "Hủy sắp xếp",
-            }}
-            loading={addLoading && addTaskAssLoading}
-            pagination={false}
-            indentSize={20}
-            childrenColumnName={"subtasks"}
-        />
-    );
 
 
 
@@ -1288,6 +1274,23 @@ const TaskDepartment = () => {
         setTaskDataSelectFormTable([]);
     };
 
+
+    const expandedRowRender = (part) => (
+        <Table
+            columns={taskColumns}
+            dataSource={part.tasks}
+            locale={{
+                triggerDesc: "Sắp xếp giảm dần",
+                triggerAsc: "Sắp xếp tăng dần",
+                cancelSort: "Hủy sắp xếp",
+            }}
+            loading={addLoading && addTaskAssLoading}
+            pagination={false}
+            indentSize={20}
+            childrenColumnName={"subtasks"}
+        />
+    );
+
     return (
         <>
             {/* <div>{projectPartData && JSON.stringify(projectPartData)}</div> */}
@@ -1346,7 +1349,7 @@ const TaskDepartment = () => {
                 <FormSendEmail
                     formName={"formSendEmail" + mode}
                     form={formSendEmail}
-                  
+
                     formItems={formItemsSendEmail}
                 ></FormSendEmail>
             </ModalSendEmail>
@@ -1367,7 +1370,7 @@ const TaskDepartment = () => {
                 setTaskDataSelectFormTable={setTaskDataSelectFormTable}
                 queryClient={queryClient}
                 doersData={doersData}
-                file_list = {file_list}
+                file_list={file_list}
                 setDoersData={setDoersData}
                 doerSelected={doerSelected}
                 setDoerSelected={setDoerSelected}
