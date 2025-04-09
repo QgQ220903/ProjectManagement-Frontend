@@ -1,0 +1,109 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Learn space\\HK2 4 year\\DACN\\ProjectManagement-Frontend\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Learn space\\HK2 4 year\\DACN\\ProjectManagement-Frontend\\src\\components\\modal\\Modal.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\modal\\Modal.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Learn space\\HK2 4 year\\DACN\\ProjectManagement-Frontend\\src\\Services\\RolesdetailService.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\Services\\RolesdetailService.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Learn space\\HK2 4 year\\DACN\\ProjectManagement-Frontend\\src\\Services\\RolesService.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\Services\\RolesService.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Learn space\\HK2 4 year\\DACN\\ProjectManagement-Frontend\\src\\Services\\FeaturesService.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\Services\\FeaturesService.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Learn space\\HK2 4 year\\DACN\\ProjectManagement-Frontend\\src\\Services\\RoleService.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\Services\\RoleService.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Modal.jsx",
+              "DocumentMoniker": "D:\\Learn space\\HK2 4 year\\DACN\\ProjectManagement-Frontend\\src\\components\\modal\\Modal.jsx",
+              "RelativeDocumentMoniker": "src\\components\\modal\\Modal.jsx",
+              "ToolTip": "D:\\Learn space\\HK2 4 year\\DACN\\ProjectManagement-Frontend\\src\\components\\modal\\Modal.jsx",
+              "RelativeToolTip": "src\\components\\modal\\Modal.jsx",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2025-04-06T20:55:44.749Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "RolesService.js",
+              "DocumentMoniker": "D:\\Learn space\\HK2 4 year\\DACN\\ProjectManagement-Frontend\\src\\Services\\RolesService.js",
+              "RelativeDocumentMoniker": "src\\Services\\RolesService.js",
+              "ToolTip": "D:\\Learn space\\HK2 4 year\\DACN\\ProjectManagement-Frontend\\src\\Services\\RolesService.js",
+              "RelativeToolTip": "src\\Services\\RolesService.js",
+              "ViewState": "AQIAAA8AAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-04-06T20:55:24.167Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "FeaturesService.js",
+              "DocumentMoniker": "D:\\Learn space\\HK2 4 year\\DACN\\ProjectManagement-Frontend\\src\\Services\\FeaturesService.js",
+              "RelativeDocumentMoniker": "src\\Services\\FeaturesService.js",
+              "ToolTip": "D:\\Learn space\\HK2 4 year\\DACN\\ProjectManagement-Frontend\\src\\Services\\FeaturesService.js",
+              "RelativeToolTip": "src\\Services\\FeaturesService.js",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-04-06T20:55:19.264Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "RoleService.js",
+              "DocumentMoniker": "D:\\Learn space\\HK2 4 year\\DACN\\ProjectManagement-Frontend\\src\\Services\\RoleService.js",
+              "RelativeDocumentMoniker": "src\\Services\\RoleService.js",
+              "ToolTip": "D:\\Learn space\\HK2 4 year\\DACN\\ProjectManagement-Frontend\\src\\Services\\RoleService.js",
+              "RelativeToolTip": "src\\Services\\RoleService.js",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-04-06T20:55:11.453Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "RolesdetailService.js",
+              "DocumentMoniker": "D:\\Learn space\\HK2 4 year\\DACN\\ProjectManagement-Frontend\\src\\Services\\RolesdetailService.js",
+              "RelativeDocumentMoniker": "src\\Services\\RolesdetailService.js",
+              "ToolTip": "D:\\Learn space\\HK2 4 year\\DACN\\ProjectManagement-Frontend\\src\\Services\\RolesdetailService.js",
+              "RelativeToolTip": "src\\Services\\RolesdetailService.js",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-04-06T20:54:54.795Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
