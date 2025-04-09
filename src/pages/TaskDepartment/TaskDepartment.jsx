@@ -22,25 +22,25 @@ import PageHeader from "@/components/PageHeader";
 
 import { Link } from "react-router-dom";
 
-import { projectPartGetAPI } from "@/Services/ProjectService";
+import { projectPartGetAPI } from "@/services/ProjectService";
 
-import { projectPartPostAPI, projectPartGetAPIForIdUser, projectPartGetAPIWithIdDepartment } from "@/Services/ProjectPartService";
+import { projectPartPostAPI, projectPartGetAPIForIdUser, projectPartGetAPIWithIdDepartment } from "@/services/ProjectPartService";
 
 // Employee API
-import { employeeGetAllAPI, employeeGetAllAPIWithDepartment } from "@/Services/EmployeeService";
+import { employeeGetAllAPI, employeeGetAllAPIWithDepartment } from "@/services/EmployeeService";
 
 import EmptyTemplate from "@/components/emptyTemplate/EmptyTemplate";
 
-import { workHistoriesPostAPI, workHistoriesGetAPI } from "@/Services/WorkHistoryService";
+import { workHistoriesPostAPI, workHistoriesGetAPI } from "@/services/WorkHistoryService";
 
 // Task API
-import { taskPost, taskDelete } from "@/Services/TaskService";
+import { taskPost, taskDelete } from "@/services/TaskService";
 
-import { taskAssignmentsPost, taskAssignmentsPatch } from "@/Services/TaskAssignmentsService";
+import { taskAssignmentsPost, taskAssignmentsPatch } from "@/services/TaskAssignmentsService";
 
-import { departmentTaskPost } from "@/Services/DepartmentTaskService";
+import { departmentTaskPost } from "@/services/DepartmentTaskService";
 
-import { sendEmail } from "@/Services/EmailService.";
+import { sendEmail } from "@/services/EmailService.";
 
 import { formatDate, getRandomColor, getInitials } from "@/utils/cn";
 
@@ -48,8 +48,10 @@ import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History, File, Pen, Arro
 import ButtonIcon from "@/components/ButtonIcon";
 
 import ModalProjectTask from "@/components/modal/Modal";
+import ModalSendEmail from "@/components/modal/Modal";
 
 import FormProjectTask from "@/components/form/Form";
+import FormSendEmail from "@/components/form/Form";
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -59,11 +61,11 @@ import { useAuth } from "@/hooks/use-auth";
 
 import TitleTooltip from "@/components/tooltip/TitleTooltip";
 
-import useWebSocket from "@/Services/useWebSocket";
+import useWebSocket from "@/services/useWebSocket";
 
-import DrawerFile from "./components/DrawerFile";
+import DrawerFile from "@/pages/TaskDepartment/components/DrawerFile";
 
-import DrawerChatRom from "./components/DrawerChatRom";
+import DrawerChatRom from "@/pages/TaskDepartment/components/DrawerChatRom";
 
 import { searchSubtasks, searchSubtasksResponsible_person } from "@/utils/tasks"
 
@@ -79,11 +81,14 @@ const formItemLayout = {
     },
 };
 
+
+
 const priorityOrder = {
     "Thấp": 1,
     "Trung Bình": 2,
     "Cao": 3,
 };
+
 
 
 const { RangePicker } = DatePicker;
@@ -122,6 +127,10 @@ const TaskDepartment = () => {
 
     const [formTask] = Form.useForm();
 
+    const [formSendEmail] = Form.useForm();
+
+
+
     const [mode, setMode] = useState("");
 
     // const [isEmployeeTask, setIsEmployeeTask] = useState(true);
@@ -155,11 +164,11 @@ const TaskDepartment = () => {
         setOpen(true);
     };
 
-    useEffect(()=>{
-        if(file_list){
-        //    sửa lý sau
+    useEffect(() => {
+        if (file_list) {
+            //    sửa lý sau
         }
-    },[file_list])
+    }, [file_list])
 
     //  open modal file
     const showDrawerCheckList = (record) => {
@@ -440,10 +449,11 @@ const TaskDepartment = () => {
             priority: task.priority === 0 ? "Thấp" : task.priority === 1 ? "Trung Bình" : "Cao",
             key: "task" + task.id,
             created_at: formatDate(task.created_at),
+            start_time: formatDate(task.start_time),
             end_time: formatDate(task.end_time),
-            isCreateTask: task?.responsible_person ? employeeContext.position !== "NV" && task.responsible_person.id === auth.id : false,
-            isDoers: task?.responsible_person ? task.doers.some((doer) => doer.id === auth.id) || task.responsible_person.id === auth.id : false,
-            isRes: task?.responsible_person ? task.responsible_person.id === auth.id : false,
+            isCreateTask: task?.responsible_person ? employeeContext.position !== "NV" && task.responsible_person.id === employeeContext.id : false,
+            isDoers: task.doers.some((doer) => doer.id === employeeContext.id) || task.responsible_person.id === employeeContext.id,
+            isRes: task?.responsible_person ? task.responsible_person.id === employeeContext.id : false,
         };
 
         // Nếu task có subtasks, gọi đệ quy để xử lý tất cả các cấp
@@ -467,7 +477,7 @@ const TaskDepartment = () => {
         if (project_part) {
             console.log("TaskDepartment", project_part);
             // setProjectdata(project_part)
-            const dataFillter = setDataProjectPart(project_part);
+            const dataFillter = setDataProjectPart(project_part?.results);
             console.log("dataFillterv ", dataFillter);
             setProjectPartData(dataFillter);
         }
@@ -499,7 +509,7 @@ const TaskDepartment = () => {
         // console.log("project_part socket", project_part)
     }, [task_List, taskSocket, queryClient]);
 
-    
+
 
     // Cấu hình cột PARTS
     const partColumns = [
@@ -597,11 +607,11 @@ const TaskDepartment = () => {
                                 ></TitleTooltip>
                             }
                         >
-                            <Avatar 
-                            // style={{ backgroundColor: getRandomColor() }}
-                               className="bg-blue-500"
-                            > 
-                            {getInitials(value.name)}
+                            <Avatar
+                                // style={{ backgroundColor: getRandomColor() }}
+                                className="bg-blue-500"
+                            >
+                                {getInitials(value.name)}
                             </Avatar>
                         </Tooltip>
                     </Avatar.Group>
@@ -673,10 +683,19 @@ const TaskDepartment = () => {
     //         return false;
     //     });
     // };
+    const [isModalSendEmailOpen, setIsModalSendEmailOpen] = useState(false);
+
+    const handleShowSendEmail = (record) => {
+        setIsModalSendEmailOpen(true);
+    }
+
+    const handleCancelSendEmail = () => {
+        setIsModalSendEmailOpen(false);
+    }
 
     const handleArchiveTask = (record) => {
         console.log("handleArchiveTask", record)
-        mutateDeleteTask({isDelete:true,id:record.id})
+        mutateDeleteTask({ isDelete: true, id: record.id })
     }
     // Cấu hình cột TASKS
     const taskColumns = [
@@ -729,12 +748,12 @@ const TaskDepartment = () => {
         },
         {
             title: "Ngày bắt đầu",
-            dataIndex: "created_at",
-            key: "created_at",
+            dataIndex: "start_time",
+            key: "start_time",
             width: "11%",
             sorter: (a, b) => {
-                const dateA = new Date(a.created_at.split("-").reverse().join("-"));
-                const dateB = new Date(b.created_at.split("-").reverse().join("-"));
+                const dateA = new Date(a.start_time.split("-").reverse().join("-"));
+                const dateB = new Date(b.start_time.split("-").reverse().join("-"));
                 return dateA - dateB; // Sắp xếp theo số (timestamp)
             },
         },
@@ -782,10 +801,10 @@ const TaskDepartment = () => {
                                 ></TitleTooltip>
                             }
                         >
-                            <Avatar 
-                            // style={{ backgroundColor: getRandomColor() }} 
-                            className="bg-blue-500"
-                            > 
+                            <Avatar
+                                // style={{ backgroundColor: getRandomColor() }} 
+                                className="bg-blue-500"
+                            >
                                 {getInitials(value.name)}
                             </Avatar>
                         </Tooltip>
@@ -856,9 +875,9 @@ const TaskDepartment = () => {
                                 <Avatar style={{ backgroundColor: getRandomColor() }}> {item.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
                             </Tooltip>
                         ))}
-                         <Link>
-                         <Avatar icon={<Plus></Plus>} ></Avatar>
-                         </Link>
+                        <Link>
+                            <Avatar icon={<Plus></Plus>} ></Avatar>
+                        </Link>
                     </Avatar.Group>
                 </>
             ),
@@ -893,7 +912,7 @@ const TaskDepartment = () => {
                                 size="medium"
                                 color="pink"
                                 variant="solid"
-                                onClick={() => console.log("bekk")}
+                                onClick={() => handleShowSendEmail(record)}
                             >
                                 <Bell size={18} />
                             </Button>
@@ -951,32 +970,32 @@ const TaskDepartment = () => {
                         </>
                     )}
 
-                   { record.completion_percentage === 100 && (
+                    {record.completion_percentage === 100 && (
                         <>
-                             <Popconfirm
-                            title="Lưu trữ dự án?"
-                            onConfirm={()=>handleArchiveTask(record)}
-                            okText="Có"
-                            cancelText="Không"
-                            description="Bạn đã chắc chắn lưu trữ dự án này ?"
-                        >
-                             <Button 
-                                shape="circle"
-                                size="medium"
-                                color="green"
-                                variant="solid"
-                                // onClick={()=>handleArchiveTask(record)}
-                                
-                            
+                            <Popconfirm
+                                title="Lưu trữ dự án?"
+                                onConfirm={() => handleArchiveTask(record)}
+                                okText="Có"
+                                cancelText="Không"
+                                description="Bạn đã chắc chắn lưu trữ dự án này ?"
                             >
-                              <ArchiveRestore size={18} />
-                            </Button>
-                        </Popconfirm>
+                                <Button
+                                    shape="circle"
+                                    size="medium"
+                                    color="green"
+                                    variant="solid"
+                                // onClick={()=>handleArchiveTask(record)}
 
-                           
+
+                                >
+                                    <ArchiveRestore size={18} />
+                                </Button>
+                            </Popconfirm>
+
+
                         </>)
 
-                   }
+                    }
                 </Space>
             ),
         },
@@ -1126,21 +1145,17 @@ const TaskDepartment = () => {
         },
     ];
 
-    const expandedRowRender = (part) => (
-        <Table
-            columns={taskColumns}
-            dataSource={part.tasks}
-            locale={{
-                triggerDesc: "Sắp xếp giảm dần",
-                triggerAsc: "Sắp xếp tăng dần",
-                cancelSort: "Hủy sắp xếp",
-            }}
-            loading={addLoading && addTaskAssLoading}
-            pagination={false}
-            indentSize={20}
-            childrenColumnName={"subtasks"}
-        />
-    );
+    const formItemsSendEmail = [
+        {
+            name: "content",
+            label: "",
+            component: <TextArea rows={10} placeholder="nhập tin nhắn!" />,
+            // props: { readOnly: true },
+
+        },
+
+    ]
+
 
 
 
@@ -1259,6 +1274,23 @@ const TaskDepartment = () => {
         setTaskDataSelectFormTable([]);
     };
 
+
+    const expandedRowRender = (part) => (
+        <Table
+            columns={taskColumns}
+            dataSource={part.tasks}
+            locale={{
+                triggerDesc: "Sắp xếp giảm dần",
+                triggerAsc: "Sắp xếp tăng dần",
+                cancelSort: "Hủy sắp xếp",
+            }}
+            loading={addLoading && addTaskAssLoading}
+            pagination={false}
+            indentSize={20}
+            childrenColumnName={"subtasks"}
+        />
+    );
+
     return (
         <>
             {/* <div>{projectPartData && JSON.stringify(projectPartData)}</div> */}
@@ -1305,6 +1337,23 @@ const TaskDepartment = () => {
                 ></FormProjectTask>
             </ModalProjectTask>
 
+            {/* Modal show send email */}
+            <ModalSendEmail
+                isModalOpen={isModalSendEmailOpen}
+                setIsModalOpen={setIsModalSendEmailOpen}
+                // handleOk={handleOkTask}
+                handleCancel={handleCancelSendEmail}
+                title={"Gửi Email"}
+                form={formSendEmail}
+            >
+                <FormSendEmail
+                    formName={"formSendEmail" + mode}
+                    form={formSendEmail}
+
+                    formItems={formItemsSendEmail}
+                ></FormSendEmail>
+            </ModalSendEmail>
+
             {/* Drawer chatroom */}
             <DrawerChatRom
                 taskDataSelectFormTable={taskDataSelectFormTable}
@@ -1321,7 +1370,7 @@ const TaskDepartment = () => {
                 setTaskDataSelectFormTable={setTaskDataSelectFormTable}
                 queryClient={queryClient}
                 doersData={doersData}
-                file_list = {file_list}
+                file_list={file_list}
                 setDoersData={setDoersData}
                 doerSelected={doerSelected}
                 setDoerSelected={setDoerSelected}

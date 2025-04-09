@@ -2,7 +2,7 @@ import { useTheme } from "@/hooks/use-theme";
 
 import { useEffect, useState } from "react";
 
-import { Bell, ChevronsLeft, Moon, Search, Sun  } from "lucide-react";
+import { Bell, ChevronsLeft, Moon, Search, Sun } from "lucide-react";
 
 import profileImg from "@/assets/profile-image.jpg";
 
@@ -76,22 +76,22 @@ export const Header = ({ collapsed, setCollapsed }) => {
         {
             key: '0',
             label: (
-                <Typography.Title  level={5} >
+                <Typography.Title level={5} >
                     {employeeContext?.name}
                 </Typography.Title >
             ),
             disabled: true,
-     
+
         },
         {
             type: 'divider',
-          },
+        },
         {
             key: '1',
             label: (
-                !isValid ?  <Link to="login" rel="noopener noreferrer">
-                    Login 
-                </Link> :  <Link rel="noopener noreferrer" onClick={handleLogout}>
+                !isValid ? <Link to="login" rel="noopener noreferrer">
+                    Login
+                </Link> : <Link rel="noopener noreferrer" onClick={handleLogout}>
                     Logout
                 </Link>
             ),
@@ -104,7 +104,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
         //         </Link>
         //     ),
         // },
-      
+
 
     ];
 

@@ -6,9 +6,9 @@ import ButtonIcon from "@/components/ButtonIcon";
 import { Table, Form, Input, Space, Checkbox, Button, Popconfirm } from "antd";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import Search from "@/components/Search";
-import { getRolesDetailById, rolePutAPI, rolesDeleteAPI, rolesGetAPI, rolesPostAPI } from "../../Services/RolesService";
-import { featuresGetAPI } from "../../Services/FeaturesService";
-import { rolesDetailPostAPI } from "../../Services/RolesdetailService";
+import { getRolesDetailById, rolePutAPI, rolesDeleteAPI, rolesGetAPI, rolesPostAPI } from "@/services/RolesService";
+import { featuresGetAPI } from "@/services/FeaturesService";
+import { rolesDetailPostAPI } from "@/services/RolesdetailService";
 import { check } from "prettier";
 
 const Role = () => {
@@ -72,23 +72,6 @@ const Role = () => {
                 form.setFieldsValue({
                     name: res.data.name,
                 });
-
-
-
-                const mapped1 = features.map((item) => {
-                    
-                    f
-
-                    return ({
-                        key: item.feature.id,
-                        role: item.feature.name,
-                        can_view: item.can_view,
-                        can_create: item.can_create,
-                        can_update: item.can_update,
-                        can_delete: item.can_delete,
-                    })
-                });
-
 
                 const mapped = res.data.role_details.map((item) => ({
                     key: item.feature.id,
@@ -169,41 +152,39 @@ const Role = () => {
                     is_deleted: false,
                 };
                 rolePutAPI(datasave, idEdit).then((r1) => {
-                    if(r1.data)
-                    {
+                    if (r1.data) {
                         var r = r1.data;
 
 
-                        if(r1.status ==200)
-                            {
-                                var objectRoles = data2.map((item) => {
-                                    return {
-                                        can_view: item.can_view,
-                                        can_create: item.can_create,
-                                        can_update: item.can_update,
-                                        can_delete: item.can_delete,
-                                        feature: item.key,
-                                        role: r.id,
-                                    };
-                                });
-        
-                                objectRoles.forEach((item) => {
-                                    rolesDetailPostAPI(item).then((r2) => {
-                                        if (r2.status != 201) {
-                                            checkedEdit = false;
-                                        }
-                                    });
-                                });
-        
-                                if (checkedEdit) {
-                                    alert("Cập nhật nhóm quyền thành công!");
-                                    setIsEditRole(false);
-                                }
-                            }
+                        if (r1.status == 200) {
+                            var objectRoles = data2.map((item) => {
+                                return {
+                                    can_view: item.can_view,
+                                    can_create: item.can_create,
+                                    can_update: item.can_update,
+                                    can_delete: item.can_delete,
+                                    feature: item.key,
+                                    role: r.id,
+                                };
+                            });
 
-                            
+                            objectRoles.forEach((item) => {
+                                rolesDetailPostAPI(item).then((r2) => {
+                                    if (r2.status != 201) {
+                                        checkedEdit = false;
+                                    }
+                                });
+                            });
+
+                            if (checkedEdit) {
+                                alert("Cập nhật nhóm quyền thành công!");
+                                setIsEditRole(false);
+                            }
+                        }
+
+
                     }
-                   
+
                 });
             }
         } catch (error) {

@@ -25,12 +25,12 @@ import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/re
 import { useAuth } from "@/hooks/use-auth";
 import { formatDate, getRandomColor } from "@/utils/cn";
 import TitleTooltip from "@/components/tooltip/TitleTooltip";
-import FileUpload from './test';
+
 import { fileAssignmentPostAPI } from '@/services/FileService';
 
 import { FileCard } from "@/components/FileCard"
 
-import useWebSocket from "../../Services/useWebSocket";
+import useWebSocket from "@/services/useWebSocket";
 
 
 
@@ -107,7 +107,7 @@ const Task = () => {
             queryClient.invalidateQueries(["tasks"]);
         }
     }, [taskSocket, queryClient]);
-    
+
     const { mutate: addFileAssignment, isLoading: isAdding } = useMutation({
         mutationFn: fileAssignmentPostAPI,
         onSuccess: () => {
@@ -121,7 +121,7 @@ const Task = () => {
             console.log(error)
         },
     });
-   
+
 
 
 
@@ -168,7 +168,7 @@ const Task = () => {
         setOpenDrawerCheckList(false);
     }
 
-   
+
     const columns = [
         {
             title: "Tên công việc",
@@ -324,7 +324,7 @@ const Task = () => {
     };
 
     const handleUpload = () => {
-        
+
         if (taskSelectData) {
             const task_assignment_id = taskSelectData.assignment_id;
 
@@ -379,7 +379,7 @@ const Task = () => {
             </Modal>
 
             <div className="mt-5">
-               
+
                 <Table
                     columns={columns}
                     dataSource={taskData}
@@ -441,7 +441,7 @@ const Task = () => {
                 </Flex>
             </Drawer>
 
-          
+
         </>
     );
 };

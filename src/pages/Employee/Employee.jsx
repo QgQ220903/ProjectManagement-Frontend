@@ -9,17 +9,18 @@ import ModalProject from "@/components/modal/Modal";
 import FormProject from "@/components/form/Form";
 import PageHeader from "@/components/PageHeader";
 import ButtonIcon from "@/components/ButtonIcon";
-import { employeeGetAPI, employeePostAPI, employeePutAPI, employeeDeleteAPI } from "@/Services/EmployeeService";
-import { departmentGetAPI, departmentPostAPI, updateManagerForDepartmentAPI } from "@/Services/DepartmentService";
+import { employeeGetAPI, employeePostAPI, employeePutAPI, employeeDeleteAPI } from "@/services/EmployeeService";
+import { departmentGetAPI, departmentPostAPI, updateManagerForDepartmentAPI } from "@/services/DepartmentService";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 import { useRef } from "react";
-import useWebSocket from "../../Services/useWebSocket";
+import useWebSocket from "@/services/useWebSocket";
+import DepartmentSelect from "./components/DepartmentSelect";
+import { showToastMessage } from "@/utils/toast";
 
-
- // Đường dẫn
- const itemsBreadcrumb = [
+// Đường dẫn
+const itemsBreadcrumb = [
     {
         title: <Link to="/">Trang chủ</Link>,
     },
@@ -69,11 +70,16 @@ const Employee = () => {
 
     const handleChange = (value) => {
         console.log(`selected ${value}`);
+        // console.log("component",form.component("department"))
         if (value === "TP") {
             setDepartmentDataFilter(departmentData?.filter((item) => item.manager === null));
         } else {
             setDepartmentDataFilter(departmentData);
         }
+
+        // Xoá phòng ban đã chọn nếu đổi chức vụ
+        form.resetFields(["department"]);
+
     };
 
     function setDataEmployees(employees) {
@@ -131,8 +137,54 @@ const Employee = () => {
             queryClient.invalidateQueries({
                 queryKey: ["employeeEm"],
             });
+            setIsModalOpen(false);
+            showToastMessage("Sửa nhân viên thành công !", "success", "top-right");
         },
+            onError: (err) => {
+                console.log("mutatePost error",err)
+               
+                const fieldsError = [];
+
+                if (err.response?.data?.email?.[0]) {
+                    console.log("mutatePost error email", err.response.data.email[0]);
+                    fieldsError.push({
+                        name: "email",
+                        errors: [err.response.data.email[0]],
+                    });
+                }
+            
+                if (err.response?.data?.phone_number?.[0]) {
+                    console.log("mutatePost error phone_number", err.response.data.phone_number[0]);
+                    fieldsError.push({
+                        name: "phone_number",
+                        errors: [err.response.data.phone_number[0]],
+                    });
+                }
+            
+                if (fieldsError.length > 0) {
+                    form.setFields(fieldsError);
+                }
+
+            }
+        
     });
+
+    const { mutate: mutateDelete } = useMutation({
+        mutationFn: employeePutAPI,
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["employeeEm"],
+            });
+            showToastMessage("Xóa nhân viên thành công !", "success", "top-right");
+        },
+            onError: (err) => {
+                console.log("mutatePost error",err)
+               
+                showToastMessage("Xóa nhân viên thất bại !", "error", "top-right");
+            }
+        
+    });
+
     //thêm nv
     const { data: newData, mutate: mutatePost } = useMutation({
         mutationFn: employeePostAPI,
@@ -140,7 +192,35 @@ const Employee = () => {
             queryClient.invalidateQueries({
                 queryKey: ["employeeEm"],
             });
+            setIsModalOpen(false);
+            showToastMessage("Thêm nhân viên thành công !", "success", "top-right");
         },
+        onError:(err) => {
+            console.log("mutatePost error",err)
+           
+            const fieldsError = [];
+
+            if (err.response?.data?.email?.[0]) {
+                console.log("mutatePost error email", err.response.data.email[0]);
+                fieldsError.push({
+                    name: "email",
+                    errors: [err.response.data.email[0]],
+                });
+            }
+        
+            if (err.response?.data?.phone_number?.[0]) {
+                console.log("mutatePost error phone_number", err.response.data.phone_number[0]);
+                fieldsError.push({
+                    name: "phone_number",
+                    errors: [err.response.data.phone_number[0]],
+                });
+            }
+        
+            if (fieldsError.length > 0) {
+                form.setFields(fieldsError);
+            }
+
+        }
     });
     //cap nhat lại trưởng phòng trong phòng ban
     const { mutate: mutatePutDepartment } = useMutation({
@@ -187,7 +267,7 @@ const Employee = () => {
             span: 16,
         },
     };
-
+    
     const formItems = [
         {
             name: "key",
@@ -233,17 +313,22 @@ const Employee = () => {
         {
             name: "department",
             label: "Phòng ban",
-            component: (
-                <Select
-                    placeholder="Chọn phòng ban"
-                    options={departmentDataFilter?.map((item) => ({
-                        value: item.id,
-                        label: item.name,
-                    }))}
-                ></Select>
+            // component: (
+            //     <Select
+            //         placeholder="Chọn phòng ban"
+            //         options={departmentDataFilter?.map((item) => ({
+            //             value: item.id,
+            //             label: item.name,
+            //         }))}
+            //     ></Select>
+            // ),
+            component: 
+            (
+                <DepartmentSelect departmentDataFilter={departmentDataFilter} />
             ),
             rules: [{ required: true, message: "Vui lòng chọn phòng ban" }],
         },
+        
     ];
 
     const columns = [
@@ -369,13 +454,7 @@ const Employee = () => {
             render: (_, record) => (
                 <Space >
                     {roleEmployee?.can_update && (
-                        // <a
-                        //     onClick={() =>
-                        //         handleEditEmployee(record.position === "Trưởng Phòng" ? { ...record, position: "TP" } : { ...record, position: "NV" })
-                        //     }
-                        // >
-                        //     <Pencil size={20} />
-                        // </a>
+                
                         <Button
                             shape="circle"
                             size="medium"
@@ -406,7 +485,7 @@ const Employee = () => {
                             onConfirm={() => handleDeleteEmployee(record.key)}
                             okText="Có"
                             cancelText="Không"
-                             description="Bạn đã chắc chắn muốn xóa ?"
+                            description="Bạn đã chắc chắn muốn xóa ?"
                         >
                             <Button
                                 shape="circle"
@@ -444,7 +523,7 @@ const Employee = () => {
                 // Thêm nhân viên mới
                 mutatePost(values);
             }
-            setIsModalOpen(false);
+         
         } catch (error) {
             console.log(error);
         }
@@ -455,6 +534,7 @@ const Employee = () => {
         setTitle("Sửa Nhân Viên");
         //setUseData(record.position === "Trưởng phòng" ? { ...record, position: "TP" } : { ...record, position: "NV" });
         setUseData(record);
+        setDepartmentDataFilter(departmentData)
         form.setFieldsValue(record); // Đổ dữ liệu vào form
         setMode("Edit");
         setIsModalOpen(true);
@@ -462,10 +542,10 @@ const Employee = () => {
 
     const handleDeleteEmployee = async (id) => {
         try {
-            const deleteEmploye = employees.find((item) => item.id === id);
+            const deleteEmploye = employees.results.find((item) => item.id === id);
             if (deleteEmploye) {
                 const updatedEmploye = { ...deleteEmploye, is_deleted: true };
-                mutatePut({ id: updatedEmploye.id, obj: updatedEmploye });
+                mutateDelete({ id: updatedEmploye.id, obj: updatedEmploye });
             }
         } catch (error) {
             console.log(error);

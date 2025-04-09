@@ -1,5 +1,5 @@
 import React from 'react'
-import ButtonIcon from './ButtonIcon'
+import ButtonIcon from '@/components/ButtonIcon'
 import { Breadcrumb, Typography } from 'antd';
 
 import { Plus } from 'lucide-react';

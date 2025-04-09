@@ -10,7 +10,7 @@ import { useForm } from "antd/es/form/Form";
 import { accountGetAPI, accountPostAPI, accountPutAPI, accountDeleteAPI } from "@/services/AccountService";
 import { rolesGetAPI } from "@/services/RoleService";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { employeeGetAllAPI } from "@/Services/employeeService";
+import { employeeGetAllAPI } from "@/services/employeeService";
 import { Link } from "react-router-dom"
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 
@@ -85,15 +85,7 @@ const Account = () => {
                         },
                     ]);
                 }
-                // Kiểm tra nếu lỗi liên quan đến mật khẩu
-                // if (errorMessage.includes("password")) {
-                //     form.setFields([
-                //         {
-                //             name: "password",
-                //             errors: ["Mật khẩu không hợp lệ"],
-                //         },
-                //     ]);
-                // }
+              
             }
         },
     });
@@ -269,7 +261,7 @@ const Account = () => {
                         >
                             <Pencil size={18} />
                         </Button>
-                        {record.is_deleted ? (     <Popconfirm
+                        {record.is_deleted ? (<Popconfirm
                             title="Mở khóa tài khoản?"
                             onConfirm={() => handleIsLock(record, false)}
                             okText="Có"
@@ -285,28 +277,28 @@ const Account = () => {
                             >
                                 <LockKeyholeOpen size={20} />
                             </Button>
-                        </Popconfirm>) 
-                        : 
-                        (  <Popconfirm
-                            title="Khóa tài khoản?"
-                            onConfirm={() => handleIsLock(record, true)}
-                            okText="Có"
-                            cancelText="Không"
-                            description="Bạn đã chắc chắn muốn khóa ?"
-                        >
-                            <Button
-                                shape="circle"
-                                size="medium"
-                                color="red"
-                                variant="solid"
-
+                        </Popconfirm>)
+                            :
+                            (<Popconfirm
+                                title="Khóa tài khoản?"
+                                onConfirm={() => handleIsLock(record, true)}
+                                okText="Có"
+                                cancelText="Không"
+                                description="Bạn đã chắc chắn muốn khóa ?"
                             >
-                                <LockKeyhole size={20} />
-                            </Button>
-                        </Popconfirm>)}
-                      
+                                <Button
+                                    shape="circle"
+                                    size="medium"
+                                    color="red"
+                                    variant="solid"
 
-                   
+                                >
+                                    <LockKeyhole size={20} />
+                                </Button>
+                            </Popconfirm>)}
+
+
+
                     </Space>
                 </>
             ),

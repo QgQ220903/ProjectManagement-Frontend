@@ -6,7 +6,7 @@ import { getRolesAPI } from "@/services/RoleService";
 import { useNavigate } from "react-router-dom";
 import FormLogin from "@/components/form/Form";
 import { useAuth } from "@/hooks/use-auth";
-import { showToastMessage } from '@/utils/toast'
+import { showToastMessage, showToastMessagePlus } from '@/utils/toast'
 import logoSgu from "@/assets/logoSgu.png";
 
 import { ToastContainer, toast } from 'react-toastify';
@@ -39,12 +39,15 @@ const Login = () => {
 
             }
 
-
-
         },
         onError: (error) => {
-            showToastMessage('Đăng nhập thất bại !', 'error', 'top-right')
-            console.log(error);
+            showToastMessage(error.response.data.error, 'error', 'top-right')
+            //     showToastMessagePlus2({
+            //         title: 'Đăng nhập thất bại!',
+            //         description: 'Dữ liệu đã được lưu.',
+            //         type: 'error',
+            //   });
+            console.log("error.data.error", error.response.data.error);
         },
     });
 
@@ -68,16 +71,16 @@ const Login = () => {
                 <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
                     <a href="#" className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
                         <img
-                             className=" w-24 object-cover"
+                            className=" w-24 object-cover"
                             src={logoSgu}
                             alt="Logoipsum"
-                           
+
                         />
-                     
+
                     </a>
                     <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
                         <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-                
+
                             <h1 className="text-xl text-center font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
                                 Đăng nhập vào hệ thống
                             </h1>
@@ -102,9 +105,7 @@ const Login = () => {
                                     {/* <a href="#" className="text-sm font-medium text-primary-600 hover:underline dark:text-blue-600">Quên mật khẩu ?</a> */}
                                 </div>
                                 <button type="submit" className="w-full btn-primary ">Đăng nhập</button>
-                                {/* <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                                    Bạn chưa có tài khoản ? <Link to='/register' className="font-medium text-primary-600 hover:underline dark:text-primary-500">Đăng ký</Link>
-                                </p> */}
+                                
                             </form>
                         </div>
                     </div>

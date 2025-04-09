@@ -1,11 +1,12 @@
 import axios from "axios";
-import axiosInstance from "@/Services/AxiosInstance";
+import axiosInstance from "@/services/AxiosInstance";
 
+// http://localhost:8000/api/departments/1/employees/
 const api = "http://127.0.0.1:8000/api/employees/";
 
 export const employeeGetAPI = async () => {
     try {
-        const response = await axios.get(api + "get_all_employees/");
+        const response = await axiosInstance.get("/employees/get_all_employees/");
         console.log("employeeGetAPI", response);
         return response.data;
     } catch (error) {
@@ -30,26 +31,29 @@ export const employeeGetAllAPIWithDepartment = async (idDepartment) => {
         return response.data;
     } catch (error) {
         console.log(error);
+        throw error;
     }
 };
 
 export const employeePostAPI = async (obj) => {
     try {
-        const response = await axios.post(api, obj);
+        const response = await axiosInstance.post("/employees/", obj);
         console.log(response.data);
         return response.data;
     } catch (error) {
         console.log(error);
+        throw error;
     }
 };
 
 export const employeePutAPI = async (employe) => {
     try {
         console.log("api", employe.obj);
-        const response = await axios.put(`${api}${employe.id}/`, employe.obj);
+        const response = await axiosInstance.put(`/employees/${employe.id}/`, employe.obj);
         return response.data;
     } catch (error) {
         console.log(error);
+        throw error;
     }
 };
 
@@ -58,5 +62,6 @@ export const employeeDeleteAPI = async (id) => {
         await axios.delete(`${api}${id}/`);
     } catch (error) {
         console.log(error);
+        throw error;
     }
 };

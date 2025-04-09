@@ -4,20 +4,20 @@ import Search from "@/components/Search";
 import PageHeader from "@/components/PageHeader";
 import { Link, useParams } from "react-router-dom";
 
-import { projectPartGetAPI } from "@/Services/ProjectService";
-import { projectPartPostAPI } from "@/Services/ProjectPartService";
+import { projectPartGetAPI } from "@/services/ProjectService";
+import { projectPartPostAPI } from "@/services/ProjectPartService";
 // Employee API
-import { employeeGetAPI } from "@/Services/EmployeeService";
+import { employeeGetAPI } from "@/services/EmployeeService";
 
 // Department API
-import { departmentGetAPI } from "@/Services/DepartmentService";
+import { departmentGetAPI } from "@/services/DepartmentService";
 
 // Task API
-import { taskPost } from "@/Services/TaskService";
-import { taskAssignmentsPost } from "@/Services/TaskAssignmentsService";
-import { departmentTaskPost } from "@/Services/DepartmentTaskService";
+import { taskPost } from "@/services/TaskService";
+import { taskAssignmentsPost } from "@/services/TaskAssignmentsService";
+import { departmentTaskPost } from "@/services/DepartmentTaskService";
 
-import { formatDate } from "@/utils/cn";
+import { formatDate, getInitials } from "@/utils/cn";
 import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History } from "lucide-react";
 import ButtonIcon from "@/components/ButtonIcon";
 // import { FaEye } from "react-icons/fa";
@@ -39,7 +39,7 @@ import TitleTooltip from "@/components/tooltip/TitleTooltip";
 import { showToastMessage } from "@/utils/toast";
 
 import { ToastContainer, toast } from "react-toastify";
-import useWebSocket from "../../Services/useWebSocket";
+import useWebSocket from "@/services/useWebSocket";
 
 const itemsBreadcrumb = [{ title: <Link to="/">Trang chủ</Link> }, { title: <Link to="/project">Dự án</Link> }, { title: "Phần dự án" }];
 
@@ -115,7 +115,7 @@ const ProjectDetail = () => {
         queryFn: () => projectPartGetAPI(id), // Để React Query tự gọi API khi cần
         enabled: !!id, // Chỉ chạy khi id có giá trị hợp lệ
     });
-    
+
     // Thêm 1 phần dự án
     const { data: newProjectPart, mutate: mutateProjectPart } = useMutation({
         mutationFn: projectPartPostAPI,
@@ -152,7 +152,7 @@ const ProjectDetail = () => {
 
     //lấy ds nv
     const { data: employees } = useQuery({
-        queryKey: ["employees"],
+        queryKey: ["employeesProjectPart"],
         queryFn: employeeGetAPI,
     });
 
@@ -197,7 +197,7 @@ const ProjectDetail = () => {
         return taskData;
     };
 
- 
+
 
     useEffect(() => {
         if (Project_parts_List) {
@@ -217,8 +217,8 @@ const ProjectDetail = () => {
 
     useEffect(() => {
         if (employees) {
-            setEmployeesdata(employees.results);
-            setDepartmentsData(departments.results);
+            setEmployeesdata(employees?.results);
+            setDepartmentsData(departments?.results);
         }
     }, [employees, departments]);
 
@@ -331,7 +331,7 @@ const ProjectDetail = () => {
                                 ></TitleTooltip>
                             }
                         >
-                            <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
+                            <Avatar className="bg-blue-500"> {getInitials(value.name)}</Avatar>
                         </Tooltip>
                     </Avatar.Group>
                 ),
@@ -1026,7 +1026,7 @@ const ProjectDetail = () => {
                 setIsModalOpen={setIsModalHistoryOpen}
             ></ShowHistory> */}
 
-     
+
         </>
     );
 };

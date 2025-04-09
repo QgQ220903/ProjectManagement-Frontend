@@ -20,16 +20,14 @@ import PageHeader from "@/components/PageHeader";
 
 import ButtonIcon from "@/components/ButtonIcon";
 
-import { projectGetAPI, projectPostAPI, projectDeleteAPI, projectUpdateAPI } from "@/Services/ProjectService";
+import { projectGetAPI, projectPostAPI, projectDeleteAPI, projectUpdateAPI } from "@/services/ProjectService";
 
 import { formatDate } from "@/utils/cn";
 
 import { showToastMessage } from "@/utils/toast";
 
-import { ToastContainer, toast } from "react-toastify";
-
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import useWebSocket from "@/Services/useWebSocket";
+import useWebSocket from "@/services/useWebSocket";
 // import "react-toastify/dist/ReactToastify.css";
 
 const Project = () => {
@@ -179,18 +177,7 @@ const Project = () => {
     const handleDeleteProject = async (record) => {
         console.log("confirm", record);
         deleteProject(record.key); // Truyền đúng tham số
-        // try {
-        //   const response = await projectDeleteAPI(record.key)
-        //   if (response.status === 200) {
-        //     showToastMessage('Xóa dự án thành công!', 'success', 'top-right')
-        //     const newData = data.filter((item) => item.key !== record.key)
-        //     setData(newData)
-        //   } else {
-        //     showToastMessage('Xóa dự án thất bại!', 'error', 'top-right')
-        //   }
-        // } catch (error) {
-        //   console.log(error)
-        // }
+       
     };
 
     //  Tùy chỉnh cột của table
@@ -275,15 +262,15 @@ const Project = () => {
                     </a> */}
 
                     <Button
-                            shape="circle"
-                            size="medium"
-                            color="gold"
-                            variant="solid"
-                            onClick={() => handleEditProject(record)}
+                        shape="circle"
+                        size="medium"
+                        color="gold"
+                        variant="solid"
+                        onClick={() => handleEditProject(record)}
 
-                        >
-                            <Pencil size={18} />
-                        </Button>
+                    >
+                        <Pencil size={18} />
+                    </Button>
 
                     {/* <Popconfirm
                         placement="bottomRight"
@@ -313,7 +300,7 @@ const Project = () => {
                         >
                             <FaEye className="text-lg" />
                         </Button>
-                       
+
                     </Link>
                 </Space>
             ),
