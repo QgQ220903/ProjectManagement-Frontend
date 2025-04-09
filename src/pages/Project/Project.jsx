@@ -26,8 +26,6 @@ import { formatDate } from "@/utils/cn";
 
 import { showToastMessage } from "@/utils/toast";
 
-import { ToastContainer, toast } from "react-toastify";
-
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useWebSocket from "@/services/useWebSocket";
 // import "react-toastify/dist/ReactToastify.css";
@@ -179,18 +177,7 @@ const Project = () => {
     const handleDeleteProject = async (record) => {
         console.log("confirm", record);
         deleteProject(record.key); // Truyền đúng tham số
-        // try {
-        //   const response = await projectDeleteAPI(record.key)
-        //   if (response.status === 200) {
-        //     showToastMessage('Xóa dự án thành công!', 'success', 'top-right')
-        //     const newData = data.filter((item) => item.key !== record.key)
-        //     setData(newData)
-        //   } else {
-        //     showToastMessage('Xóa dự án thất bại!', 'error', 'top-right')
-        //   }
-        // } catch (error) {
-        //   console.log(error)
-        // }
+       
     };
 
     //  Tùy chỉnh cột của table

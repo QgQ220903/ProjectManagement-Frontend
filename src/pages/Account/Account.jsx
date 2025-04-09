@@ -85,15 +85,7 @@ const Account = () => {
                         },
                     ]);
                 }
-                // Kiểm tra nếu lỗi liên quan đến mật khẩu
-                // if (errorMessage.includes("password")) {
-                //     form.setFields([
-                //         {
-                //             name: "password",
-                //             errors: ["Mật khẩu không hợp lệ"],
-                //         },
-                //     ]);
-                // }
+              
             }
         },
     });

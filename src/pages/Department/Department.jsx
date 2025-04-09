@@ -6,10 +6,12 @@ import ModalDepartment from "@/components/modal/Modal";
 import FormDepartment from "@/components/form/Form";
 import PageHeader from "@/components/PageHeader";
 import ButtonIcon from "@/components/ButtonIcon";
-import { departmentGetAPI, departmentPostAPI, departmentPutAPI, departmentDeleteAPI, employeeGetAPI } from "@/services/DepartmentService";
+import { employeeGetAPI, employeeGetAllAPIWithDepartment } from "@/services/EmployeeService";
+import { departmentGetAPI, departmentPostAPI, departmentPutAPI, departmentDeleteAPI} from "@/services/DepartmentService";
 import useWebSocket from "@/services/useWebSocket";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import { showToastMessage } from "@/utils/toast";
 
 // Đường dẫn
 const itemsBreadcrumb = [
@@ -36,13 +38,17 @@ const Department = () => {
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     const departmentUpdate = useWebSocket("ws://127.0.0.1:8000/ws/departments/");
 
+    // lấy ds tất cả tv
     const { data: dataemployeess } = useQuery({
         queryKey: ["employeess"],
         queryFn: employeeGetAPI,
     });
 
     useEffect(() => {
-        setemployeess(dataemployeess || []);
+        if(dataemployeess?.results){
+
+            setemployeess(dataemployeess.results || []);
+        }
     }, [dataemployeess]);
 
     const queryClient = useQueryClient();
@@ -55,14 +61,38 @@ const Department = () => {
             queryClient.invalidateQueries(["departmentDe"]);
         }
     }, [departmentUpdate, queryClient]);
+
+
+    //sửa department
     const { data: dataDepartmentPut, mutate: mutatePut } = useMutation({
         mutationFn: departmentPutAPI,
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: ["departmentDe"],
             });
+            showToastMessage("Sửa phòng ban thành công !", "success", "top-right");
+        },
+        onError: (error) => {
+            console.error("Lỗi khi sửa phòng ban:", error);
+            showToastMessage("Sửa phòng ban thất bai !", "error", "top-right");
         },
     });
+
+    //xóa department
+    const { mutate: mutateDelete } = useMutation({
+        mutationFn: departmentDeleteAPI,
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["departmentDe"],
+            });
+            showToastMessage("Xóa phòng ban thành công !", "success", "top-right");
+        },
+        onError: (error) => {
+            console.error("Lỗi khi Xóa phòng ban:", error);
+            showToastMessage("Xóa phòng ban thất bai !", "error", "top-right");
+        },
+    });
+
     //thêm nv
     const { data: newData, mutate: mutatePost } = useMutation({
         mutationFn: departmentPostAPI,
@@ -70,22 +100,31 @@ const Department = () => {
             queryClient.invalidateQueries({
                 queryKey: ["departmentDe"],
             });
+            showToastMessage("Thêm phòng ban thành công !", "success", "top-right");
         },
+        onError: () => {
+            showToastMessage("Thêm phòng ban thất bại !", "error", "top-right");
+        }
     });
+
     function setDataDepartments(departments) {
         return departments?.map((dept) => ({
+            ...dept,
             key: dept.id,
             name: dept.name,
             manager: dept.manager ? dept.manager.name : "Chưa có trưởng phòng",
             description: dept.description ? dept.description : "Không có mô tả phòng ban",
+
         }));
     }
+
     useEffect(() => {
         //console.log("fix de", dataDepartment);
         if (dataDepartment) {
             setData(setDataDepartments(dataDepartment.results));
         }
     }, [dataDepartment]);
+
     useEffect(() => {
         if (selectedDepartment) form.setFieldsValue(selectedDepartment);
     }, [form, selectedDepartment]);
@@ -98,9 +137,17 @@ const Department = () => {
         setMode("Edit");
     };
 
-    const handleDeleteDepartment = async (id) => {
-        await departmentDeleteAPI(id);
-        setData((prevData) => prevData.filter((item) => item.key !== id));
+    const handleDeleteDepartment = async (record) => {
+        console.log(record);
+        if(record.employee_count === 0){
+            mutateDelete({id: record.key})
+            setData((prevData) => prevData.filter((item) => item.key!== record.key));
+        }else{
+            showToastMessage("Phòng ban này đang có nhân viên, không thể xóa!", "error", "top-right");
+        }
+        // await departmentDeleteAPI(record);
+        // mutateDelete({id: record.key})
+        // setData((prevData) => prevData.filter((item) => item.key !== record.key));
     };
 
     const handleOk = async () => {
@@ -277,7 +324,7 @@ const Department = () => {
                     </Button>
                     <Popconfirm
                         title="Xóa phòng ban?"
-                        onConfirm={() => handleDeleteDepartment(record.key)}
+                        onConfirm={() => handleDeleteDepartment(record)}
                         okText="Có"
                         cancelText="Không"
                         description="Bạn đã chắc chắn muốn xóa ?"
