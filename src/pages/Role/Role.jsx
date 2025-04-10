@@ -10,6 +10,19 @@ import { getRolesDetailById, rolePutAPI, rolesDeleteAPI, rolesGetAPI, rolesPostA
 import { featuresGetAPI } from "@/services/FeaturesService";
 import { rolesDetailPostAPI } from "@/services/RolesdetailService";
 import { check } from "prettier";
+import {Link} from "react-router-dom";
+
+// Đường dẫn
+const itemsBreadcrumb = [
+    {
+        title: <Link to="/">Trang chủ</Link>,
+    },
+
+    {
+        title: "Nhóm quyền",
+    },
+];
+
 
 const Role = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,15 +86,46 @@ const Role = () => {
                     name: res.data.name,
                 });
 
-                const mapped = res.data.role_details.map((item) => ({
-                    key: item.feature.id,
-                    role: item.feature.name,
-                    can_view: item.can_view,
-                    can_create: item.can_create,
-                    can_update: item.can_update,
-                    can_delete: item.can_delete,
-                }));
-                setData2(mapped);
+                const mapped1 = features.map((f) => {
+                    var tmp =null;
+                    for (const r of res.data.role_details) {
+                        if (f.id === r.feature.id) {
+                            tmp = {
+                                key: r.feature.id,
+                                role: r.feature.name,
+                                can_view: r.can_view,
+                                can_create: r.can_create,
+                                can_update: r.can_update,
+                                can_delete: r.can_delete,
+                            };
+                            break;
+                        }
+                    }
+
+
+
+                    if(tmp == null)
+                        tmp = {
+                            key: f.id,
+                            role: f.name,
+                            can_view: false,
+                            can_create: false,
+                            can_update: false,
+                            can_delete: false,
+                        };
+
+                    return tmp;
+                });
+
+                // const mapped = res.data.role_details.map((item) => ({
+                //     key: item.feature.id,
+                //     role: item.feature.name,
+                //     can_view: item.can_view,
+                //     can_create: item.can_create,
+                //     can_update: item.can_update,
+                //     can_delete: item.can_delete,
+                // }));
+                setData2(mapped1);
             }
 
             console.log("res:", res);
@@ -155,7 +199,6 @@ const Role = () => {
                     if (r1.data) {
                         var r = r1.data;
 
-
                         if (r1.status == 200) {
                             var objectRoles = data2.map((item) => {
                                 return {
@@ -181,10 +224,7 @@ const Role = () => {
                                 setIsEditRole(false);
                             }
                         }
-
-
                     }
-
                 });
             }
         } catch (error) {
@@ -226,16 +266,28 @@ const Role = () => {
             key: "action",
             render: (_, record) => (
                 <Space>
-                    <Button onClick={() => handleDetailRole(record.key)}>
+                    <Button 
+                     shape="circle"
+                     size="medium"
+                     color="gold"
+                     variant="solid"
+                    onClick={() => handleDetailRole(record.key)}
+                    >
                         <Pencil size={20} />
                     </Button>
                     <Popconfirm
                         title="Xóa nhóm quyền này?"
+                        
                         onConfirm={() => handleDetele(record.key)}
                         okText="Có"
                         cancelText="Không"
                     >
-                        <Button>
+                        <Button
+                         shape="circle"
+                         size="medium"
+                         color="red"
+                         variant="solid"
+                        >
                             <Trash2 size={20} />
                         </Button>
                     </Popconfirm>
@@ -251,7 +303,7 @@ const Role = () => {
 
     return (
         <>
-            <PageHeader title="Quản Lý Nhóm Quyền">
+            <PageHeader title="Quản Lý Nhóm Quyền" itemsBreadcrumb={itemsBreadcrumb}>
                 <ButtonIcon
                     handleEvent={() => {
                         setIsEditRole(false);
@@ -276,7 +328,7 @@ const Role = () => {
             </PageHeader>
 
             <div className="mt-5">
-                <Search size={20} />
+            
                 <Table
                     columns={columns}
                     dataSource={tableData}

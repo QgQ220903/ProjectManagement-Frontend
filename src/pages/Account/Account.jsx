@@ -14,6 +14,7 @@ import { employeeGetAllAPI } from "@/services/employeeService";
 import { Link } from "react-router-dom"
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { showToastMessage } from "@/utils/toast";
+import EmptyTemplate from "@/components/emptyTemplate/EmptyTemplate";
 
 // Đường dẫn
 const itemsBreadcrumb = [
@@ -503,6 +504,12 @@ const Account = () => {
                         defaultCurrent: current,
                         pageSize: 5, // Mặc định 10 dòng mỗi trang
                         onChange: onChange,
+                    }}
+                    locale={{
+                        triggerDesc: "Sắp xếp giảm dần",
+                        triggerAsc: "Sắp xếp tăng dần",
+                        cancelSort: "Hủy sắp xếp",
+                        emptyText: <EmptyTemplate title={"Bạn không có tài khoản nào !"} />,
                     }}
                 />
             </div>
