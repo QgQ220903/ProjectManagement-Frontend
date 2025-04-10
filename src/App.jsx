@@ -12,6 +12,7 @@ import Account from "@/pages/Account/Account";
 import Role from "@/pages/Role/Role";
 import Task from "@/pages/Task/Task";
 import TaskDepartment from "@/pages/TaskDepartment/TaskDepartment";
+import Chart from "@/pages/Chart/Chart";
 
 import TaskArchive from "@/pages/TaskArchive/TaskArchive";
 
@@ -89,6 +90,10 @@ function App() {
                 {
                     path: "task-archive",
                     element: <TaskArchive />,
+                },
+                {
+                    path: "chart",
+                    element: <Chart />,
                 },
             ],
         },
