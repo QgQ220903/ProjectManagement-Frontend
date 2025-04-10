@@ -77,7 +77,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
             key: '0',
             label: (
                 <Typography.Title level={5} >
-                    {employeeContext?.name}
+                    {employeeContext?.name || auth?.role.name }
                 </Typography.Title >
             ),
             disabled: true,
@@ -162,9 +162,15 @@ export const Header = ({ collapsed, setCollapsed }) => {
                             alt="profile image"
                             className="size-full object-cover"
                         /> */}
-                        <Avatar className="bg-blue-500" size="large" >
-                            {getInitials(employeeContext?.name)}
-                        </Avatar>
+                        {
+                   
+                           
+                        }
+                       { <Avatar className="bg-blue-500" size="large" >
+                            {getInitials(employeeContext?.name)
+                                || (auth?.role.name === "Admin" ? "Admin" : getInitials(auth?.role.name))
+                            }
+                        </Avatar>}
                     </button>
                 </Dropdown>
             </div>

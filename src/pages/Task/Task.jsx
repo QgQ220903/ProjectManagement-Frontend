@@ -23,7 +23,7 @@ import { Button, message, Upload } from "antd";
 import { taskGetWithId } from "@/services/TaskService";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
-import { formatDate, getRandomColor } from "@/utils/cn";
+import { formatDate, getRandomColor, getInitials } from "@/utils/cn";
 import TitleTooltip from "@/components/tooltip/TitleTooltip";
 
 import { fileAssignmentPostAPI } from '@/services/FileService';
@@ -31,6 +31,7 @@ import { fileAssignmentPostAPI } from '@/services/FileService';
 import { FileCard } from "@/components/FileCard"
 
 import useWebSocket from "@/services/useWebSocket";
+
 
 
 
@@ -263,20 +264,21 @@ const Task = () => {
             key: "responsible_person",
             render: (value) =>
                 value && (
-                    <Avatar.Group>
-                        <Tooltip
-                            placement="topRight"
-                            title={
-                                <TitleTooltip
-                                    name={value.name}
-                                    position={value.position}
-                                    email={value.email}
-                                ></TitleTooltip>
-                            }
-                        >
-                            <Avatar style={{ backgroundColor: getRandomColor() }}> {value.name.split(" ").reverse().join(" ").charAt(0)}</Avatar>
-                        </Tooltip>
-                    </Avatar.Group>
+                    // <Avatar.Group>
+                    //     <Tooltip
+                    //         placement="topRight"
+                    //         title={
+                    //             <TitleTooltip
+                    //                 name={value.name}
+                    //                 position={value.position}
+                    //                 email={value.email}
+                    //             ></TitleTooltip>
+                    //         }
+                    //     >
+                    //         <Avatar className="bg-blue-500">{getInitials(value.name)}</Avatar>
+                    //     </Tooltip>
+                    // </Avatar.Group>
+                    <Tag color='blue'>{value.name}</Tag>
                 ),
         },
         {

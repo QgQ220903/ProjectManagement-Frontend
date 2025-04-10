@@ -43,4 +43,7 @@ export const getInitials = (fullName) => {
 export const isArrayEmpty = (arr) => {
     return Array.isArray(arr) && arr.length === 0;
   }
-  
+
+export const splitEmployeeNames = (employeeString)=> {
+    return employeeString.split(",").map(name => name.trim());
+}

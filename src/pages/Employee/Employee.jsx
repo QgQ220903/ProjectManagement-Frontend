@@ -19,6 +19,8 @@ import useWebSocket from "@/services/useWebSocket";
 import DepartmentSelect from "./components/DepartmentSelect";
 import { showToastMessage } from "@/utils/toast";
 
+import EmptyTemplate from "@/components/emptyTemplate/EmptyTemplate";
+
 // Đường dẫn
 const itemsBreadcrumb = [
     {
