@@ -2,7 +2,7 @@ import axios from "axios";
 import axiosInstance from "@/services/AxiosInstance";
 
 // http://localhost:8000/api/departments/1/employees/
-const api = "http://3.24.47.52/api/employees/";
+const api = "https://3.24.47.52/api/employees/";
 
 export const employeeGetAPI = async () => {
     try {

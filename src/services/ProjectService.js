@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const api = "http://3.24.47.52/api/projects/";
+const api = "https://3.24.47.52/api/projects/";
 
 export const projectGetAPI = async (page) => {
     try {

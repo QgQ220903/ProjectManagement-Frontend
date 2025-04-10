@@ -42,7 +42,7 @@ export const accountDeleteAPI = async (is_deleted, id) => {
 export const logInAPI = async (obj) => {
     // return axiosInstance.post("/account/login/",obj);
     try {
-        const response = await axios.post("http://3.24.47.52/api/account/login/", obj);
+        const response = await axios.post("https://3.24.47.52/api/account/login/", obj);
         console.log("logInAPI", response);
         return response.data;
     } catch (error) {
@@ -54,7 +54,7 @@ export const logInAPI = async (obj) => {
 export const logOutAPI = async (obj) => {
     // return axiosInstance.post("/account/logout/",obj);
     try {
-        const response = await axios.post(`http://3.24.47.52/api/account/logout/`, obj);
+        const response = await axios.post(`https://3.24.47.52/api/account/logout/`, obj);
         console.log(response);
         return response.data;
     } catch (error) {

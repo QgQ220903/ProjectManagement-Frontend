@@ -1,7 +1,7 @@
 import axios from "axios";
 import axiosInstance from "@/services/AxiosInstance";
 
-const api = "http://3.24.47.52/api/departments/";
+const api = "https://3.24.47.52/api/departments/";
 
 // departments/get_all_departments/
 
