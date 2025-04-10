@@ -1105,7 +1105,7 @@ const TaskDepartment = () => {
             rules: [
                 {
                     required: true,
-                    message: "Làm ơn chọn người chịu trách nhiệm",
+                    message: "Làm ơn chọn người thực hiện",
                 },
             ],
         },
