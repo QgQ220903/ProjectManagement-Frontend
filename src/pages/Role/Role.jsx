@@ -73,15 +73,46 @@ const Role = () => {
                     name: res.data.name,
                 });
 
-                const mapped = res.data.role_details.map((item) => ({
-                    key: item.feature.id,
-                    role: item.feature.name,
-                    can_view: item.can_view,
-                    can_create: item.can_create,
-                    can_update: item.can_update,
-                    can_delete: item.can_delete,
-                }));
-                setData2(mapped);
+                const mapped1 = features.map((f) => {
+                    var tmp =null;
+                    for (const r of res.data.role_details) {
+                        if (f.id === r.feature.id) {
+                            tmp = {
+                                key: r.feature.id,
+                                role: r.feature.name,
+                                can_view: r.can_view,
+                                can_create: r.can_create,
+                                can_update: r.can_update,
+                                can_delete: r.can_delete,
+                            };
+                            break;
+                        }
+                    }
+
+
+
+                    if(tmp == null)
+                        tmp = {
+                            key: f.id,
+                            role: f.name,
+                            can_view: false,
+                            can_create: false,
+                            can_update: false,
+                            can_delete: false,
+                        };
+
+                    return tmp;
+                });
+
+                // const mapped = res.data.role_details.map((item) => ({
+                //     key: item.feature.id,
+                //     role: item.feature.name,
+                //     can_view: item.can_view,
+                //     can_create: item.can_create,
+                //     can_update: item.can_update,
+                //     can_delete: item.can_delete,
+                // }));
+                setData2(mapped1);
             }
 
             console.log("res:", res);
@@ -155,7 +186,6 @@ const Role = () => {
                     if (r1.data) {
                         var r = r1.data;
 
-
                         if (r1.status == 200) {
                             var objectRoles = data2.map((item) => {
                                 return {
@@ -181,10 +211,7 @@ const Role = () => {
                                 setIsEditRole(false);
                             }
                         }
-
-
                     }
-
                 });
             }
         } catch (error) {
