@@ -60,7 +60,10 @@ const Login = () => {
         const formData = new FormData(event.target);
         const email = formData.get("email");
         const password = formData.get("password");
-
+        if(email === '' || password === ''){
+            showToastMessage('Vui lòng nhập đầy đủ thông tin!','error', 'top-right')
+            return
+        }
         // Gọi API đăng nhập
         mutatePost({ email, password });
     };
