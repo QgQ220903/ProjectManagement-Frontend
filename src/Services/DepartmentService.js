@@ -1,7 +1,7 @@
 import axios from "axios";
 import axiosInstance from "@/services/AxiosInstance";
 
-const api = "http://127.0.0.1:8000/api/departments/";
+const api = "http://3.24.47.52/api/departments/";
 
 // departments/get_all_departments/
 
@@ -53,7 +53,7 @@ export const updateManagerForDepartmentAPI = async (obj) => {
 // hàm này ko còn dùng ở department page nhớ kiểm tra xem còn dùng ở đâu không
 export const employeeGetAPI = async () => {
     try {
-        const response = await axios.get("http://127.0.0.1:8000/api/employees/");
+        const response = await axiosInstance.get("/employees/");
         return response.data.results;
     } catch (error) {
         console.error("Lỗi khi lấy danh sách nhân viên:", error);
