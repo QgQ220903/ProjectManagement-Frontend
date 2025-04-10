@@ -10,6 +10,19 @@ import { getRolesDetailById, rolePutAPI, rolesDeleteAPI, rolesGetAPI, rolesPostA
 import { featuresGetAPI } from "@/services/FeaturesService";
 import { rolesDetailPostAPI } from "@/services/RolesdetailService";
 import { check } from "prettier";
+import {Link} from "react-router-dom";
+
+// Đường dẫn
+const itemsBreadcrumb = [
+    {
+        title: <Link to="/">Trang chủ</Link>,
+    },
+
+    {
+        title: "Nhóm quyền",
+    },
+];
+
 
 const Role = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -226,16 +239,28 @@ const Role = () => {
             key: "action",
             render: (_, record) => (
                 <Space>
-                    <Button onClick={() => handleDetailRole(record.key)}>
+                    <Button 
+                     shape="circle"
+                     size="medium"
+                     color="gold"
+                     variant="solid"
+                    onClick={() => handleDetailRole(record.key)}
+                    >
                         <Pencil size={20} />
                     </Button>
                     <Popconfirm
                         title="Xóa nhóm quyền này?"
+                        
                         onConfirm={() => handleDetele(record.key)}
                         okText="Có"
                         cancelText="Không"
                     >
-                        <Button>
+                        <Button
+                         shape="circle"
+                         size="medium"
+                         color="red"
+                         variant="solid"
+                        >
                             <Trash2 size={20} />
                         </Button>
                     </Popconfirm>
@@ -251,7 +276,7 @@ const Role = () => {
 
     return (
         <>
-            <PageHeader title="Quản Lý Nhóm Quyền">
+            <PageHeader title="Quản Lý Nhóm Quyền" itemsBreadcrumb={itemsBreadcrumb}>
                 <ButtonIcon
                     handleEvent={() => {
                         setIsEditRole(false);
@@ -276,7 +301,7 @@ const Role = () => {
             </PageHeader>
 
             <div className="mt-5">
-                <Search size={20} />
+            
                 <Table
                     columns={columns}
                     dataSource={tableData}
