@@ -31,3 +31,30 @@ export const searchSubtasksResponsible_person = (subtasks, value) => {
         return false;
     });
 };
+
+
+export const groupByDepartment = (data) => {
+    const grouped = data.reduce((acc, item) => {
+      const id = item.department_id;
+      
+      if (!acc[id]) {
+        acc[id] = {
+          department_id: item.department_id,
+          department_name: item.department_name,
+          total_tasks: 0,
+          done: 0,
+          delayed: 0,
+          in_process: 0
+        };
+      }
+  
+      acc[id].total_tasks += item.total_tasks;
+      acc[id].done += item.done;
+      acc[id].delayed += item.delayed;
+      acc[id].in_process += item.in_process;
+  
+      return acc;
+    }, {});
+  
+    return Object.values(grouped);
+  }

@@ -1,6 +1,6 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { Table } from 'antd';
-
+import EmptyTemplate from "@/components/emptyTemplate/EmptyTemplate";
 
 export const LineChartDb = ({data}) => (
   <LineChart width={700} height={400} data={[...data,
@@ -73,6 +73,12 @@ const columns = [
         pageSize: 4,
       }
     }
+    locale={{
+      triggerDesc: "Sắp xếp giảm dần",
+      triggerAsc: "Sắp xếp tăng dần",
+      cancelSort: "Hủy sắp xếp",
+      emptyText: <EmptyTemplate title={"Bạn không  có dữ liệu !"} />,
+  }}
     />
   );
 

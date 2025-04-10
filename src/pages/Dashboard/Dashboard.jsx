@@ -18,9 +18,13 @@ import { LineChartDb, TableChart } from '@/pages/Dashboard/components/char'
 
 import PageHeader from "@/components/PageHeader";
 
+import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import {groupByDepartment} from "@/utils/tasks"
+
 const { RangePicker } = DatePicker;
 
-import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 
 
 // Đường dẫn
@@ -247,7 +251,7 @@ const DashboardPage = () => {
                 triggerDesc: "Sắp xếp giảm dần",
                 triggerAsc: "Sắp xếp tăng dần",
                 cancelSort: "Hủy sắp xếp",
-                emptyText: <EmptyTemplate title={"Bạn không dữ liệu !"} />,
+                emptyText: <EmptyTemplate title={"Bạn không có dữ liệu !"} />,
               }}
             />
        
@@ -255,7 +259,7 @@ const DashboardPage = () => {
 
         <Flex className="mt-3" gap={'middle'}>
           <Card className={"flex-1"}>
-            <LineChartDb data={data}></LineChartDb>
+            <LineChartDb data={groupByDepartment(data)}></LineChartDb>
           </Card>
           <Card className={"flex-2"}>
             <TableChart data={data}></TableChart>

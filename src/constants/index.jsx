@@ -9,7 +9,7 @@ export const navbarLinks = [
         {
             label: "Thống kê",
             icon: ChartLine,
-            path: "/",
+            path: "/dashboard",
         },  
         {
             label: "Nhân Viên",
