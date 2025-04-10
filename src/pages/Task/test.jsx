@@ -19,7 +19,7 @@ const FileUpload = () => {
     formData.append('name', file.name);
 
     try {
-      const response = await axios.post('http://localhost:8000/api/files/', formData, {
+      const response = await axios.post('https://3.24.47.52/api/files/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

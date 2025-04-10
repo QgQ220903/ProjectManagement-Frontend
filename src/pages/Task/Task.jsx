@@ -68,7 +68,7 @@ const Task = () => {
 
     const props = {
         name: 'link',
-        action: 'http://localhost:8000/api/files/',
+        action: 'https://3.24.47.52/api/files/',
         data: (file) => ({
             name: file.name,  // Gửi tên file
         }),
