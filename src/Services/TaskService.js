@@ -1,11 +1,11 @@
 import axios from "axios";
 import axiosInstance from "./AxiosInstance";
 
-const api = "http://localhost:8000/api/tasks/";
+const api = "https://3.24.47.52/api/tasks/";
 
 export const taskPost = async (obj) => {
     try {
-        const response = await axios.post(api, obj);
+        const response = await axiosInstance.post("/tasks/", obj);
         console.log("taskPost",response.data)
         return response.data;
     } catch (error) {
