@@ -3,7 +3,7 @@ import { DatePicker, Space, Table, Flex, Typography, Card } from 'antd';
 
 import { dashboardGetAPI, dashboardGetAPI2 } from '@/services/DashboardService';
 
-import { CardDb } from '@/pages/Dashboard/components/Card'
+import { CardDb } from '@/pages/Dashboard/components/card'
 
 
 import { Progress, Tag } from "antd";
