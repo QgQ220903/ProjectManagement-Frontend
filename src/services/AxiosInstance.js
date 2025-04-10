@@ -2,7 +2,7 @@ import axios from "axios";
 // API base URL
 // const API_URL = "http://127.0.0.1:8000/api";
 
-const API_URL = "http://3.24.47.52/api";
+const API_URL = "https://3.24.47.52/api";
 
 // Lấy token từ localStorage hoặc cookie
 const getAccessToken = () => localStorage.getItem("access");
