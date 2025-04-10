@@ -14,6 +14,8 @@ import Task from "@/pages/Task/Task";
 import TaskDepartment from "@/pages/TaskDepartment/TaskDepartment";
 import Chart from "@/pages/Chart/Chart";
 
+import Home from "@/pages/Home/Home";
+
 import TaskArchive from "@/pages/TaskArchive/TaskArchive";
 
 import RequireAuth from "@/components/RequireAuth";
@@ -43,7 +45,7 @@ function App() {
             children: [
                 {
                     path: "/",
-                    element: "Home",
+                    element: <Home/>,
                     
                 },
                 {

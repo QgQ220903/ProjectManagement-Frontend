@@ -5,7 +5,6 @@ import { dashboardGetAPI, dashboardGetAPI2 } from '@/services/DashboardService';
 
 import { CardDb } from '@/pages/Dashboard/components/card'
 
-
 import { Progress, Tag } from "antd";
 
 import { splitEmployeeNames, getRandomColor } from "@/utils/cn"
