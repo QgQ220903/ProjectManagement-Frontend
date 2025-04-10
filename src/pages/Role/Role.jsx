@@ -11,6 +11,7 @@ import { featuresGetAPI } from "@/services/FeaturesService";
 import { rolesDetailPostAPI } from "@/services/RolesdetailService";
 import { check } from "prettier";
 import {Link} from "react-router-dom";
+import { showToastMessage, showToastMessagePlus } from "../../utils/toast";
 
 // Đường dẫn
 const itemsBreadcrumb = [
@@ -139,6 +140,8 @@ const Role = () => {
         rolesDeleteAPI(id).then((res) => {
             if (res?.status === 204) {
                 setRoles((prev) => prev.filter((item) => item.id !== id));
+                showToastMessage("Xóa nhóm quyền thành công!", "success", "top-right");
+                
             }
         });
     };
@@ -181,13 +184,14 @@ const Role = () => {
                         });
 
                         if (checkedSave) {
-                            alert("Thêm mới nhóm quyền thành công!");
+                             showToastMessage("Thêm tài khoản thành công!", "success", "top-right");
                             setIsEditRole(false);
                         }
 
                         setRoles((prev) => [...prev, res.data]);
                         setIsModalOpen(false);
                     }
+                   
                 });
             } else {
                 const values = await form.validateFields();
@@ -220,15 +224,15 @@ const Role = () => {
                             });
 
                             if (checkedEdit) {
-                                alert("Cập nhật nhóm quyền thành công!");
-                                setIsEditRole(false);
+                                showToastMessage("Cập nhật nhóm quyền thành công!", "success", "top-right");
                             }
                         }
                     }
                 });
             }
         } catch (error) {
-            console.log(error);
+            console.log('aaaaaaaaaaaaaaaaaaaa');
+           
         }
     };
 
@@ -332,6 +336,10 @@ const Role = () => {
                 <Table
                     columns={columns}
                     dataSource={tableData}
+                         pagination={{
+                                            pageSize: 5, // Mặc định 10 dòng mỗi trang
+                                        }}
+                                     
                 />
             </div>
 

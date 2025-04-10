@@ -26,6 +26,8 @@ const itemsBreadcrumb = [
   },
 ];
 
+
+
 const DashboardPage = () => {
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
@@ -66,6 +68,10 @@ const DashboardPage = () => {
   
   }, [startTime, endTime])
 
+  useEffect(()=>{
+      //var tmp = $('.ant-table-tbody');
+  })
+
 
 
 
@@ -87,7 +93,7 @@ const DashboardPage = () => {
       dataIndex: "completion_percentage",
       key: "completion_percentage",
       render: (value, record) => {
-        return <Progress type="circle" percent={record.completion_percentage} size={80} format={(percent) => {
+        return <Progress type="circle" percent={record.completion_percentage} size={45} format={(percent) => {
           if (percent === 100) {
             return 'Done';
           }
@@ -95,6 +101,10 @@ const DashboardPage = () => {
 
         }} />
       }
+    },  {
+      title: "Phòng ban",
+      dataIndex: "department",
+      key: "department",
     },
     {
       title: "Tên nhân viên",
@@ -112,7 +122,8 @@ const DashboardPage = () => {
           </Space>
         );
       }
-    }
+    },
+  
   ];
   return (
     <>

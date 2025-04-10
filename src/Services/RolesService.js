@@ -1,3 +1,4 @@
+import { showToastMessage } from "../utils/toast";
 import axiosInstance from "./AxiosInstance";
 // import axios from "axios";
 
@@ -13,6 +14,7 @@ export const rolesPostAPI = async (obj) => {
         return res;
     } catch (error) {
         console.log(error);
+        showToastMessage("Nhóm quyền đã tồn tại!", "error", "top-right");
         throw error
     }
 
@@ -44,6 +46,7 @@ export const rolePutAPI = async (obj,id) => {
         return response;
     } catch (error) {
         console.log(error);
+        showToastMessage("Nhóm quyền đã tồn tại!", "error", "top-right");
     }
 };
 
