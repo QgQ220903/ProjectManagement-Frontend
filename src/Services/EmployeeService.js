@@ -57,6 +57,20 @@ export const employeePutAPI = async (employe) => {
     }
 };
 
+// sửa chức vụ
+export const employeePatchAPI = async (id,obj) => {
+    try {
+        console.log("obj", obj);
+        const response = await axiosInstance.patch(`/employees/${id}/`,obj);
+        console.log("employeePatchAPI", response);
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+
+
 export const employeeDeleteAPI = async (id) => {
     try {
         await axios.delete(`${api}${id}/`);

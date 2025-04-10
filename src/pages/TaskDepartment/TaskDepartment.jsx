@@ -48,10 +48,10 @@ import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History, File, Pen, Arro
 import ButtonIcon from "@/components/ButtonIcon";
 
 import ModalProjectTask from "@/components/modal/Modal";
-import ModalSendEmail from "@/components/modal/Modal";
+// import ModalSendEmail from "@/components/modal/Modal";
 
 import FormProjectTask from "@/components/form/Form";
-import FormSendEmail from "@/components/form/Form";
+
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -68,6 +68,9 @@ import DrawerFile from "@/pages/TaskDepartment/components/DrawerFile";
 import DrawerChatRom from "@/pages/TaskDepartment/components/DrawerChatRom";
 
 import { searchSubtasks, searchSubtasksResponsible_person } from "@/utils/tasks"
+
+import ModalSendEmailForm from "./components/ModalSendEmail";
+
 
 const itemsBreadcrumb = [{ title: <Link to="/">Trang chủ</Link> }, { title: "Công việc phòng ban" }];
 
@@ -96,12 +99,14 @@ const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 
 const TaskDepartment = () => {
+
+
     const taskSocket = useWebSocket("ws://127.0.0.1:8000/ws/tasks/");
     const task_List = useWebSocket("ws://127.0.0.1:8000/ws/task_assignments/");
     const file_list = useWebSocket("ws://127.0.0.1:8000/ws/file-detail/");
 
     // const { id } = useParams();
-    const { auth, employeeContext } = useAuth();
+    const { auth, employeeContext, features } = useAuth();
 
     const [isModalHistoryOpen, setIsModalHistoryOpen] = useState(false);
 
@@ -129,7 +134,7 @@ const TaskDepartment = () => {
 
     const [formSendEmail] = Form.useForm();
 
-
+    const [roleTaskDepartment,setRoleTaskDepartment] = useState(null);
 
     const [mode, setMode] = useState("");
 
@@ -451,7 +456,7 @@ const TaskDepartment = () => {
             created_at: formatDate(task.created_at),
             start_time: formatDate(task.start_time),
             end_time: formatDate(task.end_time),
-            isCreateTask: task?.responsible_person ? employeeContext.position !== "NV" && task.responsible_person.id === employeeContext.id : false,
+            // isCreateTask: task?.responsible_person ? employeeContext.position !== "NV" && task.responsible_person.id === employeeContext.id : false,
             isDoers: task.doers.some((doer) => doer.id === employeeContext.id) || task.responsible_person.id === employeeContext.id,
             isRes: task?.responsible_person ? task.responsible_person.id === employeeContext.id : false,
         };
@@ -469,9 +474,21 @@ const TaskDepartment = () => {
         return taskData;
     };
 
+    useEffect(() => {
+        console.log("features",features)
+        if (features) {
+            const featureTaskDeparment = features.find((item) => item.feature.name === "Quản lý công việc phòng ban");
+            setRoleTaskDepartment(featureTaskDeparment);
+            console.log("roleTaskDepartment", roleTaskDepartment);
+
+        }
+    }, [features]);
+
     // Lấy dự liệu vào bảng cha
     useEffect(() => {
         console.log("chạy 1 lần");
+        console.log("chạy 1 lần features",features);
+        
         console.log("project_part", project_part);
         console.log("employeeContext", employeeContext.department);
         if (project_part) {
@@ -639,7 +656,7 @@ const TaskDepartment = () => {
                     </ButtonIcon>
                 </Space>
             ),
-            hidden: employeeContext.position !== "TP",
+            hidden: (!roleTaskDepartment?.can_create || employeeContext.position !== "TP") 
         },
     ];
 
@@ -686,12 +703,14 @@ const TaskDepartment = () => {
     const [isModalSendEmailOpen, setIsModalSendEmailOpen] = useState(false);
 
     const handleShowSendEmail = (record) => {
+        setTaskDataSelectFormTable(record);
+        console.log("handleShowSendEmail record", record);
         setIsModalSendEmailOpen(true);
     }
 
-    const handleCancelSendEmail = () => {
-        setIsModalSendEmailOpen(false);
-    }
+    // const handleCancelSendEmail = () => {
+    //     setIsModalSendEmailOpen(false);
+    // }
 
     const handleArchiveTask = (record) => {
         console.log("handleArchiveTask", record)
@@ -892,7 +911,7 @@ const TaskDepartment = () => {
                     size={[8, 16]}
                     wrap
                 >
-                    {record.isCreateTask && (
+                    {(record.isRes && roleTaskDepartment.can_create) && (
                         <>
                             <Button
                                 shape="circle"
@@ -947,7 +966,7 @@ const TaskDepartment = () => {
                         </>
                     )}
 
-                    {(record.isDoers || employeeContext.position === "TP") && (
+                    {(record.isDoers || roleTaskDepartment.can_create) && (
                         <>
                             <Button
                                 shape="circle"
@@ -970,7 +989,7 @@ const TaskDepartment = () => {
                         </>
                     )}
 
-                    {record.completion_percentage === 100 && (
+                    {(record.completion_percentage === 100 && roleTaskDepartment.can_delete) && (
                         <>
                             <Popconfirm
                                 title="Lưu trữ dự án?"
@@ -1047,7 +1066,7 @@ const TaskDepartment = () => {
             component: (
                 <Select
                     showSearch
-                    placeholder="Select a employee"
+                    placeholder="Chọn người chịu trách nhiệm"
                     optionFilterProp="label"
 
                     options={employeesData?.map((item) => ({
@@ -1072,7 +1091,7 @@ const TaskDepartment = () => {
                 <Select
                     mode="multiple"
                     allowClear
-                    placeholder="Please select"
+                    placeholder="Chọn người thực hiện"
 
                     options={employeesData
                         ?.filter((item) => item.position !== "TP") // Lọc bỏ Trưởng phòng
@@ -1338,7 +1357,7 @@ const TaskDepartment = () => {
             </ModalProjectTask>
 
             {/* Modal show send email */}
-            <ModalSendEmail
+            {/* <ModalSendEmail
                 isModalOpen={isModalSendEmailOpen}
                 setIsModalOpen={setIsModalSendEmailOpen}
                 // handleOk={handleOkTask}
@@ -1352,7 +1371,16 @@ const TaskDepartment = () => {
 
                     formItems={formItemsSendEmail}
                 ></FormSendEmail>
-            </ModalSendEmail>
+            </ModalSendEmail> */}
+            <ModalSendEmailForm
+                 isModalSendEmailOpen = {isModalSendEmailOpen}
+                 setIsModalSendEmailOpen = {setIsModalSendEmailOpen}
+                 formSendEmail = {formSendEmail}
+                 mode = {mode}
+                 record={taskDataSelectFormTable}
+                 setTaskDataSelectFormTable = {setTaskDataSelectFormTable}
+            
+            />
 
             {/* Drawer chatroom */}
             <DrawerChatRom

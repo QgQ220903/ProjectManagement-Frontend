@@ -26,6 +26,8 @@ import { formatDate } from "@/utils/cn";
 
 import { showToastMessage } from "@/utils/toast";
 
+import {useAuth} from "@/hooks/use-auth"
+
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useWebSocket from "@/services/useWebSocket";
 // import "react-toastify/dist/ReactToastify.css";
@@ -50,6 +52,20 @@ const Project = () => {
     const [data, setData] = useState(null);
 
     const ProjectList = useWebSocket("ws://127.0.0.1:8000/ws/projects/");
+
+    const {features} = useAuth()
+
+    const [roleProject, setRoleProject] = useState(null)
+
+    useEffect(() => {
+        console.log("features",features)
+        if (features) {
+            const featureEmployee = features.find((item) => item.feature.name === "Quản lý dự án");
+            setRoleProject(featureEmployee);
+            console.log("roleProject", roleProject);
+
+        }
+    }, [features]);
 
     // const [isLoading, setIsloading] = useState(true)
 
@@ -261,7 +277,8 @@ const Project = () => {
                         <Pencil size={20} />
                     </a> */}
 
-                    <Button
+                    {
+                     roleProject?.can_update &&  (<Button
                         shape="circle"
                         size="medium"
                         color="gold"
@@ -270,8 +287,8 @@ const Project = () => {
 
                     >
                         <Pencil size={18} />
-                    </Button>
-
+                    </Button>)
+                    }
                     {/* <Popconfirm
                         placement="bottomRight"
                         title="Xóa một dự án"
@@ -436,9 +453,9 @@ const Project = () => {
                 title={"Dự Án"}
                 itemsBreadcrumb={itemsBreadcrumb}
             >
-                <ButtonIcon handleEvent={handleCreateProject}>
+                {roleProject?.can_create && <ButtonIcon handleEvent={handleCreateProject}>
                     <Plus /> Thêm Dự Án Mới
-                </ButtonIcon>
+                </ButtonIcon>}
             </PageHeader>
 
             <div className="mt-5">

@@ -13,6 +13,7 @@ import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/re
 import { employeeGetAllAPI } from "@/services/employeeService";
 import { Link } from "react-router-dom"
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
+import { showToastMessage } from "@/utils/toast";
 
 // Đường dẫn
 const itemsBreadcrumb = [
@@ -69,6 +70,7 @@ const Account = () => {
             queryClient.invalidateQueries({
                 queryKey: ["accounts"],
             });
+            showToastMessage("Thêm tài khoản thành công!", "success", "top-right");
             setIsModalOpen(false);
         },
         onError: (err) => {
@@ -87,6 +89,8 @@ const Account = () => {
                 }
               
             }
+
+            
         },
     });
 
@@ -97,6 +101,7 @@ const Account = () => {
             queryClient.invalidateQueries({
                 queryKey: ["accounts"],
             });
+            showToastMessage("Sửa tài khoản thành công!", "success", "top-right");
             setIsModalOpen(false);
         },
     });
@@ -107,7 +112,7 @@ const Account = () => {
             queryClient.invalidateQueries({
                 queryKey: ["accounts"],
             });
-            setIsModalOpen(false);
+           
         },
     });
 
@@ -454,12 +459,14 @@ const Account = () => {
     const handleCreate = () => {
         setSelectedRecord(null);
         setMode("Add");
+        setTitle("Tạo tài khoản");
         form.resetFields();
         showModal();
     };
 
     const handleUpdate = (record) => {
         setMode("Edit");
+        setTitle("Sửa tài khoản");
         console.log("record", record.role.id);
         setSelectedRecord(record);
         // Cập nhật giá trị form trước khi mở modal
@@ -504,7 +511,7 @@ const Account = () => {
                 isModalOpen={isModalOpen}
                 handleOk={handleOk}
                 handleCancel={() => handleCancel()}
-                title={"Thêm tài khoản"}
+                title={title}
                 form={form}
             >
                 <FormAccount

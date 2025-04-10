@@ -38,3 +38,9 @@ export const getInitials = (fullName) => {
       .join("");
   }
   
+
+//   check mảng rổng
+export const isArrayEmpty = (arr) => {
+    return Array.isArray(arr) && arr.length === 0;
+  }
+  

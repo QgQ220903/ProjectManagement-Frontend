@@ -60,6 +60,7 @@ const Employee = () => {
     const employeeUpdate = useWebSocket("ws://127.0.0.1:8000/ws/employees/");
 
     useEffect(() => {
+        console.log("features",features)
         if (features) {
             const featureEmployee = features.find((item) => item.feature.name === "Quản lý nhân viên");
             setRoleEmployee(featureEmployee);
@@ -378,7 +379,7 @@ const Employee = () => {
         {
             title: "Số Điện Thoại",
             dataIndex: "phone_number",
-            key: "phone",
+            key: "phone_number",
             filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
                 <div style={{ padding: 8 }}>
                     {/* Tùy chỉnh dropdown filter */}
@@ -408,7 +409,7 @@ const Employee = () => {
                     </Space>
                 </div>
             ),
-            onFilter: (value, record) => record.phone.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            onFilter: (value, record) => record.phone_number.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
             filterSearch: true,
         },
         {

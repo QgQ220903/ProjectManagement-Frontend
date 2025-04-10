@@ -6,7 +6,7 @@ import ModalDepartment from "@/components/modal/Modal";
 import FormDepartment from "@/components/form/Form";
 import PageHeader from "@/components/PageHeader";
 import ButtonIcon from "@/components/ButtonIcon";
-import { employeeGetAPI, employeeGetAllAPIWithDepartment } from "@/services/EmployeeService";
+import { employeeGetAPI, employeeGetAllAPIWithDepartment, employeePatchAPI } from "@/services/EmployeeService";
 import { departmentGetAPI, departmentPostAPI, departmentPutAPI, departmentDeleteAPI} from "@/services/DepartmentService";
 import useWebSocket from "@/services/useWebSocket";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -29,6 +29,8 @@ const itemsBreadcrumb = [
 const Department = () => {
     const [data, setData] = useState([]);
     const [employeess, setemployeess] = useState([]);
+
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [current, setCurrent] = useState(1);
     const [total, setTotal] = useState(0);
@@ -36,20 +38,33 @@ const Department = () => {
     const [title, setTitle] = useState("");
     const [mode, setMode] = useState("");
     const [selectedDepartment, setSelectedDepartment] = useState(null);
+    // manager đc chọn
+    const [selectedManager, setSelectedManger] = useState(null);
     const departmentUpdate = useWebSocket("ws://127.0.0.1:8000/ws/departments/");
 
     // lấy ds tất cả tv
-    const { data: dataemployeess } = useQuery({
-        queryKey: ["employeess"],
-        queryFn: employeeGetAPI,
+    // const { data: dataemployeess } = useQuery({
+    //     queryKey: ["employeess"],
+    //     queryFn: employeeGetAPI,
+    // });
+
+    //lấy ds tất cả tv theo id pb
+    const { mutateAsync: fetchEmployees, data: employees } = useMutation({
+        mutationFn: (id) => employeeGetAllAPIWithDepartment(id),
+        // onSuccess: (data) => {
+        //     setTest(data.results);
+        //     console.log("data", test);
+        // },
     });
 
-    useEffect(() => {
-        if(dataemployeess?.results){
+   
 
-            setemployeess(dataemployeess.results || []);
-        }
-    }, [dataemployeess]);
+    // useEffect(() => {
+    //     if(dataemployeess?.results){
+
+    //         setemployeess(dataemployeess.results || []);
+    //     }
+    // }, [dataemployeess]);
 
     const queryClient = useQueryClient();
     const { data: dataDepartment, isLoading } = useQuery({
@@ -62,15 +77,53 @@ const Department = () => {
         }
     }, [departmentUpdate, queryClient]);
 
+    const changePosition = async (dataOld,dataNew) => {
+        console.log("changePosition dataOld :",dataOld);
+        console.log("changePosition dataNew :",dataNew);
+      
+       
+        if(dataOld === null){
+            console.log("chưa có trưởng phòng")
+            const dataNewfilter = {
+                ...dataNew,
+                position: "TP"
+            }
+            return await employeePatchAPI(dataNewfilter.id,dataNewfilter);
+        }
+        else if(dataOld.id === dataNew.id){
+            return
+        }else {
+            const dataNewfilter = {
+                ...dataNew,
+                position: "TP"
+            }
+            const dataOldfilter = {
+               ...dataOld,
+                position: "NV"
+            }
+            // patchEmployees(idOld,"NV")
+            // console.log(" patchEmployees(idOld,NV)");
+            await employeePatchAPI(dataOldfilter.id,dataOldfilter);
+            await employeePatchAPI(dataNewfilter.id,dataNewfilter);
+         
+        }
+    }
 
     //sửa department
     const { data: dataDepartmentPut, mutate: mutatePut } = useMutation({
         mutationFn: departmentPutAPI,
-        onSuccess: () => {
+        onSuccess: async (data) => {
             queryClient.invalidateQueries({
                 queryKey: ["departmentDe"],
             });
+            console.log("dataDepartmentPut",data)
             showToastMessage("Sửa phòng ban thành công !", "success", "top-right");
+         
+            if(data){
+                changePosition(selectedManager,data.manager)
+            }
+            setIsModalOpen(false);
+
         },
         onError: (error) => {
             console.error("Lỗi khi sửa phòng ban:", error);
@@ -93,7 +146,7 @@ const Department = () => {
         },
     });
 
-    //thêm nv
+    //thêm pb
     const { data: newData, mutate: mutatePost } = useMutation({
         mutationFn: departmentPostAPI,
         onSuccess: () => {
@@ -101,6 +154,7 @@ const Department = () => {
                 queryKey: ["departmentDe"],
             });
             showToastMessage("Thêm phòng ban thành công !", "success", "top-right");
+            setIsModalOpen(false);
         },
         onError: () => {
             showToastMessage("Thêm phòng ban thất bại !", "error", "top-right");
@@ -113,6 +167,7 @@ const Department = () => {
             key: dept.id,
             name: dept.name,
             manager: dept.manager ? dept.manager.name : "Chưa có trưởng phòng",
+            manager_detail: dept.manager? dept.manager : null,
             description: dept.description ? dept.description : "Không có mô tả phòng ban",
 
         }));
@@ -122,6 +177,7 @@ const Department = () => {
         //console.log("fix de", dataDepartment);
         if (dataDepartment) {
             setData(setDataDepartments(dataDepartment.results));
+            console.log("dataDepartment", data);
         }
     }, [dataDepartment]);
 
@@ -129,19 +185,25 @@ const Department = () => {
         if (selectedDepartment) form.setFieldsValue(selectedDepartment);
     }, [form, selectedDepartment]);
 
-    const handleEditDepartment = (record) => {
+    const handleEditDepartment = async (record) => {
         setTitle("Sửa Phòng Ban");
         setSelectedDepartment(record);
+        console.log("handleEditDepartment", record);
+        //set manager đc chọn
+        setSelectedManger(record.manager_detail);
+        const dataEm = await fetchEmployees(record.key)
+        setemployeess(dataEm);
+
         form.setFieldsValue(record);
         setIsModalOpen(true);
         setMode("Edit");
     };
 
     const handleDeleteDepartment = async (record) => {
-        console.log(record);
+        console.log("handleDeleteDepartment",record);
         if(record.employee_count === 0){
-            mutateDelete({id: record.key})
-            setData((prevData) => prevData.filter((item) => item.key!== record.key));
+            mutateDelete(record.key)
+            // setData((prevData) => prevData.filter((item) => item.key!== record.key));
         }else{
             showToastMessage("Phòng ban này đang có nhân viên, không thể xóa!", "error", "top-right");
         }
@@ -150,6 +212,7 @@ const Department = () => {
         // setData((prevData) => prevData.filter((item) => item.key !== record.key));
     };
 
+    // hàm thêm sửa pb
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
@@ -168,7 +231,8 @@ const Department = () => {
         } catch (error) {
             console.error("Lỗi xác thực form:", error);
         }
-        setIsModalOpen(false);
+    
+       
     };
 
     const onChange = (page) => {
@@ -200,6 +264,7 @@ const Department = () => {
                 <Select
                     placeholder="Chọn trưởng phòng"
                     allowClear
+                    notFoundContent={<Link to={"/employees"}>Vui lòng thêm nhân viên vào phòng ban</Link>}
                 >
                     {employeess.map((emp) => (
                         <Select.Option
@@ -375,7 +440,7 @@ const Department = () => {
             <ModalDepartment
                 isModalOpen={isModalOpen}
                 handleOk={handleOk}
-                handleCancel={() => setIsModalOpen(false)}
+                handleCancel={() => {setSelectedManger(null),setIsModalOpen(false)}}
                 title={title}
                 form={form}
             >

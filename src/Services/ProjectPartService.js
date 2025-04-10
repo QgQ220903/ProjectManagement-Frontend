@@ -23,6 +23,29 @@ export const projectPartPostAPI = async (obj) => {
     }
 }
 
+export const projectPartPatchAPI = async (id,obj) => {
+    try {
+        const response = await axiosInstance.patch('/project-parts/'+id+"/", obj);
+        console.log("projectPartPatchAPI", response);
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+export const projectPartDeleteAPI = async (id) => {
+    try {
+        const response = await axiosInstance.delete('/project-parts/'+id+"/");
+        console.log("projectPartPatchAPI", response);
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+
 // lấy ds phần công việc của 1 dự án theo id manager
 export const projectPartGetAPIForIdUser = async (id) => {
     try {

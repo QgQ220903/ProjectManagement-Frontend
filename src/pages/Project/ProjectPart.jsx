@@ -5,34 +5,35 @@ import PageHeader from "@/components/PageHeader";
 import { Link, useParams } from "react-router-dom";
 
 import { projectPartGetAPI } from "@/services/ProjectService";
-import { projectPartPostAPI } from "@/services/ProjectPartService";
+import { projectPartPostAPI , projectPartPatchAPI, projectPartDeleteAPI} from "@/services/ProjectPartService";
 // Employee API
 import { employeeGetAPI } from "@/services/EmployeeService";
 
 // Department API
 import { departmentGetAPI } from "@/services/DepartmentService";
-
+import { sendEmail } from "@/services/EmailService.";
 // Task API
 import { taskPost } from "@/services/TaskService";
 import { taskAssignmentsPost } from "@/services/TaskAssignmentsService";
 import { departmentTaskPost } from "@/services/DepartmentTaskService";
 
-import { formatDate, getInitials } from "@/utils/cn";
-import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History } from "lucide-react";
+import { formatDate, getInitials, isArrayEmpty } from "@/utils/cn";
+import { Pencil, Trash2, Plus, MessageCircleMore, Bell, History, RefreshCcw } from "lucide-react";
 import ButtonIcon from "@/components/ButtonIcon";
 // import { FaEye } from "react-icons/fa";
 import ModalProjectPart from "@/components/modal/Modal";
 import ModalProjectTask from "@/components/modal/Modal";
 
-import FormProjectPart from "@/components/form/Form";
+import ModalHandOver from "@/components/modal/Modal";
+
+import FormProjectPart from "@/components/form/Form"; 
+import FormHandOver from "@/components/form/Form"; 
 import FormProjectTask from "@/components/form/Form";
 import { Chat, HeaderChat } from "@/components/chatRoom/Chat";
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import ShowHistory from "@/components/ShowHistory";
-
-
 
 import TitleTooltip from "@/components/tooltip/TitleTooltip";
 
@@ -41,7 +42,11 @@ import { showToastMessage } from "@/utils/toast";
 import { ToastContainer, toast } from "react-toastify";
 import useWebSocket from "@/services/useWebSocket";
 
+import { useAuth } from "@/hooks/use-auth"
+
 const itemsBreadcrumb = [{ title: <Link to="/">Trang chủ</Link> }, { title: <Link to="/project">Dự án</Link> }, { title: "Phần dự án" }];
+
+
 
 // tùy chỉnh form kích thước input
 const formItemLayout = {
@@ -58,12 +63,32 @@ const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 
 const ProjectDetail = () => {
+
     const { id } = useParams();
+
+    const [count,setCount] = useState(0)
+
     const Project_parts_List = useWebSocket("ws://127.0.0.1:8000/ws/project-parts/");
     const task_List = useWebSocket("ws://127.0.0.1:8000/ws/task_assignments/");
     // Drawer
     const [open, setOpen] = useState(false);
     const [drawerData, setDrawerData] = useState("");
+
+    const { features } = useAuth()
+
+    const [isModalHandOverOpen, setIsModalHandOverOpen] = useState(false);
+
+    const [roleProject, setRoleProject] = useState(null)
+
+    useEffect(() => {
+        console.log("features", features)
+        if (features) {
+            const featureEmployee = features.find((item) => item.feature.name === "Quản lý dự án");
+            setRoleProject(featureEmployee);
+            console.log("roleProject", roleProject);
+
+        }
+    }, [features]);
 
     const showDrawer = (record) => {
         console.log(record);
@@ -90,6 +115,8 @@ const ProjectDetail = () => {
 
     const [projectPartSelect, setProjectPartSelect] = useState(null);
 
+    const [projectPartSelect2, setProjectPartSelect2] = useState(null);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [title, setTitle] = useState("");
@@ -99,6 +126,8 @@ const ProjectDetail = () => {
     const [form] = Form.useForm();
 
     const [formTask] = Form.useForm();
+
+    const [formHandOver] = Form.useForm();
 
     const [mode, setMode] = useState("");
 
@@ -110,7 +139,7 @@ const ProjectDetail = () => {
     const queryClient = useQueryClient();
 
     //láy dự án với id được truyền qua url
-    const { data: project } = useQuery({
+    const { data: project, isLoading } = useQuery({
         queryKey: ["project", id], // Thêm id vào queryKey để cache riêng biệt
         queryFn: () => projectPartGetAPI(id), // Để React Query tự gọi API khi cần
         enabled: !!id, // Chỉ chạy khi id có giá trị hợp lệ
@@ -119,11 +148,87 @@ const ProjectDetail = () => {
     // Thêm 1 phần dự án
     const { data: newProjectPart, mutate: mutateProjectPart } = useMutation({
         mutationFn: projectPartPostAPI,
-        onSuccess: () => {
+        onSuccess: (data) => {
+            console.log("Thêm phần dự án mới", data);
             queryClient.invalidateQueries({
                 queryKey: ["project", id], // Chỉ refetch đúng project có id đó
             });
             showToastMessage("Thêm phần dự án thành công!", "success", "top-right");
+            setIsModalOpen(false);
+            if(data){
+                if(data.department?.manager){
+                  
+                    setTimeout(()=>{
+                        sendEmail({
+                            subject: `Thông báo phần dự án dự án giao cho phòng ban ${data.department.name}!`,
+                            message: `
+                                <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4;">
+                            <tr>
+                                <td align="center">
+                                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                    <!-- Header -->
+                                    <tr>
+                                    <td style="padding: 30px; text-align: center; background-color: #4a6fa5; border-radius: 8px 8px 0 0;">
+                                        <h1 style="margin: 0; color: #ffffff;">THÔNG BÁO PHÂN CÔNG PHẦN DỰ ÁN</h1>
+                                    </td>
+                                    </tr>
+                        
+                                    <!-- Content -->
+                                    <tr>
+                                    <td style="padding: 30px;">
+                                        <h2 style="margin-top: 0; color: #4a6fa5;">Gửi đến Anh/Chị: ${data.department.manager.name},</h2>
+                                        <p style="line-height: 1.6;">
+                                        Căn cứ vào nhu cầu dự án hiện tại, Ban quản lý đã phân công phân dự án sau cho phòng ban: ${data.department.name}
+                                        </p>
+                        
+                                        <table width="100%" cellpadding="10" cellspacing="0" style="margin: 20px 0; border: 1px solid #ddd; border-collapse: collapse;">
+                                        <tr style="background-color: #f0f0f0;">
+                                            <td style="border: 1px solid #ddd; font-weight: bold;">Tên phần dự án</td>
+                                            <td style="border: 1px solid #ddd;">${data.name}</td>
+                                        </tr>
+                                        <tr style="background-color: #f0f0f0;">
+                                            <td style="border: 1px solid #ddd; font-weight: bold;">Vai trò</td>
+                                            <td style="border: 1px solid #ddd;">Trường phòng ban</td>
+                                        </tr>
+    
+                                    
+                                        </table>
+                        
+                                        <p style="line-height: 1.6;">
+                                        Anh/Chị vui lòng kiểm tra và xác nhận tiếp nhận công việc theo đường dẫn bên dưới:
+                                        </p>
+                        
+                                        <p style="line-height: 1.6;">
+                                        Mọi thắc mắc về công việc được phân công, vui lòng liên hệ trực tiếp với người giao việc hoặc qua email này.
+                                        </p>
+                                    </td>
+                                    </tr>
+                        
+                                    <!-- Footer -->
+                                    <tr>
+                                    <td style="padding: 20px; text-align: center; background-color: #f0f0f0; border-radius: 0 0 8px 8px; font-size: 12px; color: #666;">
+                                        <p style="margin: 0;">© 2023 TQT. Mọi quyền được bảo lưu.</p>
+                                        <p style="margin: 10px 0 0;">
+                                        <a href="#" style="color: #4a6fa5; text-decoration: none; margin: 0 10px;">Trang chủ</a>
+                                        <a href="#" style="color: #4a6fa5; text-decoration: none; margin: 0 10px;">Quy định</a>
+                                        <a href="#" style="color: #4a6fa5; text-decoration: none; margin: 0 10px;">Liên hệ</a>
+                                        </p>
+                                    </td>
+                                    </tr>
+                                </table>
+                                </td>
+                            </tr>
+                            </table>
+                        </body>
+                            `,
+                            recipient: data.department?.manager,
+                            send_at: null,
+    
+                        })
+                    },5000)
+                }
+            }
         },
         onError: () => {
             showToastMessage("Thêm phần dự án thất bại!", "error", "top-right");
@@ -164,6 +269,7 @@ const ProjectDetail = () => {
 
     const setDataProjectPart = (data) => {
         const dataNew = data.map((part) => ({
+            ...part,
             key: part.id,
             name: part.name,
             created_at: formatDate(part.created_at),
@@ -222,18 +328,38 @@ const ProjectDetail = () => {
         }
     }, [employees, departments]);
 
+    // useEffect(() => {
+    //     if (projectPartSelect) {
+    //         console.log(projectPartSelect);
+    //         formTask.setFieldsValue(projectPartSelect);
+    //     }
+    // }, [formTask, projectPartSelect]);
+
     useEffect(() => {
-        if (projectPartSelect) {
-            console.log(projectPartSelect);
-            formTask.setFieldsValue(projectPartSelect);
+        if (projectPartSelect2) {
+            
+            formHandOver.setFieldsValue(projectPartSelect2);
         }
-    }, [formTask, projectPartSelect]);
+    }, [formHandOver, projectPartSelect2]);
 
     const priorityOrder = {
         "Thấp": 1,
         "Trung Bình": 2,
         "Cao": 3,
     };
+
+
+    const handleOver = (record) => {
+        
+        record &&
+        setProjectPartSelect2({
+            ...record,
+            id: record.id,
+            name: record.name,
+            department_id: record.department.id,
+        });
+        setIsModalHandOverOpen(true);
+    }
 
     // Cấu hình cột PARTS
     const partColumns = [
@@ -353,12 +479,38 @@ const ProjectDetail = () => {
             width: "15%",
             render: (_, record) => (
                 <Space size="middle">
-                    <ButtonIcon handleEvent={() => handleCreateProjectTask(record)}>
-                        <Plus></Plus> Công việc
-                    </ButtonIcon>
+                   {roleProject?.can_update &&( <Button
+                        shape="circle"
+                        size="medium"
+                        color="green"
+                        variant="solid"
+                        disabled={!isArrayEmpty(record.tasks)}
+                        onClick={() => handleOver(record)}
+                    >
+                        <RefreshCcw size={18} />
+                    </Button>)}
+                  {roleProject?.can_delete && (  <Popconfirm
+                        title="Xóa dự án?"
+                        // onConfirm={() => handleDeleteDepartment(record)}
+                        onConfirm={() => handleDelete(record)}
+                        okText="Có"
+                        cancelText="Không"
+                        description="Bạn đã chắc chắn muốn xóa ?"
+                    >
+                    <Button
+                        shape="circle"
+                        size="medium"
+                        color="red"
+                        variant="solid"
+                        disabled={!isArrayEmpty(record.tasks)}
+                       
+                    >
+                        <Trash2 size={18} />
+                    </Button>
+                    </Popconfirm>)}
                 </Space>
             ),
-            hidden: true,
+
         },
     ];
 
@@ -546,7 +698,7 @@ const ProjectDetail = () => {
                         shape="circle"
                         size="medium"
                         type="primary"
-                        onClick={() => handleCreateSubTask(record)}
+
                     >
                         <Plus size={18} />
                     </Button>
@@ -586,20 +738,7 @@ const ProjectDetail = () => {
         },
     ];
 
-    const expandedRowRender = (part) => (
-        <Table
-            columns={taskColumns}
-            dataSource={part.tasks}
-            pagination={false}
-            indentSize={20}
-            childrenColumnName={"subtasks"}
-            locale={{
-                triggerDesc: "Sắp xếp giảm dần",
-                triggerAsc: "Sắp xếp tăng dần",
-                cancelSort: "Hủy sắp xếp",
-            }}
-        />
-    );
+   
 
     // Form items
     const formItems = [
@@ -649,23 +788,61 @@ const ProjectDetail = () => {
         },
     ];
 
-    const onChangeRes = (value) => {
-        console.log(`selected ${value}`);
-        if (isDepartmentTask) {
-            setIsDepartmentTask(false);
-            // Reset validation lỗi cho DepartmentTask
-            formTask.setFields([
+    const formItemsHandOver = [
+        {
+            name: "project",
+            label: "Mã dự án:",
+            component: <Input />,
+            props: { readOnly: true },
+           
+        },
+        {
+            name: "id",
+            label: "Mã Phần dự án:",
+            component: <Input />,
+            props: { readOnly: true },
+           
+        },
+        {
+            name: "name",
+            label: "Tên phần dự án:",
+            component: <Input placeholder="Please input Department" />,
+            //   props: { readOnly: mode === "Info" && true },
+            rules: [
                 {
-                    name: "DepartmentTask",
-                    errors: [], // Xóa lỗi hiển thị trên field
+                    required: true,
+                    message: "Làm ơn nhập tên phần dự án",
                 },
-            ]);
-        }
-    };
+            ],
+        },
+        {
+            name: "department_id",
+            label: "Nhóm thực hiện:",
+            component: (
+                <Select
+                    // mode="multiple"
+                    // allowClear
+                    showSearch
+                    placeholder="Vui lòng chọn phòng ban"
+                    optionFilterProp="label"
+                    // onChange={onChangeDepartmentTask}
+                    // options={options}
+                    options={departmentsData?.map((item) => ({
+                        value: item.id,
+                        label: item.name,
+                    }))}
+                />
+            ),
+            rules: [
+                {
+                    required: true,
+                    message: "Làm ơn chọn nhóm thực hiện",
+                },
+            ],
+        },
+    ];
 
-    const onSearch = (value) => {
-        console.log("search:", value);
-    };
+
 
     // Form items task
     const formItemsTask = [
@@ -716,7 +893,7 @@ const ProjectDetail = () => {
                     placeholder="Select a employee"
                     optionFilterProp="label"
                     // onChange={onChangeRes}
-                    onSearch={onSearch}
+                    // onSearch={onSearch}
                     options={employeesData?.map((item) => ({
                         value: item.id,
                         label: item.name,
@@ -765,7 +942,7 @@ const ProjectDetail = () => {
                 <RangePicker
                     showTime
                     format={"DD/MM/YY : HH:mm"}
-                    onChange={(date, dateString) => console.log("onChange", date, dateString)}
+                    // onChange={(date, dateString) => console.log("onChange", date, dateString)}
                 ></RangePicker>
             ),
             rules: [
@@ -815,11 +992,9 @@ const ProjectDetail = () => {
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
-            console.log("Success:", values);
-
+          
             mutateProjectPart(values);
-
-            setIsModalOpen(false);
+        
         } catch (error) {
             console.log("Failed:", error);
         }
@@ -840,36 +1015,36 @@ const ProjectDetail = () => {
         showModal();
     };
 
-    const handleCreateProjectTask = (value) => {
-        setIsDepartmentTask(true);
-        setIsEmployeeTask(true);
-        setIsSubTaskForm(false);
-        formTask.resetFields();
-        console.log("handleCreateProjectTask", value);
-        value &&
-            setProjectPartSelect({
-                projectPart: value.key,
-            });
-        console.log("projectPartSelect", projectPartSelect);
-        setMode("Add");
-        showModalTask();
-    };
+    // const handleCreateProjectTask = (value) => {
+    //     setIsDepartmentTask(true);
+    //     setIsEmployeeTask(true);
+    //     setIsSubTaskForm(false);
+    //     formTask.resetFields();
+    //     console.log("handleCreateProjectTask", value);
+    //     value &&
+    //         setProjectPartSelect({
+    //             projectPart: value.key,
+    //         });
+    //     console.log("projectPartSelect", projectPartSelect);
+    //     setMode("Add");
+    //     showModalTask();
+    // };
 
-    const handleCreateSubTask = (value) => {
-        setIsSubTaskForm(true);
-        setIsDepartmentTask(true);
-        setIsEmployeeTask(true);
-        formTask.resetFields();
-        console.log("handleCreateSubTask", value);
-        value &&
-            setProjectPartSelect({
-                projectPart: value.project_part,
-                task: value.id,
-            });
-        console.log("projectPartSelect", projectPartSelect);
-        setMode("Add");
-        showModalTask();
-    };
+    // const handleCreateSubTask = (value) => {
+    //     setIsSubTaskForm(true);
+    //     setIsDepartmentTask(true);
+    //     setIsEmployeeTask(true);
+    //     formTask.resetFields();
+    //     console.log("handleCreateSubTask", value);
+    //     value &&
+    //         setProjectPartSelect({
+    //             projectPart: value.project_part,
+    //             task: value.id,
+    //         });
+    //     console.log("projectPartSelect", projectPartSelect);
+    //     setMode("Add");
+    //     showModalTask();
+    // };
 
     const showModal = () => {
         setIsModalOpen(true);
@@ -879,66 +1054,357 @@ const ProjectDetail = () => {
         setIsModalTaskOpen(true);
     };
 
-    // Thêm Công việc mới
-    const handleOkTask = async () => {
+
+    const { mutate: mutatePatchProjectPart } = useMutation({
+        mutationFn: ({ id, data }) => projectPartPatchAPI(id, data),
+        onSuccess: (data) => {
+        
+          queryClient.invalidateQueries({
+            queryKey: ["project", id],
+          });
+          showToastMessage("Cập nhật phần dự án thành công!", "success", "top-right");
+          setIsModalHandOverOpen(false)
+
+          if(data.manager_id !== projectPartSelect2.manager_id) {
+            if(data.department?.manager){        
+                setTimeout(()=>{
+                    sendEmail({
+                        subject: `Thông báo chuyển phần dự án dự án giao cho phòng ban ${data.department.name}!`,
+                        message: `
+                            <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4;">
+                        <tr>
+                            <td align="center">
+                            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <!-- Header -->
+                                <tr>
+                                <td style="padding: 30px; text-align: center; background-color: #4a6fa5; border-radius: 8px 8px 0 0;">
+                                    <h1 style="margin: 0; color: #ffffff;">THÔNG BÁO PHÂN CÔNG PHẦN DỰ ÁN</h1>
+                                </td>
+                                </tr>
+                    
+                                <!-- Content -->
+                                <tr>
+                                <td style="padding: 30px;">
+                                    <h2 style="margin-top: 0; color: #4a6fa5;">Gửi đến Anh/Chị: ${data.department.manager.name},</h2>
+                                    <p style="line-height: 1.6;">
+                                    Căn cứ vào nhu cầu dự án hiện tại, Ban quản lý đã phân công phân dự án sau cho phòng ban: ${data.department.name}
+                                    </p>
+                    
+                                    <table width="100%" cellpadding="10" cellspacing="0" style="margin: 20px 0; border: 1px solid #ddd; border-collapse: collapse;">
+                                    <tr style="background-color: #f0f0f0;">
+                                        <td style="border: 1px solid #ddd; font-weight: bold;">Tên phần dự án</td>
+                                        <td style="border: 1px solid #ddd;">${data.name}</td>
+                                    </tr>
+                                    <tr style="background-color: #f0f0f0;">
+                                        <td style="border: 1px solid #ddd; font-weight: bold;">Vai trò</td>
+                                        <td style="border: 1px solid #ddd;">Trường phòng ban</td>
+                                    </tr>
+
+                                
+                                    </table>
+                    
+                                    <p style="line-height: 1.6;">
+                                    Anh/Chị vui lòng kiểm tra và xác nhận tiếp nhận công việc theo đường dẫn bên dưới:
+                                    </p>
+                    
+                                    <p style="line-height: 1.6;">
+                                    Mọi thắc mắc về công việc được phân công, vui lòng liên hệ trực tiếp với người giao việc hoặc qua email này.
+                                    </p>
+                                </td>
+                                </tr>
+                    
+                                <!-- Footer -->
+                                <tr>
+                                <td style="padding: 20px; text-align: center; background-color: #f0f0f0; border-radius: 0 0 8px 8px; font-size: 12px; color: #666;">
+                                    <p style="margin: 0;">© 2023 TQT. Mọi quyền được bảo lưu.</p>
+                                    <p style="margin: 10px 0 0;">
+                                    <a href="#" style="color: #4a6fa5; text-decoration: none; margin: 0 10px;">Trang chủ</a>
+                                    <a href="#" style="color: #4a6fa5; text-decoration: none; margin: 0 10px;">Quy định</a>
+                                    <a href="#" style="color: #4a6fa5; text-decoration: none; margin: 0 10px;">Liên hệ</a>
+                                    </p>
+                                </td>
+                                </tr>
+                            </table>
+                            </td>
+                        </tr>
+                        </table>
+                    </body>
+                        `,
+                        recipient: data.department?.manager,
+                        // recipient: "chantruong753@gmail.com",
+                        send_at: null,
+
+                    })
+                },5000)
+            }
+
+            if(projectPartSelect2.department?.manager){
+                  
+                setTimeout(()=>{
+                    sendEmail({
+                        subject: `Thông báo phần dự án bị chuyển cho phòng ban ${data.department.name}!`,
+                        message: `
+                            <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4;">
+                        <tr>
+                            <td align="center">
+                            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <!-- Header -->
+                                <tr>
+                                <td style="padding: 30px; text-align: center; background-color: #4a6fa5; border-radius: 8px 8px 0 0;">
+                                    <h1 style="margin: 0; color: #ffffff;">THÔNG BÁO BÀN GIAO PHẦN DỰ ÁN</h1>
+                                </td>
+                                </tr>
+                    
+                                <!-- Content -->
+                                <tr>
+                                <td style="padding: 30px;">
+                                    <h2 style="margin-top: 0; color: #4a6fa5;">Gửi đến Anh/Chị: ${projectPartSelect2.department.manager.name},</h2>
+                                    <p style="line-height: 1.6;">
+                                    Căn cứ vào nhu cầu dự án hiện tại, Ban quản lý đã bàn giao phân dự án sau cho phòng ban khác: 
+                                       
+                                    </p>
+                                    <p><strong> từ phòng ban ${projectPartSelect2.department.name} sang ${data.department.name} </strong> </p>
+                    
+                                    <table width="100%" cellpadding="10" cellspacing="0" style="margin: 20px 0; border: 1px solid #ddd; border-collapse: collapse;">
+                                    <tr style="background-color: #f0f0f0;">
+                                        <td style="border: 1px solid #ddd; font-weight: bold;">Tên phần dự án bị chuyển giao</td>
+                                        <td style="border: 1px solid #ddd;">${data.name}</td>
+                                    </tr>
+                                
+
+                                
+                                    </table>
+                    
+                                    <p style="line-height: 1.6;">
+                                    Anh/Chị vui lòng kiểm tra và xác nhận tiếp nhận công việc theo đường dẫn bên dưới:
+                                    </p>
+                    
+                                    <p style="line-height: 1.6;">
+                                    Mọi thắc mắc về công việc được phân công, vui lòng liên hệ trực tiếp với người giao việc hoặc qua email này.
+                                    </p>
+                                </td>
+                                </tr>
+                    
+                                <!-- Footer -->
+                                <tr>
+                                <td style="padding: 20px; text-align: center; background-color: #f0f0f0; border-radius: 0 0 8px 8px; font-size: 12px; color: #666;">
+                                    <p style="margin: 0;">© 2023 TQT. Mọi quyền được bảo lưu.</p>
+                                    <p style="margin: 10px 0 0;">
+                                    <a href="#" style="color: #4a6fa5; text-decoration: none; margin: 0 10px;">Trang chủ</a>
+                                    <a href="#" style="color: #4a6fa5; text-decoration: none; margin: 0 10px;">Quy định</a>
+                                    <a href="#" style="color: #4a6fa5; text-decoration: none; margin: 0 10px;">Liên hệ</a>
+                                    </p>
+                                </td>
+                                </tr>
+                            </table>
+                            </td>
+                        </tr>
+                        </table>
+                    </body>
+                        `,
+                        recipient: projectPartSelect2.department?.manager,
+                        // recipient: "chantruong753@gmail.com",
+                        send_at: null,
+
+                    })
+                },5000)
+            }
+          }
+        },
+        onError: () => {
+          showToastMessage("Cập nhật phần dự án thất bại!", "error", "top-right");
+        },
+      });
+
+    const { mutate: mutateDeleteProjectPart } = useMutation({
+        mutationFn: ({ id }) => projectPartDeleteAPI(id),
+        onSuccess: (data) => {
+        
+          queryClient.invalidateQueries({
+            queryKey: ["project", id],
+          });
+          showToastMessage("Xóa phần dự án thành công!", "success", "top-right");
+          setIsModalHandOverOpen(false)
+
+          
+        },
+        onError: () => {
+          showToastMessage("Xóa phần dự án thất bại!", "error", "top-right");
+        },
+      });
+      
+
+    const handleOverTask =async() => {
         try {
-            const values = await formTask.validateFields();
-            values.date = values.date?.map((d) => d.format("YYYY-MM-DDThh:mm"));
-            console.log("Validated Values:", values);
-
-            const valueNew = {
-                name: values.nameTask,
-                description: values.desTask,
-                priority: values.Priority,
-                start_time: values.date?.[0] || null,
-                end_time: values.date?.[1] || null,
-                task_status: "TO_DO",
-                completion_percentage: "0",
-                is_deleted: false,
-                project_part: values.projectPart,
-                parent_task: isSubTaskForm ? values.task : null,
-            };
-
-            // await createTask(values, valueNew, isSubTaskForm);
-            const dataTask = await mutateTask(valueNew);
-            console.log("dataTask", dataTask);
-            if (values.resEmployee) {
-                mutateTaskAssignment({
-                    employee: values.resEmployee,
-                    role: "RESPONSIBLE",
-                    task: dataTask.id,
-                });
-            }
-            if (values.WorksEmployee?.length > 0) {
-                await Promise.all(
-                    values.WorksEmployee.map((employee) =>
-                        mutateTaskAssignment({
-                            employee: employee,
-                            role: "DOER",
-                            task: dataTask.id,
-                        }),
-                    ),
-                );
-            }
-            // Gửi API tạo DepartmentTask
-            // else if (values.DepartmentTask?.length > 0) {
-            //     await Promise.all(
-            //         values.DepartmentTask.map(department =>
-            //             mutateDepartmentTask(
-            //                 { department: department,
-            //                     task: dataTask.id
-            //                 },
-            //             )
-            //         )
-            //     );
-            // }
-
-            setIsModalTaskOpen(false);
+            const values = await formHandOver.validateFields();
+           
+            //  projectPartPatchAPI(values.id,values);
+             mutatePatchProjectPart({ id: values.id, data: values });
+     
         } catch (error) {
-            console.error("Validation Failed:", error);
+            console.log("Failed:", error);
         }
+    }
+
+    const handleDelete = async(recode) => {
+        console.log("handleDelete:", recode);
+        mutateDeleteProjectPart({ id: recode.id});
+        if(recode.manager_id) {
+            if(recode.department?.manager){        
+                setTimeout(()=>{
+                    sendEmail({
+                        subject: `Thông báo hủy phần dự án được giao cho phòng ban ${recode.department.name}!`,
+                        message: `
+                            <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4;">
+                        <tr>
+                            <td align="center">
+                            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <!-- Header -->
+                                <tr>
+                                <td style="padding: 30px; text-align: center; background-color: #4a6fa5; border-radius: 8px 8px 0 0;">
+                                    <h1 style="margin: 0; color: #ffffff;">THÔNG BÁO PHÂN CÔNG PHẦN DỰ ÁN</h1>
+                                </td>
+                                </tr>
+                    
+                                <!-- Content -->
+                                <tr>
+                                <td style="padding: 30px;">
+                                    <h2 style="margin-top: 0; color: #4a6fa5;">Gửi đến Anh/Chị: ${recode.department.manager.name},</h2>
+                                    <p style="line-height: 1.6;">
+                                    Căn cứ vào nhu cầu dự án hiện tại, Ban quản lý đã hủy phần dự án sau cho phòng ban: ${recode.department.name}
+                                    </p>
+                    
+                                    <table width="100%" cellpadding="10" cellspacing="0" style="margin: 20px 0; border: 1px solid #ddd; border-collapse: collapse;">
+                                    <tr style="background-color: #f0f0f0;">
+                                        <td style="border: 1px solid #ddd; font-weight: bold;">Tên phần dự án</td>
+                                        <td style="border: 1px solid #ddd;">${recode.name}</td>
+                                    </tr>
+                    
+                                
+                                    </table>
+                    
+                                    <p style="line-height: 1.6;">
+                                    Anh/Chị vui lòng kiểm tra và xác nhận tiếp nhận công việc theo đường dẫn bên dưới:
+                                    </p>
+                    
+                                    <p style="line-height: 1.6;">
+                                    Mọi thắc mắc về công việc được phân công, vui lòng liên hệ trực tiếp với người giao việc hoặc qua email này.
+                                    </p>
+                                </td>
+                                </tr>
+                    
+                                <!-- Footer -->
+                                <tr>
+                                <td style="padding: 20px; text-align: center; background-color: #f0f0f0; border-radius: 0 0 8px 8px; font-size: 12px; color: #666;">
+                                    <p style="margin: 0;">© 2023 TQT. Mọi quyền được bảo lưu.</p>
+                                    <p style="margin: 10px 0 0;">
+                                    <a href="#" style="color: #4a6fa5; text-decoration: none; margin: 0 10px;">Trang chủ</a>
+                                    <a href="#" style="color: #4a6fa5; text-decoration: none; margin: 0 10px;">Quy định</a>
+                                    <a href="#" style="color: #4a6fa5; text-decoration: none; margin: 0 10px;">Liên hệ</a>
+                                    </p>
+                                </td>
+                                </tr>
+                            </table>
+                            </td>
+                        </tr>
+                        </table>
+                    </body>
+                        `,
+                        recipient: recode.department?.manager,
+                        // recipient: "chantruong753@gmail.com",
+                        send_at: null,
+
+                    })
+                },5000)
+            }
+
+       
+          }
+    }
+
+    // Thêm Công việc mới
+    // const handleOkTask = async () => {
+    //     try {
+    //         const values = await formTask.validateFields();
+    //         values.date = values.date?.map((d) => d.format("YYYY-MM-DDThh:mm"));
+    //         console.log("Validated Values:", values);
+
+    //         const valueNew = {
+    //             name: values.nameTask,
+    //             description: values.desTask,
+    //             priority: values.Priority,
+    //             start_time: values.date?.[0] || null,
+    //             end_time: values.date?.[1] || null,
+    //             task_status: "TO_DO",
+    //             completion_percentage: "0",
+    //             is_deleted: false,
+    //             project_part: values.projectPart,
+    //             parent_task: isSubTaskForm ? values.task : null,
+    //         };
+
+    //         // await createTask(values, valueNew, isSubTaskForm);
+    //         const dataTask = await mutateTask(valueNew);
+    //         console.log("dataTask", dataTask);
+    //         if (values.resEmployee) {
+    //             mutateTaskAssignment({
+    //                 employee: values.resEmployee,
+    //                 role: "RESPONSIBLE",
+    //                 task: dataTask.id,
+    //             });
+    //         }
+    //         if (values.WorksEmployee?.length > 0) {
+    //             await Promise.all(
+    //                 values.WorksEmployee.map((employee) =>
+    //                     mutateTaskAssignment({
+    //                         employee: employee,
+    //                         role: "DOER",
+    //                         task: dataTask.id,
+    //                     }),
+    //                 ),
+    //             );
+    //         }
+    //         // Gửi API tạo DepartmentTask
+    //         // else if (values.DepartmentTask?.length > 0) {
+    //         //     await Promise.all(
+    //         //         values.DepartmentTask.map(department =>
+    //         //             mutateDepartmentTask(
+    //         //                 { department: department,
+    //         //                     task: dataTask.id
+    //         //                 },
+    //         //             )
+    //         //         )
+    //         //     );
+    //         // }
+
+    //         setIsModalTaskOpen(false);
+    //     } catch (error) {
+    //         console.error("Validation Failed:", error);
+    //     }
+    // };
+
+     const handleCancelHandOver = () => {
+        setIsModalHandOverOpen(false);
+        setProjectPartSelect2(null)
     };
 
+    const expandedRowRender = (part) => (
+        <Table
+            columns={taskColumns}
+            dataSource={part.tasks}
+            pagination={false}
+            indentSize={20}
+            childrenColumnName={"subtasks"}
+            locale={{
+                triggerDesc: "Sắp xếp giảm dần",
+                triggerAsc: "Sắp xếp tăng dần",
+                cancelSort: "Hủy sắp xếp",
+            }}
+        />
+    );
+    
     return (
         <>
             {/* <div>{projectPartData && JSON.stringify(projectPartData)}</div> */}
@@ -946,9 +1412,10 @@ const ProjectDetail = () => {
                 title={projectdata && projectdata.name}
                 itemsBreadcrumb={itemsBreadcrumb}
             >
-                <ButtonIcon handleEvent={handleCreateProjectPart}>
-                    <Plus /> Thêm Phần Dự Án Mới
-                </ButtonIcon>
+                {roleProject?.can_create &&
+                    (<ButtonIcon handleEvent={handleCreateProjectPart}>
+                        <Plus /> Thêm Phần Dự Án Mới
+                    </ButtonIcon>)}
             </PageHeader>
 
             <div className="mt-5">
@@ -956,11 +1423,17 @@ const ProjectDetail = () => {
                     columns={partColumns}
                     dataSource={projectPartData}
                     // rowKey={(record) => getRowKey("part", record.id)}
+                    loading={isLoading}
                     expandable={{
                         expandedRowRender: (part) => expandedRowRender(part),
                         rowExpandable: (record) => record.tasks.length > 0,
                     }}
-                    pagination={false}
+                    pagination={
+                        {
+                            pageSize: 5,
+                            total: projectPartData?.length,
+                        }
+                    }
                     locale={{
                         triggerDesc: "Sắp xếp giảm dần",
                         triggerAsc: "Sắp xếp tăng dần",
@@ -988,7 +1461,7 @@ const ProjectDetail = () => {
                 ></FormProjectPart>
             </ModalProjectPart>
 
-            <ModalProjectTask
+            {/* <ModalProjectTask
                 isModalOpen={isModalTaskOpen}
                 setIsModalOpen={setIsModalTaskOpen}
                 handleOk={handleOkTask}
@@ -1002,9 +1475,31 @@ const ProjectDetail = () => {
                     formItemLayout={formItemLayout}
                     formItems={formItemsTask}
                 ></FormProjectTask>
-            </ModalProjectTask>
+            </ModalProjectTask> */}
 
-            <Drawer
+            <ModalHandOver
+                isModalOpen={isModalHandOverOpen}
+                setIsModalOpen={setIsModalHandOverOpen}
+                handleOk={handleOverTask}
+                handleCancel={handleCancelHandOver}
+                title={"Cập nhật phần dự án"}
+                form={formHandOver}
+            >
+
+                <FormHandOver
+                    formName={"formChuyenGiao"}
+                    form={formHandOver}
+                    formItemLayout={formItemLayout}
+                    formItems={formItemsHandOver}
+                    initialValues={{
+                        project: project && project.id,
+
+                    }}
+                ></FormHandOver>
+
+            </ModalHandOver>
+
+            {/* <Drawer
                 title={
                     <HeaderChat
                         data={drawerData}
@@ -1019,12 +1514,7 @@ const ProjectDetail = () => {
                 closable={false}
             >
                 <Chat></Chat>
-            </Drawer>
-
-            {/* <ShowHistory
-                isModalOpen={isModalHistoryOpen}
-                setIsModalOpen={setIsModalHistoryOpen}
-            ></ShowHistory> */}
+            </Drawer> */}
 
 
         </>
