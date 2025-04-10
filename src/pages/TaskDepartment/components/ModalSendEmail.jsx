@@ -4,7 +4,7 @@ import {Input, Select} from "antd";
 import FormSendEmail from "@/components/form/Form";
 import { sendEmail } from "@/services/EmailService.";
 import { Content } from 'antd/es/layout/layout';
-import {showToastMessage} from "@/utils/Toast";
+import {showToastMessage} from "@/utils/toast";
 
 const { TextArea } = Input;
 const ModalSendEmailForm = (
