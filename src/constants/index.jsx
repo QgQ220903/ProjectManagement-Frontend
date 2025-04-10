@@ -1,54 +1,59 @@
-import { ChartColumn, Home, NotepadText, Settings, UserCheck, UserPlus, Users } from "lucide-react";
+import {ArchiveRestore , ChartLine, Briefcase,ChartColumn,User ,UserCog, CircleUserRound, Home, NotepadText, Package, PackagePlus, Settings, ShoppingBag, UserCheck, UserPlus, Users, ClipboardList, FolderOpen } from "lucide-react";
 
 import ProfileImage from "@/assets/profile-image.jpg";
 import ProductImage from "@/assets/product-image.jpg";
 
 
 export const navbarLinks = [
+      
+        {
+            label: "Thống kê",
+            icon: ChartLine,
+            path: "/",
+        },  
+        {
+            label: "Nhân Viên",
+            icon: User,
+            path: "/employees",
+        },
+        {
+            label: "Phòng Ban",
+            icon: Users,
+            path: "/Department",
+        },   
+        {
+            label: "Dự Án",
+            icon: FolderOpen,
+            path: "/project",
+        },
+        {
+            label: "Tài Khoản",
+            icon: CircleUserRound,
+            path: "/account",
+        },
+        {
+            label: "Nhóm Quyền",
+            icon: UserCog ,
+            path: "/role",
+        },
+    
+        {
+            label: "Công Việc",
+            icon: ClipboardList,
+            path: "/task",
+        },
+        {
+            label: "Công Việc Phòng Ban",
+            icon: Briefcase,
+            path: "/task-department",
+        },
+        {
+            label: "Công Việc Lưu Trữ",
+            icon: ArchiveRestore,
+            path:"/task-archive"
+        }
 
-    {
-        label: "Dashboard",
-        icon: Home,
-        path: "/",
-    },
-    {
-        label: "Dự Án",
-        icon: ChartColumn,
-        path: "/projects",
-    },
-    {
-        label: "Công Việc",
-        icon: NotepadText,
-        path: "/tasks",
-    },
-    {
-        label: "Nhân Viên",
-        icon: Users,
-        path: "/employees",
-    },
-    {
-        label: "Tài Khoản",
-        icon: Users,
-        path: "/accounts",
-    },
-    {
-        label: "Phòng Ban",
-        icon: UserPlus,
-        path: "/department",
-    },
-    {
-        label: "Phân Quyền",
-        icon: UserCheck,
-        path: "/roles",
-    },
-
-
-    {
-        label: "Settings",
-        icon: Settings,
-        path: "/settings",
-    },
-
+      
 ];
 
 export const overviewData = [
