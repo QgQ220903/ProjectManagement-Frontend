@@ -17,7 +17,6 @@ export const rolesPostAPI = async (obj) => {
         showToastMessage("Nhóm quyền đã tồn tại!", "error", "top-right");
         throw error
     }
-
 }
 
 

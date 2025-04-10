@@ -68,9 +68,20 @@ const DashboardPage = () => {
   
   }, [startTime, endTime])
 
-  useEffect(()=>{
-      //var tmp = $('.ant-table-tbody');
-  })
+  // useEffect(()=>{
+
+  //   const elements = document.getElementsByClassName('ant-table-row');
+  //   elements.array.forEach(item => {
+  //     var x = tableData.filter((i) => {
+  //       return i.id ==item.dataset.row_key;
+  //     })
+  //     if(x[0].level == 0 )
+  //     {
+  //       item.style.backgroundColor = 'blue'
+  //     }
+  //   });
+
+  // })
 
 
 
@@ -144,6 +155,16 @@ const DashboardPage = () => {
             columns={columns}
             dataSource={tableData}
             pagination={false}
+            rowClassName={(record) => {
+              var color='';
+              if(record.level == 0)
+                color='bg-orange-500'
+              else  if(record.level == 1)
+                color = 'bg-sky-300'
+              else
+              color = 'bg-yellow-200'
+              return color;
+            }}
             locale={{
               triggerDesc: "Sắp xếp giảm dần",
               triggerAsc: "Sắp xếp tăng dần",
