@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // import Layout from "@/routes/layout";
 import MainLayout from "@/layouts/MainLayout";
 import Dashboard from "@/pages/Dashboard/Dashboard";
-import Employee from "@/pages/Employee/Employee.jsx";
+import Employee from "@/pages/Employee/Employee";
 import Department from "@/pages/Department/Department";
 import Project from "@/pages/Project/Project";
 import Account from "@/pages/Account/Account";
