@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const api = 'http://localhost:8000/api/department-tasks/'
+const api = 'https://3.24.47.52/api/department-tasks/'
 
 export const departmentTaskPost = async (obj) => {
     try {

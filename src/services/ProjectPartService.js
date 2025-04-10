@@ -1,7 +1,7 @@
 import axios from "axios";
 import axiosInstance from "@/services/AxiosInstance";
 
-const api = "http://127.0.0.1:8000/api/project-parts/";
+const api = "https://3.24.47.52/api/project-parts/";
 
 // export const projectPartPostAPI = async (obj) => {
 //     try {
