@@ -3,6 +3,10 @@ import axiosInstance from "./AxiosInstance";
 
 const api = "https://3.24.47.52/api/tasks/";
 
+// const api = "http://127.0.0.1:8000/api/tasks/";
+
+
+
 export const taskPost = async (obj) => {
     try {
         const response = await axiosInstance.post("/tasks/", obj);

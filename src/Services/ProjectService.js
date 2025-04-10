@@ -2,6 +2,8 @@ import axios from "axios";
 
 const api = "https://3.24.47.52/api/projects/";
 
+// const api = "http://127.0.0.1:8000/api/projects/";
+
 export const projectGetAPI = async (page) => {
     try {
         const response = await axios.get(`${api}?page=${page}`);

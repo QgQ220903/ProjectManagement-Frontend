@@ -1,7 +1,7 @@
 import {jwtDecode} from "jwt-decode";
 import axios from "axios";
 
-const API_URL = "http://127.0.0.1:8000/api";
+const API_URL = "https://3.24.47.52/api";
 
 export async function checkAndRefreshToken() {
     const accessToken = localStorage.getItem("access");
