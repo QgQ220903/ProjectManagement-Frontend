@@ -11,6 +11,7 @@ import { featuresGetAPI } from "@/services/FeaturesService";
 import { rolesDetailPostAPI } from "@/services/RolesdetailService";
 import { check } from "prettier";
 import {Link} from "react-router-dom";
+import { showToastMessage, showToastMessagePlus } from "../../utils/toast";
 
 // Đường dẫn
 const itemsBreadcrumb = [
@@ -86,15 +87,46 @@ const Role = () => {
                     name: res.data.name,
                 });
 
-                const mapped = res.data.role_details.map((item) => ({
-                    key: item.feature.id,
-                    role: item.feature.name,
-                    can_view: item.can_view,
-                    can_create: item.can_create,
-                    can_update: item.can_update,
-                    can_delete: item.can_delete,
-                }));
-                setData2(mapped);
+                const mapped1 = features.map((f) => {
+                    var tmp =null;
+                    for (const r of res.data.role_details) {
+                        if (f.id === r.feature.id) {
+                            tmp = {
+                                key: r.feature.id,
+                                role: r.feature.name,
+                                can_view: r.can_view,
+                                can_create: r.can_create,
+                                can_update: r.can_update,
+                                can_delete: r.can_delete,
+                            };
+                            break;
+                        }
+                    }
+
+
+
+                    if(tmp == null)
+                        tmp = {
+                            key: f.id,
+                            role: f.name,
+                            can_view: false,
+                            can_create: false,
+                            can_update: false,
+                            can_delete: false,
+                        };
+
+                    return tmp;
+                });
+
+                // const mapped = res.data.role_details.map((item) => ({
+                //     key: item.feature.id,
+                //     role: item.feature.name,
+                //     can_view: item.can_view,
+                //     can_create: item.can_create,
+                //     can_update: item.can_update,
+                //     can_delete: item.can_delete,
+                // }));
+                setData2(mapped1);
             }
 
             console.log("res:", res);
@@ -108,6 +140,8 @@ const Role = () => {
         rolesDeleteAPI(id).then((res) => {
             if (res?.status === 204) {
                 setRoles((prev) => prev.filter((item) => item.id !== id));
+                showToastMessage("Xóa nhóm quyền thành công!", "success", "top-right");
+                
             }
         });
     };
@@ -150,13 +184,14 @@ const Role = () => {
                         });
 
                         if (checkedSave) {
-                            alert("Thêm mới nhóm quyền thành công!");
+                             showToastMessage("Thêm tài khoản thành công!", "success", "top-right");
                             setIsEditRole(false);
                         }
 
                         setRoles((prev) => [...prev, res.data]);
                         setIsModalOpen(false);
                     }
+                   
                 });
             } else {
                 const values = await form.validateFields();
@@ -167,7 +202,6 @@ const Role = () => {
                 rolePutAPI(datasave, idEdit).then((r1) => {
                     if (r1.data) {
                         var r = r1.data;
-
 
                         if (r1.status == 200) {
                             var objectRoles = data2.map((item) => {
@@ -190,18 +224,15 @@ const Role = () => {
                             });
 
                             if (checkedEdit) {
-                                alert("Cập nhật nhóm quyền thành công!");
-                                setIsEditRole(false);
+                                showToastMessage("Cập nhật nhóm quyền thành công!", "success", "top-right");
                             }
                         }
-
-
                     }
-
                 });
             }
         } catch (error) {
-            console.log(error);
+            console.log('aaaaaaaaaaaaaaaaaaaa');
+           
         }
     };
 
@@ -305,6 +336,10 @@ const Role = () => {
                 <Table
                     columns={columns}
                     dataSource={tableData}
+                         pagination={{
+                                            pageSize: 5, // Mặc định 10 dòng mỗi trang
+                                        }}
+                                     
                 />
             </div>
 

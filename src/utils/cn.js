@@ -44,6 +44,18 @@ export const isArrayEmpty = (arr) => {
     return Array.isArray(arr) && arr.length === 0;
   }
 
-export const splitEmployeeNames = (employeeString)=> {
-    return employeeString.split(",").map(name => name.trim());
-}
+  export const splitEmployeeNames = (employeeString) => {
+    if (!employeeString || typeof employeeString !== 'string') return [];
+
+    var x = employeeString
+        .split(',')
+        .map(name => name.trim())
+        .filter(name => name.length > 0);
+
+        if(x.length > 4)
+        {
+            x= x.slice(0,3)
+            x.push('v.v...')
+        }
+        return x;
+};

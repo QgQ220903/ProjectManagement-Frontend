@@ -26,6 +26,8 @@ const itemsBreadcrumb = [
   },
 ];
 
+
+
 const DashboardPage = () => {
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
@@ -66,6 +68,21 @@ const DashboardPage = () => {
   
   }, [startTime, endTime])
 
+  // useEffect(()=>{
+
+  //   const elements = document.getElementsByClassName('ant-table-row');
+  //   elements.array.forEach(item => {
+  //     var x = tableData.filter((i) => {
+  //       return i.id ==item.dataset.row_key;
+  //     })
+  //     if(x[0].level == 0 )
+  //     {
+  //       item.style.backgroundColor = 'blue'
+  //     }
+  //   });
+
+  // })
+
 
 
 
@@ -87,7 +104,7 @@ const DashboardPage = () => {
       dataIndex: "completion_percentage",
       key: "completion_percentage",
       render: (value, record) => {
-        return <Progress type="circle" percent={record.completion_percentage} size={80} format={(percent) => {
+        return <Progress type="circle" percent={record.completion_percentage} size={45} format={(percent) => {
           if (percent === 100) {
             return 'Done';
           }
@@ -95,6 +112,10 @@ const DashboardPage = () => {
 
         }} />
       }
+    },  {
+      title: "Phòng ban",
+      dataIndex: "department",
+      key: "department",
     },
     {
       title: "Tên nhân viên",
@@ -112,7 +133,8 @@ const DashboardPage = () => {
           </Space>
         );
       }
-    }
+    },
+  
   ];
   return (
     <>
@@ -133,6 +155,16 @@ const DashboardPage = () => {
             columns={columns}
             dataSource={tableData}
             pagination={false}
+            rowClassName={(record) => {
+              var color='';
+              if(record.level == 0)
+                color='bg-orange-500'
+              else  if(record.level == 1)
+                color = 'bg-sky-300'
+              else
+              color = 'bg-yellow-200'
+              return color;
+            }}
             locale={{
               triggerDesc: "Sắp xếp giảm dần",
               triggerAsc: "Sắp xếp tăng dần",
