@@ -225,6 +225,7 @@ const Role = () => {
 
                             if (checkedEdit) {
                                 showToastMessage("Cập nhật nhóm quyền thành công!", "success", "top-right");
+                                setIsEditRole(false);
                             }
                         }
                     }
