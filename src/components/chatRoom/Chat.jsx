@@ -42,7 +42,7 @@ export const Chat = ({ user, roomName, }) => {
             setSocket(ws);
     
             axios
-                .get(`https://3.24.47.52/chat-history/${roomName}/`)
+                .get(`https://3.24.47.52/api/chat-history/${roomName}/`)
                 .then((response) => setChats(response.data))
                 .catch((error) => console.error("Error fetching chat history:", error));
     
