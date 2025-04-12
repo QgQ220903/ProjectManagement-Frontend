@@ -38,11 +38,11 @@ export const Chat = ({ user, roomName, }) => {
 
     useEffect(() => {
         if(roomName){
-            const ws = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${roomName}/`);
+            const ws = new WebSocket(`wss://3.24.47.52/ws/chat/${roomName}/`);
             setSocket(ws);
     
             axios
-                .get(`http://127.0.0.1:8000/chat-history/${roomName}/`)
+                .get(`https://3.24.47.52/chat-history/${roomName}/`)
                 .then((response) => setChats(response.data))
                 .catch((error) => console.error("Error fetching chat history:", error));
     
@@ -74,7 +74,7 @@ export const Chat = ({ user, roomName, }) => {
             formData.append("name", file.name);
 
             axios
-                .post("http://127.0.0.1:8000/api/files/", formData, {
+                .post("https://3.24.47.52/api/files/", formData, {
                     headers: { "Content-Type": "multipart/form-data" },
                 })
                 .then((response) => {
@@ -161,7 +161,7 @@ const FileChat = (file) => {
         <>
 
             <a
-                href={`http://127.0.0.1:8000${file.url}`}
+                href={`https://3.24.47.52${file.url}`}
                 target="_blank"
                 rel="noopener noreferrer"
             >
@@ -203,7 +203,7 @@ const FileCard = ({ file }) => {
             {/* Hình file */}
             <div className="text-5xl">
 
-                <a href={`http://127.0.0.1:8000${file.url}`}
+                <a href={`https://3.24.47.52${file.url}`}
                     target="_blank"
                     rel="noopener noreferrer" title={file.name} className='text-blue-500'>
                     {fileIcon}
@@ -211,7 +211,7 @@ const FileCard = ({ file }) => {
             </div>
 
             {/* Tên file */}
-            <a href={`http://127.0.0.1:8000${file.url}`}
+            <a href={`https://3.24.47.52${file.url}`}
                 target="_blank"
                 rel="noopener noreferrer" className="text-center mt-2 text-sm font-medium text-gray-700 truncate w-full" title={file.name}>
                 {file.name}
@@ -244,7 +244,7 @@ const FilePrivew = ({ file, setFile }) => {
             <div className=' flex items-center'>
                 <div className="text-5xl">
 
-                    <a href={`http://127.0.0.1:8000${file.url}`}
+                    <a href={`https://3.24.47.52${file.url}`}
                         target="_blank"
                         rel="noopener noreferrer" title={file.name} className='text-blue-500'>
                         {fileIcon}
@@ -252,7 +252,7 @@ const FilePrivew = ({ file, setFile }) => {
                 </div>
 
                 {/* Tên file */}
-                <a href={`http://127.0.0.1:8000${file.url}`}
+                <a href={`https://3.24.47.52${file.url}`}
                     target="_blank"
                     rel="noopener noreferrer" className=" text-sm font-medium text-gray-700 truncate w-full" title={file.name}>
                     {file.name}

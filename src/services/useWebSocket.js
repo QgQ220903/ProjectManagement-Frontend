@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 const api = "wss://3.24.47.52/ws"
 
 const useWebSocket = (name) => {
-    const url = `${api}/${name}`;
+    const url = `${api}${name}`;
 
     const [data, setData] = useState(null);
     useEffect(() => {
