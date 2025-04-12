@@ -10,6 +10,7 @@ import { showToastMessage, showToastMessagePlus } from '@/utils/toast'
 import logoSgu from "@/assets/logoSgu.png";
 
 import { ToastContainer, toast } from 'react-toastify';
+import { Button } from 'antd';
 
 const Login = () => {
     const queryClient = useQueryClient();
@@ -18,7 +19,7 @@ const Login = () => {
 
     const { loadRoleUser, setAuth, setEmployeeContext } = useAuth();  // Lấy hàm loadUserData từ context
 
-    const { data: newData, mutate: mutatePost } = useMutation({
+    const { data: newData, mutate: mutatePost, isLoading } = useMutation({
         mutationFn: logInAPI,
         onSuccess: (data) => {
             if (data) {
@@ -41,7 +42,11 @@ const Login = () => {
 
         },
         onError: (error) => {
-            showToastMessage(error.response.data.error, 'error', 'top-right')
+            if (error.code === "ERR_NETWORK") {
+                showToastMessage("Sập Server rồi!", 'error', 'top-right');
+            }else{
+                showToastMessage(error.response.data.error, 'error', 'top-right')
+            }
             //     showToastMessagePlus2({
             //         title: 'Đăng nhập thất bại!',
             //         description: 'Dữ liệu đã được lưu.',
@@ -65,7 +70,7 @@ const Login = () => {
             return
         }
         // Gọi API đăng nhập
-        mutatePost({ email, password });
+        mutatePost({ email, password }); 
     };
 
     return (
@@ -107,7 +112,9 @@ const Login = () => {
                                     </div>
                                     {/* <a href="#" className="text-sm font-medium text-primary-600 hover:underline dark:text-blue-600">Quên mật khẩu ?</a> */}
                                 </div>
-                                <button type="submit" className="w-full btn-primary ">Đăng nhập</button>
+                                <Button loading={isLoading} size='large' htmlType="submit" className="w-full btn-primary hover:bg-blue-500 "
+                                    type='primary'
+                                >Đăng nhập</Button>
                                 
                             </form>
                         </div>
