@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const api = "ws://3.24.47.52/ws"
+const api = "wss://3.24.47.52/ws"
 
 const useWebSocket = (name) => {
     const url = `${api}/${name}`;
