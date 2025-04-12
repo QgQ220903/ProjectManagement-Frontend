@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 
-const useWebSocket = (url) => {
+const api = "ws://3.24.47.52/ws"
+
+const useWebSocket = (name) => {
+    const url = `${api}/${name}`;
+
     const [data, setData] = useState(null);
     useEffect(() => {
         const socket = new WebSocket(url);

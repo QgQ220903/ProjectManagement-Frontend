@@ -51,7 +51,7 @@ const Project = () => {
 
     const [data, setData] = useState(null);
 
-    const ProjectList = useWebSocket("ws://127.0.0.1:8000/ws/projects/");
+    const ProjectList = useWebSocket("/projects/");
 
     const {features} = useAuth()
 

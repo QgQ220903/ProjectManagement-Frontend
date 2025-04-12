@@ -101,9 +101,9 @@ const { TextArea } = Input;
 const TaskDepartment = () => {
 
 
-    const taskSocket = useWebSocket("ws://127.0.0.1:8000/ws/tasks/");
-    const task_List = useWebSocket("ws://127.0.0.1:8000/ws/task_assignments/");
-    const file_list = useWebSocket("ws://127.0.0.1:8000/ws/file-detail/");
+    const taskSocket = useWebSocket("/tasks/");
+    const task_List = useWebSocket("/task_assignments/");
+    const file_list = useWebSocket("/file-detail/");
 
     // const { id } = useParams();
     const { auth, employeeContext, features } = useAuth();

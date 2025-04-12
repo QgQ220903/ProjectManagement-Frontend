@@ -42,7 +42,7 @@ const Department = () => {
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     // manager đc chọn
     const [selectedManager, setSelectedManger] = useState(null);
-    const departmentUpdate = useWebSocket("ws://127.0.0.1:8000/ws/departments/");
+    const departmentUpdate = useWebSocket("/departments/");
 
     // lấy ds tất cả tv
     // const { data: dataemployeess } = useQuery({

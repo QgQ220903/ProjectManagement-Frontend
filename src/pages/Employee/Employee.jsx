@@ -59,7 +59,7 @@ const Employee = () => {
 
     const { features } = useAuth();
 
-    const employeeUpdate = useWebSocket("ws://127.0.0.1:8000/ws/employees/");
+    const employeeUpdate = useWebSocket("/employees/");
 
     useEffect(() => {
         console.log("features",features)

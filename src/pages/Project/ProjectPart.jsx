@@ -71,8 +71,8 @@ const ProjectDetail = () => {
 
     const [count,setCount] = useState(0)
 
-    const Project_parts_List = useWebSocket("ws://127.0.0.1:8000/ws/project-parts/");
-    const task_List = useWebSocket("ws://127.0.0.1:8000/ws/task_assignments/");
+    const Project_parts_List = useWebSocket("/project-parts/");
+    const task_List = useWebSocket("/task_assignments/");
     // Drawer
     const [open, setOpen] = useState(false);
     const [drawerData, setDrawerData] = useState("");
