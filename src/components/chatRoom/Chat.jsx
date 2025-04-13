@@ -30,6 +30,8 @@ const props = {
 
 };
 
+
+
 export const Chat = ({ user, roomName, }) => {
     const [socket, setSocket] = useState(null);
     const [chats, setChats] = useState([]);
@@ -37,15 +39,15 @@ export const Chat = ({ user, roomName, }) => {
     const [file, setFile] = useState(null);
 
     useEffect(() => {
-        if(roomName){
+        if (roomName) {
             const ws = new WebSocket(`wss://3.24.47.52/ws/chat/${roomName}/`);
             setSocket(ws);
-    
+
             axios
                 .get(`https://3.24.47.52/api/chat-history/${roomName}/`)
                 .then((response) => setChats(response.data))
                 .catch((error) => console.error("Error fetching chat history:", error));
-    
+
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 console.log("onmessage", JSON.parse(event.data));
@@ -54,12 +56,12 @@ export const Chat = ({ user, roomName, }) => {
                     { sender: data.sender, chat: data.message, file: data.file, name: data.name },
                 ]);
             };
-    
+
             return () => {
                 ws.close();
             };
         }
-      
+
     }, [roomName]);
 
     const sendChat = () => {
@@ -83,13 +85,21 @@ export const Chat = ({ user, roomName, }) => {
                     socket.send(JSON.stringify(messageData));
                 })
                 .catch((error) => console.error("File upload error:", error));
-        } else if(chat){
+        } else if (chat) {
             socket.send(JSON.stringify(messageData));
         }
 
         setChat("");
         setFile(null);
     };
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendChat();
+        }
+    };
+    
 
 
     const handleSendFile = (e) => {
@@ -127,6 +137,7 @@ export const Chat = ({ user, roomName, }) => {
                 </Flex>
 
                 <input type="file" id='uploadFile' hidden onChange={(e) => handleSendFile(e)} />
+              
                 {/* Khu vực nhập tin nhắn */}
                 <div className='p-4 border-t border-x-gray-400 border-solid bg-blue-500'>
                     <Flex gap={'small'} className='px-4' align='center'>
@@ -138,7 +149,7 @@ export const Chat = ({ user, roomName, }) => {
                         </label>
 
                         <Input className='border-0 rounded-xl' placeholder="Nhập tin nhắn..." size="large" value={chat}
-                            onChange={(e) => setChat(e.target.value)} />
+                            onChange={(e) => setChat(e.target.value)}  onKeyDown={handleKeyPress} />
                         <Button size='large' onClick={sendChat} className='text-white bg-inherit rounded-none p-2'>
                             <SendHorizontal />
                         </Button>
