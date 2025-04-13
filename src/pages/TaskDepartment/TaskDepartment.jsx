@@ -38,7 +38,7 @@ import { taskPost, taskDelete } from "@/services/TaskService";
 
 import { taskAssignmentsPost, taskAssignmentsPatch } from "@/services/TaskAssignmentsService";
 
-import { departmentTaskPost } from "@/services/DepartmentTaskService";
+// import { departmentTaskPost } from "@/services/DepartmentTaskService";
 
 import { sendEmail } from "@/services/EmailService.";
 
@@ -163,6 +163,10 @@ const TaskDepartment = () => {
 
     const [isModalSendEmailOpen, setIsModalSendEmailOpen] = useState(false);
 
+    // loading thêm công việc
+    const [isLoadingAddTask, setIsLoadingAddTask] = useState(false)
+
+
     const showDrawer = (record) => {
         console.log(record);
 
@@ -170,12 +174,6 @@ const TaskDepartment = () => {
 
         setOpen(true);
     };
-
-    useEffect(() => {
-        if (file_list) {
-            //    sửa lý sau
-        }
-    }, [file_list])
 
     //  open modal file
     const showDrawerCheckList = (record) => {
@@ -217,7 +215,7 @@ const TaskDepartment = () => {
     // Thêm 1 công việc vào dự án
     const { mutateAsync: mutateTask, isLoading: addLoading } = useMutation({
         mutationFn: taskPost,
-        // onSuccess: (data) => {
+         onSuccess: (data) => {
         // queryClient.invalidateQueries({
         //     queryKey: ["taskDepartment"],
         // });
@@ -229,7 +227,7 @@ const TaskDepartment = () => {
         //     updated_date: data.created_at,
         //     content: "Tạo công việc mới",
         // });
-        // }, 
+         }, 
         onError: (error) => {
             console.log("mutateTask", error);
             showToastMessage('Thêm công việc vào dự án thất bại !', 'error', 'top-right')
@@ -254,6 +252,7 @@ const TaskDepartment = () => {
         mutationFn: workHistoriesPostAPI,
         onSuccess: () => {
             console.log("mutateHistory thành công");
+            
             // queryClient.invalidateQueries({
             //     queryKey: ["workHistories"],
             // });
@@ -275,6 +274,7 @@ const TaskDepartment = () => {
                 updated_date: data.task_details.created_at,
                 content: `Thêm ${data.employee_details.name} vào ${data.task_details.name} với vai trò ${data.role === "DOER" ? "thực hiện" : "chịu trách nghiệm"}`,
             });
+
 
             // queryClient.invalidateQueries({
             //     queryKey: ["taskDepartment"], // Chỉ refetch đúng project có id đó
@@ -535,9 +535,14 @@ const TaskDepartment = () => {
         // (task_List !== null || taskSocket !== null) && queryClient.invalidateQueries(["taskDepartment"]);
         taskSocket !== null && queryClient.invalidateQueries(["taskDepartment"]);
 
-
         // console.log("project_part socket", project_part)
     }, [taskSocket]);
+
+    useEffect(() => {
+        if (file_list) {
+            //    sửa lý sau
+        }
+    }, [file_list])
 
     // hàm show modal hisotry
     const showHistoryModal = (record) => {
@@ -670,9 +675,16 @@ const TaskDepartment = () => {
 
             //     });
 
+            setIsLoadingAddTask(true)
             const data = await mutateTask(valueNew);
 
             const taskAssignmentPromises = [];
+
+            mutateHistory({
+                task: data.id,
+                updated_date: data.created_at,
+                content: "Tạo công việc mới",
+            });
 
             if (values.resEmployee) {
                 taskAssignmentPromises.push(
@@ -697,21 +709,17 @@ const TaskDepartment = () => {
             }
 
             await Promise.all(taskAssignmentPromises);
-            await mutateHistory({
-                task: data.id,
-                updated_date: data.created_at,
-                content: "Tạo công việc mới",
-            });
-
+         
             await Promise.all([
                 queryClient.invalidateQueries({ queryKey: ["taskDepartment"] }),
                 queryClient.invalidateQueries({ queryKey: ["workHistories"] }),
             ]);
 
             showToastMessage('Thêm công việc vào dự án thành công !', 'success', 'top-right');
+            setIsLoadingAddTask(false)
             setIsModalTaskOpen(false);
 
-            console.log("HETROI"); // Bây giờ dòng này chạy cuối
+            // console.log("HETROI"); // Bây giờ dòng này chạy cuối
 
             // setIsModalTaskOpen(false);
         } catch (error) {
@@ -1363,6 +1371,7 @@ const TaskDepartment = () => {
                 handleCancel={handleCancelTask}
                 title={"Thêm Công Việc Mới"}
                 form={formTask}
+                confirmLoading={isLoadingAddTask}
             >
                 <FormProjectTask
                     formName={"formTask" + mode}

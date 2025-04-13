@@ -4,7 +4,7 @@ import { Modal } from "antd";
 
 
 const ModalCreateDepartment = (props) => {
-  const { isModalOpen, handleOk, handleCancel, title, setIsModalOpen, form, children } = props;
+  const { isModalOpen, handleOk, handleCancel, title, setIsModalOpen, form, children, confirmLoading } = props;
   
   // const reset = () => {
   //   form.resetFields()
@@ -37,6 +37,8 @@ const ModalCreateDepartment = (props) => {
       okText="Lưu"
       cancelText="Thoát"
       maskClosable={false}
+      // loading={isLoading}
+      confirmLoading={confirmLoading}
     >
       {children}
      
