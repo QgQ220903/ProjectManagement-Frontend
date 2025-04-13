@@ -25,6 +25,9 @@ const MainLayout = () => {
   const isDesktopDevice = useMediaQuery("(min-width: 768px)");
   const [collapsed, setCollapsed] = useState(!isDesktopDevice);
 
+  const isSystemDark = useMediaQuery("(prefers-color-scheme: dark)");
+  const effectiveTheme = theme === "system" ? (isSystemDark ? "dark" : "light") : theme;
+
   const sidebarRef = useRef(null);
 
   const location = useLocation();
@@ -48,33 +51,31 @@ const MainLayout = () => {
 
   return (
     <ConfigProvider
-      theme={{
-        algorithm: theme === 'dark' ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,  // Kích hoạt chế độ dark mode
-        token: {
-          colorBgBase: theme === 'dark' ? "#0f172a" : "#fff",
-          colorBgContainer: theme === 'dark' ? "#0f172a" : "#fff",
-          colorBgElevated: theme === 'dark' ? "#0f172a" : "#fff"
+    theme={{
+      algorithm: effectiveTheme === 'dark' ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+      token: {
+        colorBgBase: effectiveTheme === 'dark' ? "#0f172a" : "#fff",
+        colorBgContainer: effectiveTheme === 'dark' ? "#0f172a" : "#fff",
+        colorBgElevated: effectiveTheme === 'dark' ? "#0f172a" : "#fff"
+      },
+      components: {
+        Table: {
+          headerBorderRadius: 5
         },
-        components: {
-          Table: {
-            headerBorderRadius: 5
-          },
-          Input: {
-            borderRadius: 5,
-            borderRadiusLG: 5,
-            borderRadiusSM: 5
-          },
-          Card: {
-            bodyPadding: 15
-          },
-          Tooltip: {
-            colorBgSpotlight: theme === 'dark' ? "#0f172a" : "#fff",
-            colorTextLightSolid: theme === 'dark' ? "#fff" : "0f172a",
-          }
+        Input: {
+          borderRadius: 5,
+          borderRadiusLG: 5,
+          borderRadiusSM: 5
+        },
+        Card: {
+          bodyPadding: 15
+        },
+        Tooltip: {
+          colorBgSpotlight: effectiveTheme === 'dark' ? "#0f172a" : "#fff",
+          colorTextLightSolid: effectiveTheme === 'dark' ? "#fff" : "0f172a",
         }
-
-
-      }}
+      }
+    }}
     >
       <div className="min-h-screen bg-slate-100 transition-colors dark:bg-slate-950">
         <div
