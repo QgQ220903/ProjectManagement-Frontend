@@ -102,7 +102,7 @@ const TaskDepartment = () => {
 
 
     const taskSocket = useWebSocket("/tasks/");
-    const task_List = useWebSocket("/task_assignments/");
+    // const task_List = useWebSocket("/task_assignments/");
     const file_list = useWebSocket("/file-detail/");
 
     // const { id } = useParams();
@@ -134,7 +134,7 @@ const TaskDepartment = () => {
 
     const [formSendEmail] = Form.useForm();
 
-    const [roleTaskDepartment,setRoleTaskDepartment] = useState(null);
+    const [roleTaskDepartment, setRoleTaskDepartment] = useState(null);
 
     const [mode, setMode] = useState("");
 
@@ -160,6 +160,8 @@ const TaskDepartment = () => {
     const [doerSelected, setDoerSelected] = useState([]);
 
     const [childrenDrawer, setChildrenDrawer] = useState(false);
+
+    const [isModalSendEmailOpen, setIsModalSendEmailOpen] = useState(false);
 
     const showDrawer = (record) => {
         console.log(record);
@@ -211,23 +213,24 @@ const TaskDepartment = () => {
     });
 
 
-    console.log("project part soc ket", project_part);
+
     // Thêm 1 công việc vào dự án
     const { mutateAsync: mutateTask, isLoading: addLoading } = useMutation({
         mutationFn: taskPost,
-        onSuccess: (data) => {
-            queryClient.invalidateQueries({
-                queryKey: ["taskDepartment"],
-            });
-            console.log("mutateTask", data);
-            showToastMessage('Thêm công việc vào dự án thành công !', 'success', 'top-right')
+        // onSuccess: (data) => {
+        // queryClient.invalidateQueries({
+        //     queryKey: ["taskDepartment"],
+        // });
 
-            mutateHistory({
-                task: data.id,
-                updated_date: data.created_at,
-                content: "Tạo công việc mới",
-            });
-        }, onError: (error) => {
+        // showToastMessage('Thêm công việc vào dự án thành công !', 'success', 'top-right')
+
+        // mutateHistory({
+        //     task: data.id,
+        //     updated_date: data.created_at,
+        //     content: "Tạo công việc mới",
+        // });
+        // }, 
+        onError: (error) => {
             console.log("mutateTask", error);
             showToastMessage('Thêm công việc vào dự án thất bại !', 'error', 'top-right')
         },
@@ -251,26 +254,31 @@ const TaskDepartment = () => {
         mutationFn: workHistoriesPostAPI,
         onSuccess: () => {
             console.log("mutateHistory thành công");
+            // queryClient.invalidateQueries({
+            //     queryKey: ["workHistories"],
+            // });
         },
     });
 
     // Thêm 1 nhân viên vào công việc
     const {
         data: newTaskAssignments,
-        mutate: mutateTaskAssignment,
+        mutateAsync: mutateTaskAssignment,
         isLoading: addTaskAssLoading,
     } = useMutation({
         mutationFn: taskAssignmentsPost,
-        onSuccess: (data) => {
-            queryClient.invalidateQueries({
-                queryKey: ["taskDepartment"], // Chỉ refetch đúng project có id đó
-            });
+        onSuccess: async (data) => {
+
             console.log("newTaskAssignments", data);
-            mutateHistory({
+            await mutateHistory({
                 task: data.task_details.id,
                 updated_date: data.task_details.created_at,
                 content: `Thêm ${data.employee_details.name} vào ${data.task_details.name} với vai trò ${data.role === "DOER" ? "thực hiện" : "chịu trách nghiệm"}`,
             });
+
+            // queryClient.invalidateQueries({
+            //     queryKey: ["taskDepartment"], // Chỉ refetch đúng project có id đó
+            // });
 
             setTimeout(() => {
                 // Code bạn muốn chạy sau 5s
@@ -475,7 +483,7 @@ const TaskDepartment = () => {
     };
 
     useEffect(() => {
-        console.log("features",features)
+        console.log("useEffect features", features)
         if (features) {
             const featureTaskDeparment = features.find((item) => item.feature.name === "Quản lý công việc phòng ban");
             setRoleTaskDepartment(featureTaskDeparment);
@@ -486,11 +494,11 @@ const TaskDepartment = () => {
 
     // Lấy dự liệu vào bảng cha
     useEffect(() => {
-        console.log("chạy 1 lần");
-        console.log("chạy 1 lần features",features);
-        
-        console.log("project_part", project_part);
-        console.log("employeeContext", employeeContext.department);
+        console.log("useEffect chạy 1 lần");
+        // console.log("chạy 1 lần features", features);
+
+        // console.log("project_part", project_part);
+        // console.log("employeeContext", employeeContext.department);
         if (project_part) {
             console.log("TaskDepartment", project_part);
             // setProjectdata(project_part)
@@ -501,18 +509,21 @@ const TaskDepartment = () => {
     }, [project_part]);
 
     useEffect(() => {
+        console.log("useEffect employees");
         if (employees) {
             setEmployeesdata(employees);
         }
     }, [employees]);
 
     useEffect(() => {
+        console.log("useEffect workHistories");
         if (workHistories) {
             setHistoriesData(workHistories);
         }
     }, [workHistories]);
 
     useEffect(() => {
+        console.log("useEffect projectPartSelect");
         if (projectPartSelect) {
             console.log(projectPartSelect);
             formTask.setFieldsValue(projectPartSelect);
@@ -520,13 +531,200 @@ const TaskDepartment = () => {
     }, [formTask, projectPartSelect]);
 
     useEffect(() => {
-        console.log("socket");
-        (task_List !== null || taskSocket !== null) && queryClient.invalidateQueries(["taskDepartment"]);
+        console.log("useEffect taskSocket");
+        // (task_List !== null || taskSocket !== null) && queryClient.invalidateQueries(["taskDepartment"]);
+        taskSocket !== null && queryClient.invalidateQueries(["taskDepartment"]);
+
 
         // console.log("project_part socket", project_part)
-    }, [task_List, taskSocket, queryClient]);
+    }, [taskSocket]);
+
+    // hàm show modal hisotry
+    const showHistoryModal = (record) => {
+        console.log("showHistoryModal", record);
+        setTaskDataSelectFormTable(record);
+        setIsModalHistoryOpen(true);
+    };
+
+    const handleShowSendEmail = (record) => {
+        setTaskDataSelectFormTable(record);
+        console.log("handleShowSendEmail record", record);
+        setIsModalSendEmailOpen(true);
+    }
+
+    const handleArchiveTask = (record) => {
+        console.log("handleArchiveTask", record)
+        mutateDeleteTask({ isDelete: true, id: record.id })
+    }
+
+    const handleCancelTask = () => {
+        setIsModalTaskOpen(false);
+    };
+
+    // hàm mở modal tạo tạo task mới
+    const handleCreateProjectTask = (value) => {
+        setIsSubTaskForm(false);
+        setEmployeesdata(employees);
+        formTask.resetFields();
+        console.log("handleCreateProjectTask", value);
+        value &&
+            setProjectPartSelect({
+                projectPart: value.key,
+            });
+        console.log("projectPartSelect", projectPartSelect);
+        setMode("Add");
+        showModalTask();
+    };
+
+    // hàm  mở modal tạo task con
+    const handleCreateSubTask = (value) => {
+        setIsSubTaskForm(true);
+        setEmployeesdata(value.doers);
+        formTask.resetFields();
+        console.log("handleCreateSubTask", value);
+        value &&
+            setProjectPartSelect({
+                projectPart: value.project_part,
+                task: value.id,
+            });
+        console.log("projectPartSelect", projectPartSelect);
+        setMode("Add");
+        showModalTask();
+    };
 
 
+    const showModalTask = () => {
+        setIsModalTaskOpen(true);
+    };
+
+    // Thêm Công việc mới
+    const handleOkTask = async () => {
+        try {
+
+            const values = await formTask.validateFields();
+            values.date = values.date?.map((d) => d.format("YYYY-MM-DDThh:mm"));
+            console.log("Validated Values:", values);
+
+            const valueNew = {
+                name: values.nameTask,
+                description: values.desTask,
+                priority: values.Priority,
+                start_time: values.date?.[0] || null,
+                end_time: values.date?.[1] || null,
+                task_status: "IN_PROGRESS",
+                completion_percentage: "0",
+                is_deleted: false,
+                project_part: values.projectPart,
+                parent_task: isSubTaskForm ? values.task : null,
+            };
+
+
+            // await mutateTask(valueNew,
+            //     {
+            //         onSuccess: async (data) => {
+            //             console.log("Custom success handler", data);
+
+            //             const taskAssignmentPromises = [];
+
+            //             if (values.resEmployee) {
+            //                 taskAssignmentPromises.push(
+            //                     mutateTaskAssignment({
+            //                         employee: values.resEmployee,
+            //                         role: "RESPONSIBLE",
+            //                         task: data.id,
+            //                     })
+            //                 );
+            //             }
+
+            //             if (values.WorksEmployee?.length > 0) {
+            //                 taskAssignmentPromises.push(
+            //                     ...values.WorksEmployee.map((employee) =>
+            //                         mutateTaskAssignment({
+            //                             employee: employee,
+            //                             role: "DOER",
+            //                             task: data.id,
+            //                         })
+            //                     )
+            //                 );
+            //             }
+
+            //             await Promise.all(taskAssignmentPromises); // Đợi tất cả hoàn tất song song
+            //             await mutateHistory({
+            //                 task: data.id,
+            //                 updated_date: data.created_at,
+            //                 content: "Tạo công việc mới",
+            //             });
+            //             queryClient.invalidateQueries({
+            //                 queryKey: ["taskDepartment"],
+
+            //             });
+
+            //             queryClient.invalidateQueries({
+            //                 queryKey: ["workHistories"],
+            //             })
+
+            //             showToastMessage('Thêm công việc vào dự án thành công !', 'success', 'top-right');
+            //             setIsModalTaskOpen(false);
+            //         }
+
+
+            //     });
+
+            const data = await mutateTask(valueNew);
+
+            const taskAssignmentPromises = [];
+
+            if (values.resEmployee) {
+                taskAssignmentPromises.push(
+                    mutateTaskAssignment({
+                        employee: values.resEmployee,
+                        role: "RESPONSIBLE",
+                        task: data.id,
+                    })
+                );
+            }
+
+            if (values.WorksEmployee?.length > 0) {
+                taskAssignmentPromises.push(
+                    ...values.WorksEmployee.map((employee) =>
+                        mutateTaskAssignment({
+                            employee,
+                            role: "DOER",
+                            task: data.id,
+                        })
+                    )
+                );
+            }
+
+            await Promise.all(taskAssignmentPromises);
+            await mutateHistory({
+                task: data.id,
+                updated_date: data.created_at,
+                content: "Tạo công việc mới",
+            });
+
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ["taskDepartment"] }),
+                queryClient.invalidateQueries({ queryKey: ["workHistories"] }),
+            ]);
+
+            showToastMessage('Thêm công việc vào dự án thành công !', 'success', 'top-right');
+            setIsModalTaskOpen(false);
+
+            console.log("HETROI"); // Bây giờ dòng này chạy cuối
+
+            // setIsModalTaskOpen(false);
+        } catch (error) {
+            console.error("Validation Failed:", error);
+        }
+    };
+
+
+    // hàm đóng modal history
+    const handleCancelSelctTask = () => {
+        setIsModalHistoryOpen(false);
+        setTaskDataSelectFormTable([]);
+    };
 
     // Cấu hình cột PARTS
     const partColumns = [
@@ -656,66 +854,11 @@ const TaskDepartment = () => {
                     </ButtonIcon>
                 </Space>
             ),
-            hidden: (!roleTaskDepartment?.can_create || employeeContext.position !== "TP") 
+            hidden: (!roleTaskDepartment?.can_create || employeeContext.position !== "TP")
         },
     ];
 
-    // hàm show modal hisotry
-    const showHistoryModal = (record) => {
-        console.log("showHistoryModal", record);
-        setTaskDataSelectFormTable(record);
-        setIsModalHistoryOpen(true);
-    };
 
-    // // Hàm tìm kiếm theo key theo valuee
-    // const searchSubtasks = (subtasks, value, key) => {
-    //     return subtasks.some((subtask) => {
-    //         // Kiểm tra trường key có trong subtask và có chứa giá trị tìm kiếm
-    //         if (subtask[key] && subtask[key].toLowerCase().includes(value.toLowerCase())) {
-    //             return true;
-    //         }
-
-    //         // Nếu có các subtasks con, tiếp tục tìm kiếm đệ quy
-    //         if (subtask.subtasks && Array.isArray(subtask.subtasks)) {
-    //             return searchSubtasks(subtask.subtasks, value, key); // Đệ quy vào subtasks con
-    //         }
-
-    //         return false;
-    //     });
-    // };
-
-    // // Hàm tìm kiếm respone theo valuee
-    // const searchSubtasksResponsible_person = (subtasks, value) => {
-    //     return subtasks.some((subtask) => {
-    //         // Kiểm tra trường key có trong subtask và có chứa giá trị tìm kiếm
-    //         if (subtask.responsible_person && subtask.responsible_person.name.toLowerCase().includes(value.toLowerCase())) {
-    //             return true;
-    //         }
-
-    //         // Nếu có các subtasks con, tiếp tục tìm kiếm đệ quy
-    //         if (subtask.subtasks && Array.isArray(subtask.subtasks)) {
-    //             return searchSubtasksResponsible_person(subtask.subtasks, value); // Đệ quy vào subtasks con
-    //         }
-
-    //         return false;
-    //     });
-    // };
-    const [isModalSendEmailOpen, setIsModalSendEmailOpen] = useState(false);
-
-    const handleShowSendEmail = (record) => {
-        setTaskDataSelectFormTable(record);
-        console.log("handleShowSendEmail record", record);
-        setIsModalSendEmailOpen(true);
-    }
-
-    // const handleCancelSendEmail = () => {
-    //     setIsModalSendEmailOpen(false);
-    // }
-
-    const handleArchiveTask = (record) => {
-        console.log("handleArchiveTask", record)
-        mutateDeleteTask({ isDelete: true, id: record.id })
-    }
     // Cấu hình cột TASKS
     const taskColumns = [
         {
@@ -1164,134 +1307,7 @@ const TaskDepartment = () => {
         },
     ];
 
-    const formItemsSendEmail = [
-        {
-            name: "content",
-            label: "",
-            component: <TextArea rows={10} placeholder="nhập tin nhắn!" />,
-            // props: { readOnly: true },
 
-        },
-
-    ]
-
-
-
-
-    const handleCancelTask = () => {
-        setIsModalTaskOpen(false);
-    };
-
-    // hàm mở modal tạo tạo task mới
-    const handleCreateProjectTask = (value) => {
-        setIsSubTaskForm(false);
-        setEmployeesdata(employees);
-        formTask.resetFields();
-        console.log("handleCreateProjectTask", value);
-        value &&
-            setProjectPartSelect({
-                projectPart: value.key,
-            });
-        console.log("projectPartSelect", projectPartSelect);
-        setMode("Add");
-        showModalTask();
-    };
-
-    // hàm  mở modal tạo task con
-    const handleCreateSubTask = (value) => {
-        setIsSubTaskForm(true);
-        setEmployeesdata(value.doers);
-        formTask.resetFields();
-        console.log("handleCreateSubTask", value);
-        value &&
-            setProjectPartSelect({
-                projectPart: value.project_part,
-                task: value.id,
-            });
-        console.log("projectPartSelect", projectPartSelect);
-        setMode("Add");
-        showModalTask();
-    };
-
-
-    const showModalTask = () => {
-        setIsModalTaskOpen(true);
-    };
-
-    // Thêm Công việc mới
-    const handleOkTask = async () => {
-        try {
-
-            const values = await formTask.validateFields();
-            values.date = values.date?.map((d) => d.format("YYYY-MM-DDThh:mm"));
-            console.log("Validated Values:", values);
-
-            const valueNew = {
-                name: values.nameTask,
-                description: values.desTask,
-                priority: values.Priority,
-                start_time: values.date?.[0] || null,
-                end_time: values.date?.[1] || null,
-                task_status: "IN_PROGRESS",
-                completion_percentage: "0",
-                is_deleted: false,
-                project_part: values.projectPart,
-                parent_task: isSubTaskForm ? values.task : null,
-            };
-
-            // await createTask(values, valueNew, isSubTaskForm);
-            const dataTask = await mutateTask(valueNew);
-            console.log("dataTask", dataTask);
-            if (values.resEmployee) {
-                mutateTaskAssignment({
-                    employee: values.resEmployee,
-                    role: "RESPONSIBLE",
-                    task: dataTask.id,
-                });
-            }
-            if (values.WorksEmployee?.length > 0) {
-                await Promise.all(
-                    values.WorksEmployee.map((employee) =>
-                        mutateTaskAssignment({
-                            employee: employee,
-                            role: "DOER",
-                            task: dataTask.id,
-                        }),
-                    ),
-                );
-            }
-
-            setIsModalTaskOpen(false);
-        } catch (error) {
-            console.error("Validation Failed:", error);
-        }
-    };
-
-
-    function hasAssignmentInTask(task, assignmentId) {
-        // 1. Kiểm tra ngay trong doers của task hiện tại
-        if (task.doers?.some(doer => doer.id_assignment === assignmentId)) {
-            return true;
-        }
-
-        // 2. Nếu có subtasks, lặp đệ quy xuống từng subtask
-        if (task.subtasks) {
-            for (const sub of task.subtasks) {
-                if (hasAssignmentInTask(sub, assignmentId)) {
-                    return true;
-                }
-            }
-        }
-
-        // 3. Nếu không tìm thấy ở đâu, trả về false
-        return false;
-    }
-
-    // hàm đóng modal history
-    const handleCancelSelctTask = () => {
-        setIsModalHistoryOpen(false);
-        setTaskDataSelectFormTable([]);
-    };
 
 
     const expandedRowRender = (part) => (
@@ -1373,13 +1389,13 @@ const TaskDepartment = () => {
                 ></FormSendEmail>
             </ModalSendEmail> */}
             <ModalSendEmailForm
-                 isModalSendEmailOpen = {isModalSendEmailOpen}
-                 setIsModalSendEmailOpen = {setIsModalSendEmailOpen}
-                 formSendEmail = {formSendEmail}
-                 mode = {mode}
-                 record={taskDataSelectFormTable}
-                 setTaskDataSelectFormTable = {setTaskDataSelectFormTable}
-            
+                isModalSendEmailOpen={isModalSendEmailOpen}
+                setIsModalSendEmailOpen={setIsModalSendEmailOpen}
+                formSendEmail={formSendEmail}
+                mode={mode}
+                record={taskDataSelectFormTable}
+                setTaskDataSelectFormTable={setTaskDataSelectFormTable}
+
             />
 
             {/* Drawer chatroom */}
