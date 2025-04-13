@@ -1,5 +1,5 @@
 import React, { Children, useEffect, useState } from "react";
-
+import dayjs from 'dayjs'
 import {
     Table,
     Tooltip,
@@ -557,9 +557,9 @@ const TaskDepartment = () => {
         setIsModalSendEmailOpen(true);
     }
 
-    const handleArchiveTask = (record) => {
+    const handleArchiveTask = async (record) => {
         console.log("handleArchiveTask", record)
-        mutateDeleteTask({ isDelete: true, id: record.id })
+        await mutateDeleteTask({ isDelete: true, id: record.id })
     }
 
     const handleCancelTask = () => {
@@ -680,7 +680,7 @@ const TaskDepartment = () => {
 
             const taskAssignmentPromises = [];
 
-            mutateHistory({
+            await mutateHistory({
                 task: data.id,
                 updated_date: data.created_at,
                 content: "Tạo công việc mới",
@@ -1170,6 +1170,44 @@ const TaskDepartment = () => {
             ),
         },
     ];
+// Hàm chặn ngày trước hôm nay
+    const disablePastDates = (current) => {
+        return current && current < dayjs().startOf('day');
+      };
+    
+      const disabledDateTime = () => {
+        const now = dayjs();
+        return {
+          disabledHours: () => {
+            const hours = [];
+            for (let i = 0; i < 24; i++) {
+              if (i < now.hour()) {
+                hours.push(i);
+              }
+            }
+            return hours;
+          },
+          disabledMinutes: (selectedHour) => {
+            const minutes = [];
+            if (selectedHour === now.hour()) {
+              for (let i = 0; i < now.minute(); i++) {
+                minutes.push(i);
+              }
+            }
+            return minutes;
+          },
+          disabledSeconds: (selectedHour, selectedMinute) => {
+            const seconds = [];
+            if (selectedHour === now.hour() && selectedMinute === now.minute()) {
+              for (let i = 0; i < now.second(); i++) {
+                seconds.push(i);
+              }
+            }
+            return seconds;
+          },
+        };
+      };
+    
 
     // Form items thêm task
     const formItemsTask = [
@@ -1268,7 +1306,10 @@ const TaskDepartment = () => {
             component: (
                 <RangePicker
                     showTime
+                  
                     format={"DD/MM/YY : HH:mm"}
+                    disabledDate={disablePastDates}
+                    disabledTime={disabledDateTime }
                     onChange={(date, dateString) => console.log("onChange", date, dateString)}
                 ></RangePicker>
             ),
