@@ -109,7 +109,7 @@ export const Chat = ({ user, roomName, }) => {
     }
     return (
         <>
-            <Flex vertical className='h-full border bg-gray-50 ' justify={'flex-end'} >
+            <Flex vertical className='h-full border bg-gray-50 dark:bg-[#0f172a] dark:border-[#0f172a]' justify={'flex-end'} >
                 {/* Khu vực tin nhắn */}
                 <Flex vertical
                     className='p-4 overflow-y-auto flex-1 '
@@ -287,7 +287,7 @@ export const ChatItem = ({ isSender, name, chat, file, email }) => {
 
 
                 <div
-                    className={`flex gap-3  border border-1 p-2    ${isSender ? "flex-row-reverse bg-blue-500 text-white border-blue-500 rounded-bl-xl rounded-tl-xl rounded-br-3xl" : "bg-gray-200 rounded-br-xl rounded-bl-3xl rounded-tr-xl"} `}>
+                    className={`flex gap-3  border border-1 p-2    ${isSender ? "flex-row-reverse bg-blue-500 text-white border-blue-500 rounded-bl-xl rounded-tl-xl rounded-br-3xl" : "bg-gray-200 dark:bg-gray-500 rounded-br-xl rounded-bl-3xl rounded-tr-xl"} `}>
                     <Tooltip
                         placement="topRight"
 
