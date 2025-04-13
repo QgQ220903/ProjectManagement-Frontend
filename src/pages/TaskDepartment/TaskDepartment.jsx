@@ -1175,38 +1175,38 @@ const TaskDepartment = () => {
         return current && current < dayjs().startOf('day');
       };
     
-      const disabledDateTime = () => {
-        const now = dayjs();
-        return {
-          disabledHours: () => {
-            const hours = [];
-            for (let i = 0; i < 24; i++) {
-              if (i < now.hour()) {
-                hours.push(i);
-              }
-            }
-            return hours;
-          },
-          disabledMinutes: (selectedHour) => {
-            const minutes = [];
-            if (selectedHour === now.hour()) {
-              for (let i = 0; i < now.minute(); i++) {
-                minutes.push(i);
-              }
-            }
-            return minutes;
-          },
-          disabledSeconds: (selectedHour, selectedMinute) => {
-            const seconds = [];
-            if (selectedHour === now.hour() && selectedMinute === now.minute()) {
-              for (let i = 0; i < now.second(); i++) {
-                seconds.push(i);
-              }
-            }
-            return seconds;
-          },
-        };
-      };
+    //   const disabledDateTime = () => {
+    //     const now = dayjs();
+    //     return {
+    //       disabledHours: () => {
+    //         const hours = [];
+    //         for (let i = 0; i < 24; i++) {
+    //           if (i < now.hour()) {
+    //             hours.push(i);
+    //           }
+    //         }
+    //         return hours;
+    //       },
+    //       disabledMinutes: (selectedHour) => {
+    //         const minutes = [];
+    //         if (selectedHour === now.hour()) {
+    //           for (let i = 0; i < now.minute(); i++) {
+    //             minutes.push(i);
+    //           }
+    //         }
+    //         return minutes;
+    //       },
+    //       disabledSeconds: (selectedHour, selectedMinute) => {
+    //         const seconds = [];
+    //         if (selectedHour === now.hour() && selectedMinute === now.minute()) {
+    //           for (let i = 0; i < now.second(); i++) {
+    //             seconds.push(i);
+    //           }
+    //         }
+    //         return seconds;
+    //       },
+    //     };
+    //   };
     
 
     // Form items thêm task
@@ -1305,11 +1305,9 @@ const TaskDepartment = () => {
             // getValueFromEvent: (_, dateString) => dateString,
             component: (
                 <RangePicker
-                    showTime
-                  
+                    showTime       
                     format={"DD/MM/YY : HH:mm"}
                     disabledDate={disablePastDates}
-                    disabledTime={disabledDateTime }
                     onChange={(date, dateString) => console.log("onChange", date, dateString)}
                 ></RangePicker>
             ),

@@ -49,6 +49,7 @@ import { useAuth } from "@/hooks/use-auth"
 
 import {getRandomColor} from "@/utils/cn"
 
+
 const itemsBreadcrumb = [{ title: <Link to="/">Trang chủ</Link> }, { title: <Link to="/project">Dự án</Link> }, { title: "Phần dự án" }];
 
 
@@ -1443,6 +1444,7 @@ const ProjectDetail = () => {
                         triggerDesc: "Sắp xếp giảm dần",
                         triggerAsc: "Sắp xếp tăng dần",
                         cancelSort: "Hủy sắp xếp",
+                        emptyText: <EmptyTemplate title={"Bạn không có phần dự án nào được giao !"} />,
                     }}
                 />
             </div>
