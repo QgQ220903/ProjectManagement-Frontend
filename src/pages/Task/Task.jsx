@@ -13,7 +13,7 @@ import { Link } from 'react-router-dom'
 import { showToastMessage } from '@/utils/toast'
 import { Pencil, Trash2, Plus, File } from "lucide-react";
 
-
+import { workHistoriesPostAPI, workHistoriesGetAPI } from "@/services/WorkHistoryService";
 
 import { CalendarSchedule } from "@/components/CalendarSchedule";
 
@@ -33,7 +33,7 @@ import { FileCard } from "@/components/FileCard"
 import useWebSocket from "@/services/useWebSocket";
 
 
-
+import dayjs from 'dayjs'
 
 const { Dragger } = Upload;
 
@@ -111,10 +111,20 @@ const Task = () => {
 
     const { mutate: addFileAssignment, isLoading: isAdding } = useMutation({
         mutationFn: fileAssignmentPostAPI,
-        onSuccess: () => {
+        onSuccess: (data) => {
             queryClient.invalidateQueries(["tasks"]); // Fetch lại danh sách mà không cần current
             showToastMessage('Lưu file thành công !', 'success', 'top-right')
             setFileList([]);
+            console.log("addFileAssignment", data)
+            if (data?.task_assignment) {
+                mutateHistory({
+                    task: data.task_assignment.task,
+                    updated_date:dayjs().format(),
+                    content: `${data.task_assignment.employee_details.name} đã nộp file "${data.file.name}"`,
+                });
+                // console.log("dayjs", typeof dayjs().format())
+            }
+         
             setIsModalOpen(false);
         },
         onError: (error) => {
@@ -124,7 +134,17 @@ const Task = () => {
     });
 
 
+    // thêm lịch sử
+    const { mutateAsync: mutateHistory, isLoading: historyPostLoading } = useMutation({
+        mutationFn: workHistoriesPostAPI,
+        onSuccess: () => {
+            console.log("mutateHistory thành công");
 
+            // queryClient.invalidateQueries({
+            //     queryKey: ["workHistories"],
+            // });
+        },
+    });
 
 
     useEffect(() => {

@@ -292,6 +292,8 @@ const Employee = () => {
                     // defaultValue={'NV'}
                     placeholder="Chọn chức vụ"
                     onChange={handleChange}
+                    optionFilterProp="label"
+                    showSearch
                     options={[
                         { value: "NV", label: "Nhân Viên" },
                         { value: "TN", label: "Nhóm Trưởng" },

@@ -12,7 +12,7 @@ import Account from "@/pages/Account/Account";
 import Role from "@/pages/Role/Role";
 import Task from "@/pages/Task/Task";
 import TaskDepartment from "@/pages/TaskDepartment/TaskDepartment";
-import Chart from "@/pages/Chart/Chart";
+// import Chart from "@/pages/Chart/Chart";
 
 import Home from "@/pages/Home/Home";
 
@@ -62,10 +62,6 @@ function App() {
                     element: <Department />
                 },
                 {
-                    path: "verified-customers",
-                    element: <h1 className="title">Verified Customers</h1>,
-                },
-                {
                     path: "project",
                     element: <Project />,
                 },
@@ -91,16 +87,8 @@ function App() {
                     element: <TaskDepartment/>,
                 },
                 {
-                    path: "settings",
-                    element: <h1 className="title">Settings</h1>,
-                },
-                {
                     path: "task-archive",
                     element: <TaskArchive />,
-                },
-                {
-                    path: "chart",
-                    element: <Chart />,
                 },
             ],
         },

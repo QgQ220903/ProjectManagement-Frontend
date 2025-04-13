@@ -10,8 +10,10 @@ import { getRolesDetailById, rolePutAPI, rolesDeleteAPI, rolesGetAPI, rolesPostA
 import { featuresGetAPI } from "@/services/FeaturesService";
 import { rolesDetailPostAPI } from "@/services/RolesdetailService";
 import { check } from "prettier";
-import {Link} from "react-router-dom";
-import { showToastMessage, showToastMessagePlus } from "../../utils/toast";
+import { Link } from "react-router-dom";
+import { showToastMessage } from "../../utils/toast";
+
+import EmptyTemplate from "@/components/emptyTemplate/EmptyTemplate";
 
 // Đường dẫn
 const itemsBreadcrumb = [
@@ -88,7 +90,7 @@ const Role = () => {
                 });
 
                 const mapped1 = features.map((f) => {
-                    var tmp =null;
+                    var tmp = null;
                     for (const r of res.data.role_details) {
                         if (f.id === r.feature.id) {
                             tmp = {
@@ -105,7 +107,7 @@ const Role = () => {
 
 
 
-                    if(tmp == null)
+                    if (tmp == null)
                         tmp = {
                             key: f.id,
                             role: f.name,
@@ -141,7 +143,7 @@ const Role = () => {
             if (res?.status === 204) {
                 setRoles((prev) => prev.filter((item) => item.id !== id));
                 showToastMessage("Xóa nhóm quyền thành công!", "success", "top-right");
-                
+
             }
         });
     };
@@ -184,14 +186,14 @@ const Role = () => {
                         });
 
                         if (checkedSave) {
-                             showToastMessage("Thêm tài khoản thành công!", "success", "top-right");
+                            showToastMessage("Thêm tài khoản thành công!", "success", "top-right");
                             setIsEditRole(false);
                         }
 
                         setRoles((prev) => [...prev, res.data]);
                         setIsModalOpen(false);
                     }
-                   
+
                 });
             } else {
                 const values = await form.validateFields();
@@ -233,7 +235,7 @@ const Role = () => {
             }
         } catch (error) {
             console.log('aaaaaaaaaaaaaaaaaaaa');
-           
+
         }
     };
 
@@ -265,33 +267,67 @@ const Role = () => {
 
     const columns = [
         { title: "ID", dataIndex: "key", key: "key" },
-        { title: "Nhóm quyền", dataIndex: "role", key: "role" },
+        { title: "Nhóm quyền", 
+            dataIndex: "role", 
+            key: "role" ,
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    {/* Tùy chỉnh dropdown filter */}
+                    <Input
+                        autoFocus
+                        placeholder="Tìm kiếm theo tên phòng ban"
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ marginBottom: 8, display: "block" }}
+                    />
+                    <Space>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => clearFilters && clearFilters()}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => confirm()}
+                        >
+                            Tìm
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            onFilter: (value, record) => record.role.toLowerCase().includes(value.toLowerCase()), // So sánh không phân biệt hoa/thường
+            filterSearch: true,
+        },
         {
             title: "Chức năng",
             key: "action",
             render: (_, record) => (
                 <Space>
-                    <Button 
-                     shape="circle"
-                     size="medium"
-                     color="gold"
-                     variant="solid"
-                    onClick={() => handleDetailRole(record.key)}
+                    <Button
+                        shape="circle"
+                        size="medium"
+                        color="gold"
+                        variant="solid"
+                        onClick={() => handleDetailRole(record.key)}
                     >
                         <Pencil size={20} />
                     </Button>
                     <Popconfirm
                         title="Xóa nhóm quyền này?"
-                        
+
                         onConfirm={() => handleDetele(record.key)}
                         okText="Có"
                         cancelText="Không"
                     >
                         <Button
-                         shape="circle"
-                         size="medium"
-                         color="red"
-                         variant="solid"
+                            shape="circle"
+                            size="medium"
+                            color="red"
+                            variant="solid"
                         >
                             <Trash2 size={20} />
                         </Button>
@@ -333,14 +369,20 @@ const Role = () => {
             </PageHeader>
 
             <div className="mt-5">
-            
+
                 <Table
                     columns={columns}
                     dataSource={tableData}
-                         pagination={{
-                                            pageSize: 5, // Mặc định 10 dòng mỗi trang
-                                        }}
-                                     
+                    pagination={{
+                        pageSize: 5, // Mặc định 10 dòng mỗi trang
+                    }}
+                    locale={{
+                        triggerDesc: "Sắp xếp giảm dần",
+                        triggerAsc: "Sắp xếp tăng dần",
+                        cancelSort: "Hủy sắp xếp",
+                        emptyText: <EmptyTemplate title={"Bạn không có nhóm quyền nào!"} />,
+                    }}
+
                 />
             </div>
 

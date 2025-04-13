@@ -11,6 +11,8 @@ const DepartmentSelect = ({ departmentDataFilter, value, onChange }) => {
             disabled={!position}
             value={value}         // ✅ bắt buộc
             onChange={onChange}   // ✅ bắt buộc
+            optionFilterProp="label"
+            showSearch
             options={departmentDataFilter?.map((item) => ({
                 value: item.id,
                 label: item.name,

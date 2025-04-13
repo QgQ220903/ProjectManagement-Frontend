@@ -296,6 +296,9 @@ const Department = () => {
                     placeholder="Chọn trưởng phòng"
                    
                     notFoundContent={<Link to={"/employees"}>Vui lòng thêm nhân viên vào phòng ban</Link>}
+
+                    optionFilterProp="label"
+                    showSearch
                     options={employeess?.map((item) => ({
                         value: item.id,
                         label: `${item.name}`,
