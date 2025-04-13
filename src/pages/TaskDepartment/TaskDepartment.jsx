@@ -876,7 +876,7 @@ const TaskDepartment = () => {
             width: "20%",
             render: (text, record) => (
                 <>
-                    <a>{text}</a>
+                    <p>{text}</p>
                     <Progress percent={record.completion_percentage} />
                 </>
             ),

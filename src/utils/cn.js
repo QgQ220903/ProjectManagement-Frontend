@@ -24,10 +24,31 @@ export const removeLocalStorageWhenLogout = () => {
     localStorage.removeItem("auth");      
 }
 
-export const getRandomColor = () => {
-    return "#" + Math.floor(Math.random() * 16777215).toString(16);
-};
+// export const getRandomColor = () => {
+//     return "#" + Math.floor(Math.random() * 16777215).toString(16);
+// };
 
+export const getRandomColor = () => {
+    const colors = [
+      '#3498db', // xanh dương
+      '#1abc9c', // xanh ngọc
+      '#2ecc71', // xanh lá
+      '#e74c3c', // đỏ
+      '#f1c40f', // vàng
+      '#e91e63', // hồng
+      '#f39c12', // cam
+      '#9b59b6', // tím
+      '#34495e', // xám xanh đậm
+      '#16a085', // xanh ngọc đậm
+      '#d35400', // cam đậm
+      '#c0392b', // đỏ đậm
+    ];
+    const randomIndex = Math.floor(Math.random() * colors.length);
+    return colors[randomIndex];
+  };
+  
+  
+  
 export const getInitials = (fullName) => {
     if (!fullName) return "";
   

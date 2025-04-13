@@ -47,6 +47,8 @@ import useWebSocket from "@/services/useWebSocket";
 
 import { useAuth } from "@/hooks/use-auth"
 
+import {getRandomColor} from "@/utils/cn"
+
 const itemsBreadcrumb = [{ title: <Link to="/">Trang chủ</Link> }, { title: <Link to="/project">Dự án</Link> }, { title: "Phần dự án" }];
 
 
@@ -517,9 +519,9 @@ const ProjectDetail = () => {
         },
     ];
 
-    const getRandomColor = () => {
-        return "#" + Math.floor(Math.random() * 16777215).toString(16);
-    };
+    // const getRandomColor = () => {
+    //     return "#" + Math.floor(Math.random() * 16777215).toString(16);
+    // };
 
     // Cấu hình cột TASKS
     const taskColumns = [
