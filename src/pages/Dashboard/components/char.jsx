@@ -24,7 +24,7 @@ const columns = [
     key: 'department_name',
   },
   {
-    title: 'Công việc',
+    title: 'Phần dự án',
     dataIndex: 'project_part_name',
     key: 'project_part_name',
   },
