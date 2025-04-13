@@ -19,7 +19,7 @@ export const navbarLinks = [
         {
             label: "Phòng Ban",
             icon: Users,
-            path: "/Department",
+            path: "/department",
         },   
         {
             label: "Dự Án",
