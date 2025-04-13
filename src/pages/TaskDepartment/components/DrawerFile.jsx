@@ -23,8 +23,8 @@ const DrawerFile = ({ taskDataSelectFormTable, setTaskDataSelectFormTable, setDo
             console.log("file_list", file_list)
             const isFile = hasAssignmentId(recordData, file_list.file_detail.task_assignment.id)
             console.log("file_list hasAssignmentId", isFile)
-            if (!recordData.subtasks || recordData.subtasks.length === 0) {
-                if (recordData.id_assignment === file_list.file_detail.task_assignment.id) {
+            if (!recordData?.subtasks || recordData?.subtasks.length === 0) {
+                if (recordData?.id_assignment === file_list.file_detail.task_assignment.id) {
                     setDoerSelected(prevData => {
                         return {
                             ...prevData, // Giữ nguyên dữ liệu cũ
@@ -46,7 +46,7 @@ const DrawerFile = ({ taskDataSelectFormTable, setTaskDataSelectFormTable, setDo
                             ...prevData.files,
                             {
                                 ...file_list.file_detail.file,
-                                link: `http://127.0.0.1:8000${file_list.file_detail.file.link}` // Thêm "http" vào link
+                                link: `https://3.24.47.52${file_list.file_detail.file.link}` // Thêm "http" vào link
                             }
                         ] // Thêm file vào mảng files
                     };
@@ -112,23 +112,45 @@ const DrawerFile = ({ taskDataSelectFormTable, setTaskDataSelectFormTable, setDo
         return task.subtasks.flatMap((subtask) => findFilesInDoers(subtask));
     }
 
+    // const hasAssignmentId = (task, idToFind) => {
+    //     // Hàm đệ quy kiểm tra tất cả task và subtasks
+        
+    //     const checkDoers = (currentTask) => {
+    //         if (currentTask.doers?.some(doer => doer.id_assignment === idToFind)) {
+    //             return true;
+    //         }
+
+    //         // Kiểm tra tiếp trong subtasks
+    //         if (currentTask.subtasks && currentTask.subtasks.length > 0) {
+    //             return currentTask.subtasks.some(subtask => checkDoers(subtask));
+    //         }
+
+    //         return false;
+    //     };
+
+    //     return checkDoers(task);
+    // };
+
     const hasAssignmentId = (task, idToFind) => {
         // Hàm đệ quy kiểm tra tất cả task và subtasks
         const checkDoers = (currentTask) => {
+            if (!currentTask) return false; // Nếu null hoặc undefined thì bỏ qua
+    
             if (currentTask.doers?.some(doer => doer.id_assignment === idToFind)) {
                 return true;
             }
-
+    
             // Kiểm tra tiếp trong subtasks
-            if (currentTask.subtasks && currentTask.subtasks.length > 0) {
+            if (Array.isArray(currentTask.subtasks)) {
                 return currentTask.subtasks.some(subtask => checkDoers(subtask));
             }
-
+    
             return false;
         };
-
+    
         return checkDoers(task);
     };
+    
 
     //Hiển thị drawer con
     const showChildrenDrawer = (record) => {
