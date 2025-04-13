@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from "axios";
 import { Typography, Flex, Tag, Input, Avatar, Card, Button, Tooltip, Upload } from 'antd';
 import { SquareX, SendHorizontal, Paperclip, Trash2 } from 'lucide-react';
@@ -33,6 +33,7 @@ const props = {
 
 
 export const Chat = ({ user, roomName, }) => {
+    const inputRef = useRef(null);
     const [socket, setSocket] = useState(null);
     const [chats, setChats] = useState([]);
     const [chat, setChat] = useState("");
@@ -90,6 +91,7 @@ export const Chat = ({ user, roomName, }) => {
         }
 
         setChat("");
+        handleClearFile()
         setFile(null);
     };
 
@@ -100,11 +102,19 @@ export const Chat = ({ user, roomName, }) => {
         }
     };
     
+    const handleClearFile = () => {
+        setFile(null);
+        if (inputRef.current) {
+            inputRef.current.value = ''; // reset input
+        }
+    };
 
 
     const handleSendFile = (e) => {
+        console.log("handleSendFile",e.target.files[0])
         const selectedFile = e.target.files[0];  // Lấy tệp ngay lập tức
         setFile(selectedFile);  // Cập nhật state file
+        // handleClearFile()
 
     }
     return (
@@ -136,7 +146,7 @@ export const Chat = ({ user, roomName, }) => {
 
                 </Flex>
 
-                <input type="file" id='uploadFile' hidden onChange={(e) => handleSendFile(e)} />
+                <input type="file" id='uploadFile' hidden onInput={(e) => handleSendFile(e)} ref={inputRef}/>
               
                 {/* Khu vực nhập tin nhắn */}
                 <div className='p-4 border-t border-x-gray-400 border-solid bg-blue-500'>
@@ -159,7 +169,7 @@ export const Chat = ({ user, roomName, }) => {
                         // <div className='text-white flex justify-center p-2 w-full border mt-2'>
                         //     {file.name}
                         // </div>
-                        <FilePrivew file={file} setFile={setFile}></FilePrivew>
+                        <FilePrivew file={file} setFile={setFile} handleClearFile={handleClearFile}></FilePrivew>
                     )}
                 </div>
             </Flex>
@@ -167,21 +177,6 @@ export const Chat = ({ user, roomName, }) => {
     )
 }
 
-const FileChat = (file) => {
-    return (
-        <>
-
-            <a
-                href={`https://3.24.47.52${file.url}`}
-                target="_blank"
-                rel="noopener noreferrer"
-            >
-                📁{file.name}
-            </a>
-
-        </>
-    )
-}
 
 // Định dạng icon theo file type
 const getFileIcon = (fileType) => {
@@ -210,7 +205,7 @@ const FileCard = ({ file }) => {
     const fileIcon = getFileIcon(fileExtension);
 
     return (
-        <div className="w-full bg-gray-100 p-3 border rounded-xl shadow-lg flex flex-col items-center">
+        <div className="w-full bg-gray-100 p-3 border rounded-xl shadow-lg flex flex-col items-center ">
             {/* Hình file */}
             <div className="text-5xl">
 
@@ -224,7 +219,7 @@ const FileCard = ({ file }) => {
             {/* Tên file */}
             <a href={`https://3.24.47.52${file.url}`}
                 target="_blank"
-                rel="noopener noreferrer" className="text-center mt-2 text-sm font-medium text-gray-700 truncate w-full" title={file.name}>
+                rel="noopener noreferrer" className="text-center mt-2 text-sm font-medium text-gray-700 truncate w-full " title={file.name}>
                 {file.name}
             </a>
 
@@ -242,7 +237,7 @@ const FileCard = ({ file }) => {
 };
 
 
-const FilePrivew = ({ file, setFile }) => {
+const FilePrivew = ({ file, setFile, handleClearFile }) => {
 
 
     // Lấy đuôi file
@@ -250,7 +245,7 @@ const FilePrivew = ({ file, setFile }) => {
     const fileIcon = getFileIcon(fileExtension);
 
     return (
-        <div className="w-full bg-white p-1 border rounded-md flex mt-3 items-center justify-between">
+        <div className="w-full bg-white p-1 border rounded-md flex mt-3 items-center justify-between dark:bg-[#0f172a] dark:border-[#0f172a]">
 
             <div className=' flex items-center'>
                 <div className="text-5xl">
@@ -270,7 +265,7 @@ const FilePrivew = ({ file, setFile }) => {
                 </a>
             </div>
 
-            <a className='p-2 hover:text-red-500' onClick={() => setFile(null)}>
+            <a className='p-2 hover:text-red-500' onClick={handleClearFile}>
                 <Trash2 />
             </a>
 
