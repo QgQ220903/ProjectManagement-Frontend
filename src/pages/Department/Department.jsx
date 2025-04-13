@@ -118,10 +118,11 @@ const Department = () => {
             queryClient.invalidateQueries({
                 queryKey: ["departmentDe"],
             });
-            console.log("dataDepartmentPut",data)
+            console.log("dataDepartmentPut",data.manager)
+            console.log("selectedManager",selectedManager)
             showToastMessage("Sửa phòng ban thành công !", "success", "top-right");
-         
-            if(data){
+            
+            if(data?.manager){
                 changePosition(selectedManager,data.manager)
             }
             setIsModalOpen(false);
@@ -187,16 +188,39 @@ const Department = () => {
         if (selectedDepartment) form.setFieldsValue(selectedDepartment);
     }, [form, selectedDepartment]);
 
+    // useEffect(() => {
+    //     if (selectedDepartment) {
+    //       const patchedData = {
+    //         ...selectedDepartment,
+    //         manager: selectedDepartment.manager_detail.id
+                
+    //       };
+    //       form.setFieldsValue(patchedData);
+    //     }
+    //   }, [selectedDepartment]);
+      
+
     const handleEditDepartment = async (record) => {
         setTitle("Sửa Phòng Ban");
-        setSelectedDepartment(record);
-        console.log("handleEditDepartment", record);
+        console.log("handleEditDepartment",record);
+        setSelectedDepartment({
+            ...record,
+            manager: record.manager_detail?.id || null,
+            
+        });
+        console.log("handleEditDepartment", selectedDepartment);
         //set manager đc chọn
         setSelectedManger(record.manager_detail);
         const dataEm = await fetchEmployees(record.key)
         setemployeess(dataEm);
 
-        form.setFieldsValue(record);
+        // form.setFieldsValue({
+        //     ...record,
+        //     manager: {
+        //         id:record.manager_detail?.id,
+        //         name:record.manager_detail?.name
+        //     } ,
+        // });
         setIsModalOpen(true);
         setMode("Edit");
     };
@@ -217,10 +241,12 @@ const Department = () => {
     // hàm thêm sửa pb
     const handleOk = async () => {
         try {
+            console.log("handleOk",selectedManager);
             const values = await form.validateFields();
+            console.log("handleOk",values);
             const payload = {
                 ...values,
-                manager: !values.manager || values.manager === "Chưa có trưởng phòng" ? null : values.manager,
+                // manager: selectedManager.id
             };
 
             console.log("Payload gửi đi:", payload);
@@ -228,7 +254,10 @@ const Department = () => {
             if (mode === "Edit") {
                 mutatePut({ id: selectedDepartment.key, obj: payload });
             } else {
-                mutatePost(payload);
+                mutatePost({
+                    ...payload,
+                    manager: null
+                });
             }
         } catch (error) {
             console.error("Lỗi xác thực form:", error);
@@ -265,17 +294,22 @@ const Department = () => {
             component: (
                 <Select
                     placeholder="Chọn trưởng phòng"
-                    allowClear
+                   
                     notFoundContent={<Link to={"/employees"}>Vui lòng thêm nhân viên vào phòng ban</Link>}
+                    options={employeess?.map((item) => ({
+                        value: item.id,
+                        label: `${item.name}`,
+                    }))}
+
                 >
-                    {employeess.map((emp) => (
+                    {/* {employeess.map((emp) => (
                         <Select.Option
                             key={emp.id}
                             value={emp.id}
                         >
                             {emp.name}
                         </Select.Option>
-                    ))}
+                    ))} */}
                 </Select>
             ),
             hidden: mode === "Add" ? true : false,
