@@ -12,7 +12,7 @@
 
 ![Web UI Design](./public/web.jpg)
 
-![Live View](https://project-management-frontend-snowy.vercel.app/)
+Link Live View: [Live View](https://project-management-frontend-snowy.vercel.app/)
 
 ### 🔐 Tài khoản demo
 
