@@ -200,7 +200,7 @@ const TaskDepartment = () => {
     //láy dự án với id được truyền qua url
     const { data: project_part, isLoading } = useQuery({
         queryKey: ["taskDepartment"], // Thêm id vào queryKey để cache riêng biệt
-        queryFn: () => projectPartGetAPIWithIdDepartment(employeeContext.department), // Để React Query tự gọi API khi cần
+        queryFn: () => projectPartGetAPIWithIdDepartment(employeeContext?.department), // Để React Query tự gọi API khi cần
         enabled: !!employeeContext.department, // Chỉ chạy khi id có giá trị hợp lệ
     });
 
