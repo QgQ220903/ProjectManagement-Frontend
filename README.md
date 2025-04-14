@@ -12,7 +12,7 @@
 
 ![Web UI Design](./public/web.jpg)
 
-Link Live View: [Live View](https://project-management-frontend-snowy.vercel.app/)
+[Live View](https://project-management-frontend-snowy.vercel.app/)
 
 ### 🔐 Tài khoản demo
 
@@ -26,8 +26,6 @@ Mật khẩu: 123456
 2. [🛠️ Công nghệ sử dụng](#công-nghệ-sử-dụng)
 3. [✨ Tính năng chính](#tính-năng-chính)
 4. [🚀 Khởi chạy dự án](#khởi-chạy-dự-án)
-5. [☁️ Triển khai](#triển-khai)
-6. [☕ Ủng hộ](#ủng-hộ)
 
 ## 💬 Giới thiệu
 
