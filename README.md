@@ -4,82 +4,85 @@
     <br />
     <br />
     <p>
-        Build a Modern Dashboard UI Design using React JS, TailwindCSS.
-</p>
-<a href="https://youtu.be/uHxZMmvQXHQ">Watch Tutorial</a>
-
+        Web quản lý công việc phòng ban sử dụng React, Django.
+    </p>
 </div>
 
 <br />
 
-![Dashboard UI Design](./public/Dashboard%20UI%20Design.png)
+![Web UI Design](./public/web.jpg)
 
-## 🗒️ Table of Contents
+![Live View](https://project-management-frontend-snowy.vercel.app/)
 
-1. [💬 Introduction](#introduction)
-2. [🛠️ Tools](#tools)
-3. [✨ Features](#features)
-4. [🚀 Getting Started](#getting-started)
-5. [💻 Code Snippets](#code-snippets)
-6. [☕ Support Me](#support-me)
+### 🔐 Tài khoản demo
 
-## <a name="introduction">💬 Introduction</a>
+Bạn có thể đăng nhập để trải nghiệm:
+Email: chantruog753@gmail.com
+Mật khẩu: 123456
 
-Welcome to the Dashboard UI Design repository! This project is a comprehensive guide to building a clean, user-friendly, and fully responsive dashboard interface. Whether you're new to UI/UX design or an experienced developer looking to enhance your skills, this repository provides essential resources to help you create an efficient and visually organized dashboard experience. Explore best practices for crafting intuitive layouts, managing data visualization, and ensuring seamless user interaction.
+## 🗒️ Mục lục
 
-## <a name="tools">🛠️ Tools</a>
+1. [💬 Giới thiệu](#giới-thiệu)
+2. [🛠️ Công nghệ sử dụng](#công-nghệ-sử-dụng)
+3. [✨ Tính năng chính](#tính-năng-chính)
+4. [🚀 Khởi chạy dự án](#khởi-chạy-dự-án)
+5. [☁️ Triển khai](#triển-khai)
+6. [☕ Ủng hộ](#ủng-hộ)
 
--   [React JS](https://react.dev)
--   [TailwindCSS](https://tailwindcss.com/)
--   [Lucide Icons](https://lucide.dev/)
--   [React Router](https://reactrouter.com/en/main)
--   [Recharts](https://recharts.org/en-US/)
+## 💬 Giới thiệu
 
-## <a name="features">✨ Features</a>
+Dự án **Web quản lý công việc phòng ban** là một ứng dụng giúp quản lý công việc, tiến độ và trao đổi giữa các thành viên trong công ty hoặc tổ chức. Giao diện hiện đại, dễ sử dụng, có hỗ trợ real-time thông qua **Django Channels**. Hệ thống chia rõ vai trò người dùng, bảo mật tốt, và có khả năng mở rộng linh hoạt.
 
--   **Responsive Design:** Ensures your portfolio looks great on desktops, tablets, and mobile devices.
--   **Clean and Modern Layout:** A professional design that highlights your projects, skills, and experience.
+## 🛠️ Công nghệ sử dụng
 
-## <a name="getting-started">🚀 Getting Started</a>
+- 💻 Frontend:
+  - [ReactJS](https://reactjs.org/)
+  - [TailwindCSS](https://tailwindcss.com/)
+  - [Ant Design](https://ant.design/)
+  - [React Router](https://reactrouter.com/)
+  - [Vite](https://vitejs.dev/)
 
-To get started follow these steps:
+- 🖥️ Backend:
+  - [Django](https://www.djangoproject.com/)
+  - [Django REST Framework](https://www.django-rest-framework.org/)
+  - [Django Channels](https://channels.readthedocs.io/en/stable/)
 
-#### Cloning the Repository
+- ☁️ Triển khai:
+  - Backend: [AWS EC2](https://aws.amazon.com/ec2/)
+  - Frontend: [Vercel](https://vercel.com/)
 
-Using CLI
+## ✨ Tính năng chính
 
+- ✅ Quản lý phòng ban, nhân viên và phân công công việc
+- ✅ Giao diện hiện đại, responsive
+- ✅ Tích hợp websocket (Django Channels) để cập nhật real-time
+- ✅ Xác thực JWT và phân quyền người dùng
+- ✅ Thống kê và biểu đồ trực quan
+- ✅ Tương tác nhanh qua UI thân thiện từ Ant Design
+
+## 🚀 Khởi chạy dự án
+
+### Backend (Django)
+🔗 Mã nguồn: [GitHub - Django Backend](https://github.com/QgQ220903/ProjectManagement_Backend)
 ```bash
-git clone https://github.com/xdcode2/dashboard-ui-design.git
+# Cài đặt virtual env
+python -m venv env
+source env/bin/activate  # macOS/Linux
+env\Scripts\activate     # Windows
+
+# Cài đặt dependencies
+pip install -r requirements.txt
+
+# Khởi chạy server
+python manage.py migrate
+python manage.py runserver
 ```
-
-**\*\*_Ensure you have installed [Git](https://git-scm.com) on your machine._**
-
-or using GitHub:
-
--   Go to the project [repository](https://github.com/xdcode2/dashboard-ui-design) on my GitHub page
--   Click on the green button on the top 👆
--   Click Download ZIP
-
-#### Installation
-
-Install the project dependencies using npm:
-
+### Frontend (React)
 ```bash
+# Cài đặt dependencies
 npm install
-```
 
-**\*\*_Ensure you have installed [NodeJS](https://nodejs.org/en) on your machine._**
-
-#### Running the Project
-
-```bash
+# Chạy dev server
 npm run dev
 ```
 
-**\*\*_This project uses [Vite](https://vitejs.dev)._**
-
-## <a name="support-me">☕ Support Me</a>
-
-[![ko-fi](https://img.shields.io/static/v1?message=Support%20me%20on%20ko-fi&logo=kofi&label=&color=ff5e5b&logoColor=white&labelColor=&style=for-the-badge)](https://ko-fi.com/J3J1NMYT7)
-
-[![youtube](https://img.shields.io/static/v1?message=Subscribe&logo=youtube&label=&color=FF0000&logoColor=white&labelColor=&style=for-the-badge)](https://www.youtube.com/@_xdcode_ "XD Code")
