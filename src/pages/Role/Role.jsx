@@ -39,12 +39,16 @@ const Role = () => {
     const [columns2, setColumns2] = useState([]);
     const [idEdit, setIdEdit] = useState(0);
 
+    const [isLoading, setIsLoading] = useState(false)
+
     // Load Roles & Features
     useEffect(() => {
+        setIsLoading(true)
         rolesGetAPI().then((res) => setRoles(res));
         featuresGetAPI().then((res) => {
             if (res.data) setFeatures(res.data);
         });
+        setIsLoading(false)
     }, []);
 
     // Set up data2 từ features
@@ -229,6 +233,7 @@ const Role = () => {
                                 showToastMessage("Cập nhật nhóm quyền thành công!", "success", "top-right");
                                 setIsEditRole(false);
                             }
+                            setIsModalOpen(false);
                         }
                     }
                 });
@@ -373,6 +378,7 @@ const Role = () => {
                 <Table
                     columns={columns}
                     dataSource={tableData}
+                    loading={isLoading}
                     pagination={{
                         pageSize: 5, // Mặc định 10 dòng mỗi trang
                     }}

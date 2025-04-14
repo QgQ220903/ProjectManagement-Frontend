@@ -26,6 +26,8 @@ import { formatDate } from "@/utils/cn";
 
 import { showToastMessage } from "@/utils/toast";
 
+import EmptyTemplate from "@/components/emptyTemplate/EmptyTemplate";
+
 import {useAuth} from "@/hooks/use-auth"
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -475,7 +477,10 @@ const Project = () => {
                         triggerDesc: "Sắp xếp giảm dần",
                         triggerAsc: "Sắp xếp tăng dần",
                         cancelSort: "Hủy sắp xếp",
+                        emptyText: <EmptyTemplate title={"Bạn không có dữ liệu !"} />,
                     }}
+
+                
                 />
             </div>
 

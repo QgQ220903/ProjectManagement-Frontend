@@ -53,7 +53,7 @@ const Account = () => {
     });
 
     //lấy ds tk
-    const { data: accounts } = useQuery({
+    const { data: accounts, isLoading } = useQuery({
         queryKey: ["accounts"],
         queryFn: accountGetAPI,
     });
@@ -499,6 +499,7 @@ const Account = () => {
                 <Table
                     columns={columns}
                     dataSource={accountData}
+                    loading={isLoading}
                     pagination={{
                         total: total,
                         defaultCurrent: current,
